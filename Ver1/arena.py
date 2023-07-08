@@ -2,8 +2,8 @@ from game_multi import SnakeGameArena, SnakeGameAICompetition,pygame
 import numpy as np
 import matplotlib.pyplot as plt
 import agentDQN
-import agent_Sarsa
-import agent_Sarsa_Lambda
+import agent_Q
+import agent_Q_Lambda
 
 
 BLACK = (0, 0, 0)
@@ -170,8 +170,8 @@ if __name__ == '__main__':
     AGENT_NAMES = ["Deep DQN","TD(0)","TD(Lambda)"]
 
     agent_DQN = agentDQN.AgentDQN()
-    agent_TD = agent_Sarsa.Agent_Sarsa()
-    agent_TD_Lambda = agent_Sarsa_Lambda.Agent_Sarsa_Lambda()
+    agent_TD = agent_Q.Agent_Q()
+    agent_TD_Lambda = agent_Q_Lambda.Agent_Q_Lambda()
     # Agents = [agent_DQN,agent_TD,agent_TD_Lambda]
     Agents = [agent_DQN]
     # train(agent_num=len(Agents))

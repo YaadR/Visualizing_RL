@@ -1,4 +1,5 @@
-'''Sarsa(Lambda) Algorithm
+'''
+Q(Lambda) Algorithm
 '''
 
 import numpy as np
@@ -24,7 +25,7 @@ HEIGHT = 360
 STATE_VEC_SIZE =11
 MAX_MEMORY = 100_000
 
-class Agent_Sarsa_Lambda:
+class Agent_Q_Lambda:
 
     def __init__(self):
         self.n_games = 0
@@ -269,6 +270,6 @@ def play():
             print('Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:', round(mean_score,3))
 
 if __name__ == '__main__':
-    agent = Agent_Sarsa_Lambda()
+    agent = Agent_Q_Lambda()
     train()
     play()

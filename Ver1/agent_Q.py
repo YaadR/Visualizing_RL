@@ -1,5 +1,5 @@
 '''
-Sarsa learning
+Q learning
 '''
 import numpy as np
 from collections import deque
@@ -22,7 +22,7 @@ HEIGHT = 360
 STATE_VEC_SIZE =11
 MAX_MEMORY = 100_000
 
-class Agent_Sarsa:
+class Agent_Q:
 
     def __init__(self):
         self.n_games = 0
@@ -258,6 +258,6 @@ def play():
 
 
 if __name__ == '__main__':
-    agent = Agent_Sarsa()
+    agent = Agent_Q()
     train()
     play()

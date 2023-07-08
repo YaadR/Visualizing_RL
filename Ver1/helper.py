@@ -190,3 +190,22 @@ def table_visualize(table,axs,mean_score,plot_scores):
     plt.pause(0.1)
 
     # return last_bias
+
+
+def activation_visualize(state_vector,layer1,layer2,axs):
+    # Extract the biases from the model
+
+    axs[0].imshow(state_vector, cmap='cool')
+    axs[0].set_title(f'State vector activation')
+
+    axs[1].imshow(layer1, cmap='cool')
+    axs[1].set_title(f'Layer 1 activation')
+
+    axs[2].imshow(layer2, cmap='cool')
+    axs[2].set_title(f'Layer 1 activation')
+
+    plt.tight_layout()
+    plt.show()
+    plt.pause(0.1)
+
+    # return last_bias

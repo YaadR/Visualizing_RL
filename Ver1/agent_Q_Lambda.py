@@ -180,11 +180,11 @@ class Agent_Q_Lambda:
 def train():
     plot_scores = []
     plot_mean_scores = []
-    ma_100 = deque(maxlen=100)
+    total_score = 0
+    mean_score = 0
     record = 0
     # agent = AgentTD_Lambda()
     game = SnakeGameAI(arrow=True)
-    ma_50 = deque(maxlen=50)
 
     plt.ion()
 
@@ -222,11 +222,12 @@ def train():
             print('Game', agent.n_games, 'Score', score, 'Record:', record)
 
             plot_scores.append(score)
-            ma_100.append(score)
-            plot_mean_scores.append(statistics.mean(ma_100))
+            total_score += score
+            mean_score = total_score / agent.n_games
+            plot_mean_scores.append(mean_score)
             table_visualize(np.array(list(agent.Q.values())), axs,plot_mean_scores,plot_scores)
             # plot(plot_scores, plot_mean_scores)
-            if statistics.mean(ma_100)>15:
+            if mean_score>4:
                 break
 
 def play():

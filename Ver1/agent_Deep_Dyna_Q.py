@@ -192,10 +192,12 @@ class Agent_Deep_Dyna_Q:
 def train():
     plot_scores = []
     plot_mean_scores = []
+    total_score = 0
+    mean_score = 0
     record = 0
     agent = Agent_Deep_Dyna_Q()
     game = SnakeGameAI(arrow=True, agentID=0)
-    ma_50 = deque(maxlen=50)
+
     action = [0,0,0]
 
 
@@ -231,8 +233,9 @@ def train():
             print('Game', agent.n_games, 'Score', score, 'Record:', record)
 
             plot_scores.append(score)
-            ma_50.append(score)
-            plot_mean_scores.append(statistics.mean(ma_50))
+            total_score += score
+            mean_score = total_score / agent.n_games
+            plot_mean_scores.append(mean_score)
             plot(plot_scores, plot_mean_scores)
 
 

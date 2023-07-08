@@ -97,7 +97,7 @@ class CriticNetwork(nn.Module):
         return value
 
 
-class DPN_Trainer:
+class _DPN_Trainer_:
     def __init__(self, critic_network,actor_network, lr, gamma,critic_optimizer,actor_optimizer):
         self.lr = lr
         self.gamma = gamma
@@ -163,7 +163,7 @@ class DPN_Trainer:
 
 
 
-class DPN_Trainer_2:
+class DPN_Trainer:
     def __init__(self, model, lr, gamma, optimizer,scheduler = None):
         self.lr = lr
         self.gamma = gamma
@@ -262,6 +262,50 @@ class DPN_Trainer_2:
         loss.backward()
         self.optimizer.step()
 
+
+class ValueTrainer:
+    def __init__(self, model, lr, gamma):
+        self.lr = lr
+        self.gamma = gamma
+        self.model = model
+        self.optimizer = optim.Adam(model.parameters(), lr=self.lr)
+        self.criterion = nn.MSELoss()
+        self.loss_bus = 0
+
+    def train_step(self, state, action, reward, next_state, done):
+        state = torch.tensor(state, dtype=torch.float)
+        next_state = torch.tensor(next_state, dtype=torch.float)
+        action = torch.tensor(action, dtype=torch.long)
+        reward = torch.tensor(reward, dtype=torch.float)
+        # (n, x)
+        loss_bus_flag = False
+        if len(state.shape) == 1:
+            # (1, x)
+            state = torch.unsqueeze(state, 0)
+            next_state = torch.unsqueeze(next_state, 0)
+            action = torch.unsqueeze(action, 0)
+            reward = torch.unsqueeze(reward, 0)
+            done = (done, )
+        else:
+            loss_bus_flag = True
+
+        # predicted Q values with current state
+        pred = self.model(state)
+
+        target = pred.clone()
+        for idx in range(len(done)):
+            Q_new = reward[idx]
+            if not done[idx]:
+                Q_new = reward[idx] + self.gamma * torch.max(self.model(next_state[idx]))
+
+            target[idx][torch.argmax(action[idx]).item()] = Q_new
+
+        self.optimizer.zero_grad()
+        loss = self.criterion(target, pred)
+        if loss_bus_flag:
+            self.loss_bus = loss.detach().numpy()
+        loss.backward()
+        self.optimizer.step()
 
 class QTrainer:
     def __init__(self, model, lr, gamma):

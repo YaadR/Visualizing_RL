@@ -9,7 +9,7 @@ import random
 import numpy as np
 from collections import deque
 from game import SnakeGameAI, Direction, Point
-from model import ActorCritic, ActorNetwork, CriticNetwork, DPN_Trainer, DPN_Trainer_2
+from model import ActorCritic, ActorNetwork, CriticNetwork, DPN_Trainer, DPN_Trainer
 from helper import plot, visualize_biases,net_visualize
 from sklearn import preprocessing
 import math
@@ -33,7 +33,7 @@ NUM_ACTIONS = 3  # Number of possible actions (up, down, left, right)
 ALPHA = 0.1  # Learning rate
 GAMMA = 0.9  # Discount factor
 NUM_EPISODES = 100  # Number of training episodes
-STATE_VEC_SIZE = 13
+STATE_VEC_SIZE = 11
 HIDDEN_LAYER = 256
 
 
@@ -48,7 +48,7 @@ class AgentDQN:
         self.model = ActorCritic(STATE_VEC_SIZE, NUM_ACTIONS)  # Linear_QNet(13, 256, 3)
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=LR)
         # self.scheduler = StepLR(self.optimizer, step_size=5, gamma=0.1)
-        self.trainer = DPN_Trainer_2(model=self.model, optimizer=self.optimizer, lr=LR, gamma=self.gamma)
+        self.trainer = DPN_Trainer(model=self.model, optimizer=self.optimizer, lr=LR, gamma=self.gamma)
 
         # Actor Critic apart
         # self.critic_network = CriticNetwork(STATE_VEC_SIZE,hidden_size=HIDDEN_LAYER)
@@ -200,10 +200,11 @@ class AgentDQN:
 def train():
     plot_scores = []
     plot_mean_scores = []
+    total_score = 0
     record = 0
+    mean_score = 0
     agent = AgentDQN()
     game = SnakeGameAI(arrow=True, agentID=0)
-    ma_100 = deque(maxlen=100)
     loss_buss = []
     loss_buss_2 = []
     last_bias = np.zeros((int(np.sqrt(HIDDEN_LAYER)), int(np.sqrt(HIDDEN_LAYER))))
@@ -266,15 +267,16 @@ def train():
             # print('Game', agent.n_games, 'Score', score, 'Record:', record)
 
             plot_scores.append(score)
-            ma_100.append(score)
-            plot_mean_scores.append(statistics.mean(ma_100))
+            total_score += score
+            mean_score = total_score / agent.n_games
+            plot_mean_scores.append(mean_score)
             # plot(plot_scores, plot_mean_scores)
             last_bias = visualize_biases(agent.model, axs, last_bias, difference_val, loss_buss,epsilon_decay=plot_mean_scores, agent_type=1,loss_1=loss_buss_2)
             # net_visualize(agent.model, axs)
             # difference_val[0] = 0
             episode_loss = []
             episode_loss_2 = []
-            print('Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:',round(statistics.mean(ma_100), 3))
+            print('Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:',round(mean_score, 3))
 
 
 if __name__ == '__main__':

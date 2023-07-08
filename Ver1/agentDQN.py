@@ -8,7 +8,7 @@ import numpy as np
 from collections import deque
 from game import SnakeGameAI, Direction, Point, pygame
 from model import Linear_QNet, QTrainer
-from helper import plot,heat_map_step,distance_collapse,visualize_biases,net_visualize
+from helper import plot,heat_map_step,distance_collapse,visualize_biases,net_visualize,activation_visualize
 from sklearn import preprocessing
 import math
 import matplotlib.pyplot as plt
@@ -25,6 +25,9 @@ HEIGHT = 360
 MAX_MEMORY = 100_000
 BATCH_SIZE = 1000
 LR = 0.001
+NUM_ACTIONS = 3  # Number of possible actions (up, down, left, right)
+STATE_VEC_SIZE = 11
+HIDDEN_LAYER = 256
 
 class AgentDQN:
 
@@ -33,7 +36,7 @@ class AgentDQN:
         self.epsilon = 0 # randomness
         self.gamma = 0.9 # discount rate
         self.memory = deque(maxlen=MAX_MEMORY) # popleft()
-        self.model = Linear_QNet(13, 256, 3)
+        self.model = Linear_QNet(STATE_VEC_SIZE, HIDDEN_LAYER, NUM_ACTIONS)
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
         self.actions_probability = [0,0,0]
 
@@ -185,12 +188,14 @@ class AgentDQN:
 
 
 def train():
+
     plot_scores = []
     plot_mean_scores = []
+    total_score = 0
     record = 0
     agent = AgentDQN()
     game = SnakeGameAI(arrow=True,agentID=0)
-    ma_50 = deque(maxlen=100)
+    mean_score=0
     loss_buss = []
     last_bias = np.zeros((16,16))
     difference_val = []
@@ -227,7 +232,7 @@ def train():
                 X,Y  = distance_collapse(state_new[-2:], game.w, game.h, game.direction.value)
                 heatmap = heat_map_step(heatmap,game.direction.value,game.w//10, game.h//10,int(game.head.x)//10,int(game.head.y)//10,any(state_new[:3]),X//10,Y//10)
 
-        if (record >=20 and statistics.mean(ma_50)>4) and heat_flag:
+        if (record >=20 and mean_score>4) and heat_flag:
             heat_flag = True
             axis[0].imshow(heatmap.T, cmap='viridis', interpolation='nearest')
             # if not counter%10:
@@ -263,11 +268,12 @@ def train():
 
             # print('Game', agent.n_games, 'Score', score, 'Record:', record)
 
-            plot_scores.append(score)
-            ma_50.append(score)
-            # print('Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:', round(statistics.mean(ma_50), 3))
 
-            # plot_mean_scores.append(statistics.mean(ma_50))
+            plot_scores.append(score)
+            total_score += score
+            mean_score = total_score / agent.n_games
+            # print('Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:',round(mean_score, 3) )
+            plot_mean_scores.append(mean_score)
 
             # plot(plot_scores, plot_mean_scores)
             if heat_flag:
@@ -310,4 +316,12 @@ if __name__ == '__main__':
     agent = AgentDQN()
     train()
     # play()
+    fig, axs = plt.subplots(1, 3, width_ratios=[1, 8,1], figsize=(8, 6))
+    for i in range(STATE_VEC_SIZE):
+        state_vector = np.zeros(STATE_VEC_SIZE)
+        state_vector[i] = 1
+        layer_1_activation = agent.model.linear1(state_vector)
+        layer_2_activation = agent.model.linear2(torch.relu(layer_1_activation))
+        activation_visualize(state_vector, layer_1_activation, layer_2_activation, axs)
+
 

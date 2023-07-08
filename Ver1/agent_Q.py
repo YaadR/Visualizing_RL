@@ -171,9 +171,9 @@ class Agent_Q:
 def train():
     plot_scores = []
     plot_mean_scores = []
-    ma_100 = deque(maxlen=100)
     total_score = 0
     record = 0
+    mean_score = 0
     # agent = AgentTD()
     game = SnakeGameAI(arrow=True)
 
@@ -208,11 +208,12 @@ def train():
 
 
             plot_scores.append(score)
-            ma_100.append(score)
-            plot_mean_scores.append(np.mean(ma_100)[0])
+            total_score += score
+            mean_score = total_score / agent.n_games
+            plot_mean_scores.append(mean_score)
             # plot(plot_scores, plot_mean_scores)
-            print('Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:', round(np.mean(ma_100)[0],3))
-            if np.mean(ma_100)[0] > 15:
+            print('Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:', round(mean_score,3))
+            if mean_score > 4:
                 break
 
 def play():

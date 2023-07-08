@@ -110,8 +110,8 @@ class AgentDQN:
             game.food.y > game.head.y,  # food down
 
             # Food distance from head - X axis, Y axis and both
-            round(preprocessing.normalize([[math.dist([game.head.x], [game.food.x]), 0, game.w]])[0][0],2),
-            round(preprocessing.normalize([[math.dist([game.head.y], [game.food.y]), 0, game.h]])[0][0],2)
+            #round(preprocessing.normalize([[math.dist([game.head.x], [game.food.x]), 0, game.w]])[0][0],2),
+            #round(preprocessing.normalize([[math.dist([game.head.y], [game.food.y]), 0, game.h]])[0][0],2)
 
         ]
 

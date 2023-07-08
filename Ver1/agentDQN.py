@@ -89,11 +89,11 @@ class AgentDQN:
             game.food.x < game.head.x,  # food left
             game.food.x > game.head.x,  # food right
             game.food.y < game.head.y,  # food up
-            game.food.y > game.head.y,  # food down
+            game.food.y > game.head.y  # food down
 
             # Food distance from head - X axis, Y axis and both
-            preprocessing.normalize([[math.dist([game.head.x],[game.food.x]),0,game.w]])[0][0],
-            preprocessing.normalize([[math.dist([game.head.y],[game.food.y]),0,game.h]])[0][0]
+            #preprocessing.normalize([[math.dist([game.head.x],[game.food.x]),0,game.w]])[0][0],
+            #preprocessing.normalize([[math.dist([game.head.y],[game.food.y]),0,game.h]])[0][0]
             ]
 
         return np.array(state, dtype=float)
@@ -145,11 +145,11 @@ class AgentDQN:
             game.food.x < game.head[id].x,  # food left
             game.food.x > game.head[id].x,  # food right
             game.food.y < game.head[id].y,  # food up
-            game.food.y > game.head[id].y,  # food down
+            game.food.y > game.head[id].y  # food down
 
             # Food distance from head - X axis, Y axis and both
-            preprocessing.normalize([[math.dist([game.head[id].x], [game.food.x]), 0, game.w]])[0][0],
-            preprocessing.normalize([[math.dist([game.head[id].y], [game.food.y]), 0, game.h]])[0][0]
+            #preprocessing.normalize([[math.dist([game.head[id].x], [game.food.x]), 0, game.w]])[0][0],
+            #preprocessing.normalize([[math.dist([game.head[id].y], [game.food.y]), 0, game.h]])[0][0]
         ]
 
         return np.array(state, dtype=float)
@@ -256,7 +256,7 @@ def train():
             loss_buss.append(agent.trainer.loss_bus)
             epsilon_decay.append(agent.epsilon/200)
             # last_bias = visualize_biases(agent.model, axs, last_bias, difference_val,loss_buss,epsilon_decay)
-            net_visualize(agent.model, axs)
+            # net_visualize(agent.model, axs)
             # difference_val[0]=0
             # reset heatmap
             if heat_flag:
@@ -275,7 +275,9 @@ def train():
             # print('Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:',round(mean_score, 3) )
             plot_mean_scores.append(mean_score)
 
-            # plot(plot_scores, plot_mean_scores)
+            plot(plot_scores, plot_mean_scores)
+            if mean_score > 4:
+                break
             if heat_flag:
                 axis[1].cla()
                 axis[1].set_title("Training")

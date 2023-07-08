@@ -308,9 +308,6 @@ def play():
 
 if __name__ == '__main__':
     agent = AgentDQN()
-    # 10 gamma =0.9
-
     train()
-
     # play()
 

@@ -1,14 +1,12 @@
 '''
-TD(lambda) Algorithm
+Sarsa learning
 '''
-
 import numpy as np
 from collections import deque
 from game import SnakeGameAI, Direction, Point, pygame
-from helper import plot,heat_map_step,distance_collapse,table_visualize
+from helper import plot,heat_map_step,distance_collapse
 import matplotlib.pyplot as plt
 import json
-import statistics
 
 # Constants
 NUM_ACTIONS = 3  # Number of possible actions (up, down, left, right)
@@ -17,7 +15,6 @@ GAMMA = 0.9  # Discount factor
 EPSILON = 80 # Exploration rate
 NUM_EPISODES = 100  # Number of training episodes
 
-LAMBDA = 0.8
 
 BLOCK_SIZE = 20
 WIDTH =  480
@@ -25,20 +22,19 @@ HEIGHT = 360
 STATE_VEC_SIZE =11
 MAX_MEMORY = 100_000
 
-class AgentTD_Lambda:
+class Agent_Sarsa:
 
     def __init__(self):
         self.n_games = 0
         self.epsilon = EPSILON # randomness
         self.gamma = GAMMA # discount rate
         self.alpha = ALPHA
-        self.Lambda = LAMBDA # learning rate
         # self.Q = np.zeros((2**STATE_VEC_SIZE, NUM_ACTIONS)) # Initialize Q-table
         self.Q = dict()
-        self.eligibility_trace  = dict()
+        self.eligibility_trace = dict()
         self.num_actions = NUM_ACTIONS
         self.num_episodes = NUM_EPISODES
-        self.actions_probability = [0, 0, 0]
+        self.actions_probability = [0,0,0]
 
     def get_state(self, game):
         head = game.snake[0]
@@ -89,7 +85,9 @@ class AgentTD_Lambda:
             game.food.x > game.head.x,  # food right
             game.food.y < game.head.y,  # food up
             game.food.y > game.head.y  # food down
+
         ]
+
         return np.array(state, dtype=int)
 
     def get_state_arena(self, game,id=0):
@@ -145,28 +143,22 @@ class AgentTD_Lambda:
         ]
 
         return np.array(state, dtype=int)
-
     # Function to choose an action based on epsilon-greedy policy
     def get_action(self,state):
-        uni = np.random.uniform()
-        if uni < (self.epsilon-self.n_games)/self.num_episodes:
-        # if self.n_games < self.epsilon:
+        if np.random.uniform() < (self.epsilon-self.n_games)/self.num_episodes:
             return np.random.randint(NUM_ACTIONS)
         else:
             state_idx = self.array_tobinary(state)
-            self.actions_probability = self.Q[state_idx]
+            # self.actions_probability = self.Q[state_idx]
             return np.argmax(self.Q[state_idx])
+
 
 
     # Function to update Q-values using TD(0) learning
     def update_Q(self,state, action, reward, next_state):
+        # self.Q[self.array_tobinary(state), action] += self.alpha * (reward + self.gamma * np.max(self.Q[self.array_tobinary(next_state)]) - self.Q[self.array_tobinary(state), action])
+        self.Q[self.array_tobinary(state)][action] += self.alpha * (reward + self.gamma * np.max(self.Q[self.array_tobinary(next_state)]) - self.Q[self.array_tobinary(state)][action])
 
-        delta = reward + self.gamma * np.max(self.Q[self.array_tobinary(next_state)]) - self.Q[self.array_tobinary(state)][action]
-        self.eligibility_trace[self.array_tobinary(state)][action] += 1
-        for key in self.Q.keys():
-            for act in range(self.num_actions):
-                self.Q[key][act] += self.alpha * delta * self.eligibility_trace[key][act]
-                self.eligibility_trace[key][act] *= self.gamma * self.Lambda
 
 
     def array_tobinary(self,state):
@@ -176,27 +168,26 @@ class AgentTD_Lambda:
         return int(sb, 2)
 
 
-
 def train():
     plot_scores = []
     plot_mean_scores = []
     ma_100 = deque(maxlen=100)
+    total_score = 0
     record = 0
-    # agent = AgentTD_Lambda()
+    # agent = AgentTD()
     game = SnakeGameAI(arrow=True)
-    ma_50 = deque(maxlen=50)
 
-    plt.ion()
 
-    fig, axs = plt.subplots(1, 2,width_ratios=[8,4], figsize=(8, 6))
+
     while True:
         # get old state
         state = agent.get_state(game)
         if agent.array_tobinary(state) not in agent.Q.keys():
             agent.Q[agent.array_tobinary(state)] = [0,0,0]
-            agent.eligibility_trace[agent.array_tobinary(state)] = [0,0,0]
+
 
         # get move
+
         action = agent.get_action(state)
         game.actions_probability = agent.actions_probability
 
@@ -205,11 +196,8 @@ def train():
         state_next = agent.get_state(game)
         if agent.array_tobinary(state_next) not in agent.Q.keys():
             agent.Q[agent.array_tobinary(state_next)] = [0,0,0]
-            agent.eligibility_trace[agent.array_tobinary(state_next)] = [0, 0, 0]
-
 
         agent.update_Q(state,action,reward,state_next)
-
 
         if done:
             game.reset()
@@ -219,14 +207,12 @@ def train():
                 record = score
 
 
-            print('Game', agent.n_games, 'Score', score, 'Record:', record)
-
             plot_scores.append(score)
             ma_100.append(score)
-            plot_mean_scores.append(statistics.mean(ma_100))
-            table_visualize(np.array(list(agent.Q.values())), axs,plot_mean_scores,plot_scores)
+            plot_mean_scores.append(np.mean(ma_100)[0])
             # plot(plot_scores, plot_mean_scores)
-            if statistics.mean(ma_100)>15:
+            print('Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:', round(np.mean(ma_100)[0],3))
+            if np.mean(ma_100)[0] > 15:
                 break
 
 def play():
@@ -241,18 +227,18 @@ def play():
         state = agent.get_state(game)
         if agent.array_tobinary(state) not in agent.Q.keys():
             agent.Q[agent.array_tobinary(state)] = [0,0,0]
-            agent.eligibility_trace[agent.array_tobinary(state)] = [0,0,0]
 
         # get move
+
         action = agent.get_action(state)
+
         game.actions_probability = agent.actions_probability
 
         # perform move and get new state
         reward, done, score = game.play_step(action)
-        # state_next = agent.get_state(game)
-        # if agent.array_tobinary(state_next) not in agent.Q.keys():
-        #     agent.Q[agent.array_tobinary(state_next)] = [0,0,0]
-        #     agent.eligibility_trace[agent.array_tobinary(state_next)] = [0, 0, 0]
+        state_next = agent.get_state(game)
+        if agent.array_tobinary(state_next) not in agent.Q.keys():
+            agent.Q[agent.array_tobinary(state_next)] = [0,0,0]
 
         if done:
             game.reset()
@@ -269,7 +255,9 @@ def play():
             # plot(plot_scores, plot_mean_scores)
             print('Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:', round(mean_score,3))
 
+
+
 if __name__ == '__main__':
-    agent = AgentTD_Lambda()
+    agent = Agent_Sarsa()
     train()
     play()

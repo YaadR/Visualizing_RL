@@ -278,4 +278,6 @@ def train():
 
 
 if __name__ == '__main__':
-    train()
+    plot_mean_all = []
+    for i in range(20):
+        train()

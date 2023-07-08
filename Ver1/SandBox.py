@@ -159,18 +159,46 @@ def visualize_weights(model):
 # state = np.array([0,0,0,1,1,0,1,1,0,1,1])
 # visualize_biases(model,state)
 
+import numpy as np
 import matplotlib.pyplot as plt
 
-# Create a figure and axis
-fig, ax = plt.subplots()
+# Generate random data for 10 lists of mean scores
+num_lists = 10
+num_scores = 100
+mean_scores = []
+scores = []
+for _ in range(num_lists):
+    scores.append(list(np.random.rand(num_scores)))
 
-# Remove the ticks
-ax.set_xticks([])
-ax.set_yticks([])
-#
-# # Remove the grid lines
-# ax.grid(False)
+
+for n in range(num_lists):
+    for i in range(100):
+        scores[n][i]*=5*i
+
+
+mean_scores =  np.mean(scores,axis=0)
+
+# Plotting parameters
+alpha_value = 0.2  # Alpha value for faded background
+average_color = 'blue'  # Color for the average line
+
+# Plot each list of mean scores with a faded background
+for i, score in enumerate(scores):
+    plt.plot(score, color='orange', alpha=alpha_value)
+
+# Plot the average line with a solid color
+# average_scores = np.mean(mean_scores, axis=0)
+plt.plot(mean_scores, color=average_color, label='Average')
+
+# Add labels and title
+plt.xlabel('Iterations')
+plt.ylabel('Mean Score')
+plt.title('Average of Multiple Lists of Mean Scores')
+
+# Add legend
+plt.legend()
 
 # Show the plot
 plt.show()
+
 

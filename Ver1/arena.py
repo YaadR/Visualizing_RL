@@ -10,7 +10,7 @@ BLACK = (0, 0, 0)
 WIDTH = 480
 HEIGHT = 360
 
-TRAIN_STOP = 1
+TRAIN_STOP = 4
 plot_colors = ['blue','green','purple']
 
 def train(agent_num=1):
@@ -38,7 +38,7 @@ def train(agent_num=1):
 
                 if i and agent.array_tobinary(state) not in agent.Q.keys():
                     agent.Q[agent.array_tobinary(state)] = [0,0,0]
-                    if i>1:
+                    if i:
                         agent.eligibility_trace[agent.array_tobinary(state)] = [0, 0, 0]
 
                 # get move
@@ -52,7 +52,7 @@ def train(agent_num=1):
                 state_next = agent.get_state(arena.env[i])
                 if i and agent.array_tobinary(state_next) not in agent.Q.keys():
                     agent.Q[agent.array_tobinary(state_next)] = [0,0,0]
-                    if i>1:
+                    if i:
                         agent.eligibility_trace[agent.array_tobinary(state_next)] = [0, 0, 0]
 
                 if i:
@@ -133,11 +133,12 @@ def play(agent_num=1):
         for i,agent in enumerate(Agents):
 
             state = agent.get_state_arena(arena,i)
+            # print(state)
 
             if i and agent.array_tobinary(state) not in agent.Q.keys():
-                agent.Q[agent.array_tobinary(state)] = [0, 0, 0]
-                if i > 1:
-                    agent.eligibility_trace[agent.array_tobinary(state)] = [0, 0, 0]
+                agent.Q[agent.array_tobinary(state)] = np.random.dirichlet(np.ones(3))
+                if i:
+                    agent.eligibility_trace[agent.array_tobinary(state)] = np.random.dirichlet(np.ones(3))
             # get action
             action = agent.get_action(state)
             # arena.actions_probability[i] = agent.actions_probability
@@ -167,16 +168,20 @@ def play(agent_num=1):
 
 
 if __name__ == '__main__':
-    AGENT_NAMES = ["Deep DQN","TD(0)","TD(Lambda)"]
+    # AGENT_NAMES = ["Deep DQN","Q(0)","Q(Lambda)"]
+    AGENT_NAMES = ["Deep DQN","Q(Lambda)"]
+    # AGENT_NAMES = ["Deep DQN"]
 
     agent_DQN = agentDQN.AgentDQN()
-    agent_TD = agent_Q.Agent_Q()
-    agent_TD_Lambda = agent_Q_Lambda.Agent_Q_Lambda()
-    # Agents = [agent_DQN,agent_TD,agent_TD_Lambda]
-    Agents = [agent_DQN]
-    # train(agent_num=len(Agents))
-    train()
-    pygame.quit()
-    pygame.init()
-    # play(agent_num=len(Agents))
-    play()
+    # agent_Q = agent_Q.Agent_Q()
+    agent_Q_Lambda = agent_Q_Lambda.Agent_Q_Lambda()
+    # Agents = [agent_DQN,agent_Q,agent_Q_Lambda]
+    Agents = [agent_DQN,agent_Q_Lambda]
+    # Agents = [agent_DQN]
+    train(agent_num=len(Agents))
+    # train()
+    plt.close()
+    # pygame.quit()
+    # pygame.init()
+    play(agent_num=len(Agents))
+    # play()

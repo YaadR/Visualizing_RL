@@ -57,7 +57,7 @@ class SnakeGameArena:
             self.env.append(SnakeGameAI(arrow=arrow, agentID=i))
 
 text_position = [[0, 0],[0, 25],[0, 50]]
-AGENT_NAMES = ["DQN","TD(0)","TD(Lambda)"]
+AGENT_NAMES = ["Deep DQN","Q(0)","Q(Lambda)"]
 
 class SnakeGameAICompetition:
 
@@ -101,12 +101,13 @@ class SnakeGameAICompetition:
 
         self.score = [0]*self.agent_num
         self.food = None #[None]*self.agent_num
+        self.food_counter = 0 #[None]*self.agent_num
         self._place_food()
         self.frame_iteration = [0]*self.agent_num
 
     def little_reset(self,agentID=0):
 
-        self.direction[agentID] = (Direction.RIGHT)
+        self.direction[agentID] = Direction.RIGHT
 
         self.head[agentID] = (Point(self.w / 2, self.h / 2))
         self.snake[agentID] =[self.head[agentID],
@@ -115,6 +116,7 @@ class SnakeGameAICompetition:
 
         # self.score[agentID] = 0
         self.frame_iteration[agentID] = 0
+        self.score[agentID] -=5
 
 
 
@@ -140,12 +142,19 @@ class SnakeGameAICompetition:
             return reward, game_over, self.score
 
         # 4. place new food or just move
+
         if self.head[agentID] == self.food:
             self.score[agentID] += 1
             reward = 10
             self._place_food(agentID=agentID)
+            self.food_counter = 0
         else:
             self.snake[agentID].pop()
+            self.food_counter+=1
+
+        if self.food_counter > 300:
+            self._place_food(agentID=agentID)
+
 
         # 5. update ui and clock
         self._update_ui(agentID)

@@ -37,7 +37,7 @@ STATE_VEC_SIZE = 11
 HIDDEN_LAYER = 256
 
 
-class AgentDQN:
+class AgentDPN:
 
     def __init__(self):
         self.n_games = 0
@@ -203,7 +203,7 @@ def train():
     total_score = 0
     record = 0
     mean_score = 0
-    agent = AgentDQN()
+    agent = AgentDPN()
     game = SnakeGameAI(arrow=True, agentID=0)
     loss_buss = []
     loss_buss_2 = []
@@ -280,6 +280,4 @@ def train():
 
 
 if __name__ == '__main__':
-    plot_mean_all = []
-    for i in range(20):
-        train()
+    train()

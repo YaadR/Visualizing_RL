@@ -192,20 +192,25 @@ def table_visualize(table,axs,mean_score,plot_scores):
     # return last_bias
 
 
-def activation_visualize(state_vector,layer1,layer2,axs):
+def activation_visualize(state_vector,layer1,layer2,axs,index=0,activation_name='State vector activation'):
     # Extract the biases from the model
+    layer_widen = np.zeros((len(layer1.T),50))
+    for i,v in enumerate(layer1.T):
+        layer_widen[i] = v
 
-    axs[0].imshow(state_vector, cmap='cool')
-    axs[0].set_title(f'State vector activation')
+    axs[0].imshow(state_vector.T, cmap='viridis')
+    axs[0].set_title(activation_name)
 
-    axs[1].imshow(layer1, cmap='cool')
+
+    axs[1].imshow(layer_widen, cmap='viridis')
     axs[1].set_title(f'Layer 1 activation')
 
-    axs[2].imshow(layer2, cmap='cool')
-    axs[2].set_title(f'Layer 1 activation')
+    axs[2].imshow(layer2.T, cmap='viridis')
+    axs[2].set_title(f'Layer 2 activation')
 
     plt.tight_layout()
+    plt.savefig(f'activation_{index}.jpg')  # Specify the desired file name and extension
     plt.show()
-    plt.pause(0.1)
 
+    plt.pause(2)
     # return last_bias

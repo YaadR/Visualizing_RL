@@ -105,10 +105,10 @@ class AgentDQN:
         point_u = Point(head.x, head.y - 20)
         point_d = Point(head.x, head.y + 20)
 
-        dir_l = game.direction[id] == Direction.LEFT
-        dir_r = game.direction[id] == Direction.RIGHT
-        dir_u = game.direction[id] == Direction.UP
-        dir_d = game.direction[id] == Direction.DOWN
+        dir_l = game.direction[id].value == Direction.LEFT.value
+        dir_r = game.direction[id].value == Direction.RIGHT.value
+        dir_u = game.direction[id].value == Direction.UP.value
+        dir_d = game.direction[id].value == Direction.DOWN.value
 
         # env = pygame.surfarray.array3d(game.display)
         # min_env = np.zeros((HEIGHT//BLOCK_SIZE,WIDTH//BLOCK_SIZE))
@@ -272,11 +272,11 @@ def train():
             plot_scores.append(score)
             total_score += score
             mean_score = total_score / agent.n_games
-            # print('Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:',round(mean_score, 3) )
+            print('Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:',round(mean_score, 3) )
             plot_mean_scores.append(mean_score)
 
             plot(plot_scores, plot_mean_scores)
-            if mean_score > 4:
+            if mean_score > 6:
                 break
             if heat_flag:
                 axis[1].cla()
@@ -316,14 +316,23 @@ def play():
 
 if __name__ == '__main__':
     agent = AgentDQN()
+
     train()
     # play()
-    fig, axs = plt.subplots(1, 3, width_ratios=[1, 8,1], figsize=(8, 6))
-    for i in range(STATE_VEC_SIZE):
-        state_vector = np.zeros(STATE_VEC_SIZE)
-        state_vector[i] = 1
-        layer_1_activation = agent.model.linear1(state_vector)
-        layer_2_activation = agent.model.linear2(torch.relu(layer_1_activation))
-        activation_visualize(state_vector, layer_1_activation, layer_2_activation, axs)
+
+
+    # plt.close()
+    # plt.ion()
+    # fig, axs = plt.subplots(1, 3, width_ratios=[1, 5,1], figsize=(8, 6))
+    # plt.subplots_adjust(wspace=0.1)
+    # activate_names = ['Danger Straight','Danger Right','Danger Left','Direction Left','Direction Right','Direction Up','Direction Down','Food location Left' ,'Food location Right','Food location Up','Food location Down' ]
+    # for i in range(STATE_VEC_SIZE):
+    #     state_vector = torch.zeros(STATE_VEC_SIZE)
+    #     state_vector[i] = 1
+    #     state_vector = state_vector.reshape((1, -1))
+    #     layer_1_activation = agent.model.linear1(state_vector)
+    #     layer_2_activation = agent.model.linear2(torch.relu(layer_1_activation)).detach().numpy()
+    #     layer_1_activation = layer_1_activation.detach().numpy()
+    #     activation_visualize(state_vector, layer_1_activation, layer_2_activation, axs,i,activate_names[i])
 
 

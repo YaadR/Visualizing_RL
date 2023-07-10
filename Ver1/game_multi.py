@@ -242,8 +242,14 @@ class SnakeGameAICompetition:
         for pt in self.obstacle:
             pygame.draw.rect(self.display, BROWN,pygame.Rect(pt.x, pt.y, BLOCK_SIZE, BLOCK_SIZE))
 
+        # for pt in self.snake[agentID]:
+        #     pygame.draw.rect(self.display, AGENT_UI[agentID+1][0], pygame.Rect(pt.x, pt.y, BLOCK_SIZE, BLOCK_SIZE))
+        #
+        snake_color_decay = AGENT_UI[self.agentID][0]
+        decay_ratio = 0.90 if len(self.snake[agentID]) < 10 else 0.97
         for pt in self.snake[agentID]:
-            pygame.draw.rect(self.display, AGENT_UI[agentID+1][0], pygame.Rect(pt.x, pt.y, BLOCK_SIZE, BLOCK_SIZE))
+            pygame.draw.rect(self.display, snake_color_decay, pygame.Rect(pt.x, pt.y, BLOCK_SIZE, BLOCK_SIZE))
+            snake_color_decay = (int(decay_ratio*snake_color_decay[0]),int(decay_ratio*snake_color_decay[1]),int(decay_ratio*snake_color_decay[2]))
 
 
         pygame.draw.rect(self.display, AGENT_UI[0][1],

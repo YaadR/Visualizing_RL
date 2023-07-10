@@ -121,7 +121,7 @@ def play(agent_num=1):
         plot_mean_scores.append([])
     total_score = [0]*agent_num
     record = [0]*agent_num
-    arena = SnakeGameAICompetition(arrow=False,agent_num=agent_num,obstacle_flag=True)
+    arena = SnakeGameAICompetition(arrow=True,agent_num=agent_num,obstacle_flag=True)
 
     # plt.ion()
     # figure, axis = plt.subplots(3, 1, figsize=(6, 5.5))

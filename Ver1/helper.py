@@ -213,7 +213,7 @@ def activation_visualize(state_vector,layer1,layer2,axs,index=0,activation_name=
     axs[2].set_title(f'Layer 2 activation')
 
     plt.tight_layout()
-    plt.savefig(f'activation_{index}.jpg')  # Specify the desired file name and extension
+    plt.savefig(f'{activation_name}.jpg')  # Specify the desired file name and extension
     plt.show()
 
     plt.pause(2)

@@ -276,12 +276,12 @@ def train():
             plot_mean_scores.append(mean_score)
 
             plot(plot_scores, plot_mean_scores)
-            if mean_score > 6:
+            if mean_score > 8:
                 break
             if heat_flag:
                 axis[1].cla()
                 axis[1].set_title("Training")
-                axis[1].set_xlabel('Number of Games')
+                axis[1].set_xlabel('Games')
                 axis[1].set_ylabel('Score')
                 axis[1].plot(plot_scores)
                 axis[1].plot(plot_mean_scores)
@@ -321,18 +321,18 @@ if __name__ == '__main__':
     # play()
 
 
-    # plt.close()
-    # plt.ion()
-    # fig, axs = plt.subplots(1, 3, width_ratios=[1, 5,1], figsize=(8, 6))
-    # plt.subplots_adjust(wspace=0.1)
-    # activate_names = ['Danger Straight','Danger Right','Danger Left','Direction Left','Direction Right','Direction Up','Direction Down','Food location Left' ,'Food location Right','Food location Up','Food location Down' ]
-    # for i in range(STATE_VEC_SIZE):
-    #     state_vector = torch.zeros(STATE_VEC_SIZE)
-    #     state_vector[i] = 1
-    #     state_vector = state_vector.reshape((1, -1))
-    #     layer_1_activation = agent.model.linear1(state_vector)
-    #     layer_2_activation = agent.model.linear2(torch.relu(layer_1_activation)).detach().numpy()
-    #     layer_1_activation = layer_1_activation.detach().numpy()
-    #     activation_visualize(state_vector, layer_1_activation, layer_2_activation, axs,i,activate_names[i])
+    plt.close()
+    plt.ion()
+    fig, axs = plt.subplots(1, 3, width_ratios=[1, 5,1], figsize=(8, 6))
+    plt.subplots_adjust(wspace=0.1)
+    activate_names = ['Danger Straight','Danger Right','Danger Left','Direction Left','Direction Right','Direction Up','Direction Down','Food location Left' ,'Food location Right','Food location Up','Food location Down' ]
+    for i in range(STATE_VEC_SIZE):
+        state_vector = torch.zeros(STATE_VEC_SIZE)
+        state_vector[i] = 1
+        state_vector = state_vector.reshape((1, -1))
+        layer_1_activation = agent.model.linear1(state_vector)
+        layer_2_activation = agent.model.linear2(torch.relu(layer_1_activation)).detach().numpy()
+        layer_1_activation = layer_1_activation.detach().numpy()
+        activation_visualize(state_vector, layer_1_activation, layer_2_activation, axs,i,activate_names[i])
 
 

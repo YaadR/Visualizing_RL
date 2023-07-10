@@ -278,7 +278,7 @@ class ValueTrainer:
         action = torch.tensor(action, dtype=torch.long)
         reward = torch.tensor(reward, dtype=torch.float)
         # (n, x)
-        loss_bus_flag = False
+
         if len(state.shape) == 1:
             # (1, x)
             state = torch.unsqueeze(state, 0)
@@ -286,13 +286,14 @@ class ValueTrainer:
             action = torch.unsqueeze(action, 0)
             reward = torch.unsqueeze(reward, 0)
             done = (done, )
-        else:
-            loss_bus_flag = True
+
 
         # predicted Q values with current state
         pred = self.model(state)
 
         target = pred.clone()
+        #self._values[self._state] = self._values[self._state] + self._step_size * (
+        #           reward + discount * self._values[next_state] - self._values[self._state])
         for idx in range(len(done)):
             Q_new = reward[idx]
             if not done[idx]:
@@ -302,8 +303,6 @@ class ValueTrainer:
 
         self.optimizer.zero_grad()
         loss = self.criterion(target, pred)
-        if loss_bus_flag:
-            self.loss_bus = loss.detach().numpy()
         loss.backward()
         self.optimizer.step()
 

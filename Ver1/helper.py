@@ -90,6 +90,10 @@ def normalize(array):
         return array
     return [(value - min_value) / (max_value - min_value) for value in array]
 
+def softmax(x):
+    e_x = np.exp(x - np.max(x))
+    return e_x / np.sum(e_x, axis=0)
+
 def visualize_biases(model,axs,last_bias,diff,loss,epsilon_decay=None,agent_type=1,loss_1=None,):
     # Extract the biases from the model
     biases = []

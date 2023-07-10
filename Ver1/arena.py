@@ -10,8 +10,8 @@ BLACK = (0, 0, 0)
 WIDTH = 480
 HEIGHT = 360
 
-TRAIN_STOP = 4
-plot_colors = ['blue','green','purple']
+TRAIN_STOP = 6
+plot_colors = ['blue','purple','green']
 
 def train(agent_num=1):
     trained = [False]*agent_num
@@ -26,7 +26,7 @@ def train(agent_num=1):
     arena = SnakeGameArena(arrow=True,agent_num=agent_num)
 
     plt.ion()
-    figure, axis = plt.subplots(3, 1, figsize=(6, 5.5))
+    figure, axis = plt.subplots(2, 1, figsize=(6, 5.5))
     plt.subplots_adjust(hspace=1)
 
 
@@ -168,9 +168,9 @@ def play(agent_num=1):
 
 
 if __name__ == '__main__':
-    # AGENT_NAMES = ["Deep DQN","Q(0)","Q(Lambda)"]
-    AGENT_NAMES = ["Deep DQN","Q(Lambda)"]
-    # AGENT_NAMES = ["Deep DQN"]
+    # AGENT_NAMES = ["DQN","Q(0)","Q(Lambda)"]
+    AGENT_NAMES = ["DQN","Q(Lambda)"]
+    # AGENT_NAMES = ["DQN"]
 
     agent_DQN = agentDQN.AgentDQN()
     # agent_Q = agent_Q.Agent_Q()

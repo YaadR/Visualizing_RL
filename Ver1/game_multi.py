@@ -40,7 +40,7 @@ WIDTH = 480
 HEIGHT = 360
 SPEED = 30
 
-AGENT_UI = [[BLUE, RED], [BLUE, BLUE_FOOD], [GREEN, GREEN_FOOD], [PURPLE, PURPLE_FOOD]]
+AGENT_UI = [[BLUE, RED], [BLUE, BLUE_FOOD], [PURPLE, PURPLE_FOOD], [GREEN, GREEN_FOOD]]
 
 OBSTACLE_HEIGHT = 60
 OBSTACLE_WIDTH = 80
@@ -57,7 +57,7 @@ class SnakeGameArena:
             self.env.append(SnakeGameAI(arrow=arrow, agentID=i))
 
 text_position = [[0, 0],[0, 25],[0, 50]]
-AGENT_NAMES = ["Deep DQN","Q(0)","Q(Lambda)"]
+AGENT_NAMES = ["DQN","Q(Lambda)","Q(0)"]
 
 class SnakeGameAICompetition:
 
@@ -74,6 +74,7 @@ class SnakeGameAICompetition:
         self.reset()
         self.actions_probability = [[0, 0, 0]]*agent_num
         self.probability_clock = [[0, 0, 0, 0]]*agent_num
+        self.cumulative_reward = [0]*agent_num
         self.agentID = agentID
 
     def place_obstacle(self):
@@ -116,7 +117,6 @@ class SnakeGameAICompetition:
 
         # self.score[agentID] = 0
         self.frame_iteration[agentID] = 0
-        self.score[agentID] -=5
 
 
 
@@ -139,6 +139,7 @@ class SnakeGameAICompetition:
         if self.is_collision(agentID=agentID) or self.frame_iteration[agentID] > 50 * len(self.snake[agentID]):
             game_over = True
             reward = -10
+            self.cumulative_reward[agentID]+=reward
             return reward, game_over, self.score
 
         # 4. place new food or just move
@@ -146,6 +147,7 @@ class SnakeGameAICompetition:
         if self.head[agentID] == self.food:
             self.score[agentID] += 1
             reward = 10
+            self.cumulative_reward[agentID] += reward
             self._place_food(agentID=agentID)
             self.food_counter = 0
         else:
@@ -248,7 +250,7 @@ class SnakeGameAICompetition:
                          pygame.Rect(self.food.x, self.food.y, BLOCK_SIZE, BLOCK_SIZE))
 
 
-        text = font.render(AGENT_NAMES[agentID]+" Score:" + str(self.score[agentID]), True, AGENT_UI[agentID+1][0])
+        text = font.render(AGENT_NAMES[agentID]+" Score:" + str(self.score[agentID])+" Total Reward:"+str(self.cumulative_reward[agentID]), True, AGENT_UI[agentID+1][0])
         self.display.blit(text, text_position[agentID])
 
 

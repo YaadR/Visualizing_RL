@@ -41,10 +41,10 @@ OBSTACLE_HEIGHT = 60
 OBSTACLE_WIDTH = 80
 BROWN = (139, 69, 19)
 
-AGENT_UI = [[BLUE, RED], [BLUE, BLUE_FOOD], [GREEN, GREEN_FOOD], [PURPLE, PURPLE_FOOD]]
+AGENT_UI = [[BLUE, RED], [BLUE, BLUE_FOOD], [PURPLE, PURPLE_FOOD], [GREEN, GREEN_FOOD]]
 
 text_position = [[0, 0],[WIDTH//2 -50, 0],[WIDTH-160, 0]]
-AGENT_NAMES = ["Deep DynaQ","TD(0)","TD(Lambda)"]
+AGENT_NAMES = ["DQN","Q(0)","Q(Lambda)"]
 
 class SnakeGameAI:
 
@@ -208,8 +208,11 @@ class SnakeGameAI:
         for pt in self.obstacle:
             pygame.draw.rect(self.display, BROWN,pygame.Rect(pt.x, pt.y, BLOCK_SIZE, BLOCK_SIZE))
 
+        snake_color_decay = AGENT_UI[self.agentID][0]
+        decay_ratio = 0.90 if len(self.snake) < 10 else 0.97
         for pt in self.snake:
-            pygame.draw.rect(self.display, AGENT_UI[self.agentID][0], pygame.Rect(pt.x, pt.y, BLOCK_SIZE, BLOCK_SIZE))
+            pygame.draw.rect(self.display, snake_color_decay, pygame.Rect(pt.x, pt.y, BLOCK_SIZE, BLOCK_SIZE))
+            snake_color_decay = (int(decay_ratio*snake_color_decay[0]),int(decay_ratio*snake_color_decay[1]),int(decay_ratio*snake_color_decay[2]))
 
 
         pygame.draw.rect(self.display, AGENT_UI[self.agentID][1],

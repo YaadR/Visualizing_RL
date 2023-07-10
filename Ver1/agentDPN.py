@@ -32,6 +32,7 @@ LR = 0.001
 NUM_ACTIONS = 3  # Number of possible actions (up, down, left, right)
 ALPHA = 0.1  # Learning rate
 GAMMA = 0.9  # Discount factor
+EPSILON= 80
 NUM_EPISODES = 100  # Number of training episodes
 STATE_VEC_SIZE = 11
 HIDDEN_LAYER = 256
@@ -43,6 +44,7 @@ class AgentDPN:
         self.n_games = 0
         self.gamma = GAMMA  # discount rate
         self.memory = deque(maxlen=MAX_MEMORY)  # popleft()
+        self.epsilon = 0
 
         # Actor Critic combined
         self.model = ActorCritic(STATE_VEC_SIZE, NUM_ACTIONS)  # Linear_QNet(13, 256, 3)
@@ -188,12 +190,28 @@ class AgentDPN:
         state = torch.tensor(state, dtype=torch.float).unsqueeze(0)
         self.actions_probability = [0, 0, 0]
 
-        action_probs,_ = self.model(state)
-        action = action_probs[0].squeeze().detach().numpy()
-        self.actions_probability = action
+        # action_probs,_ = self.model(state)
+        # action = action_probs[0].squeeze().detach().numpy()
+        # self.actions_probability = action
+        #
+        # action_probs = action_probs.squeeze().detach().numpy()
+        # action = np.random.choice(NUM_ACTIONS, p=action_probs)
+        # return action
 
-        action_probs = action_probs.squeeze().detach().numpy()
-        action = np.random.choice(NUM_ACTIONS, p=action_probs)
+        # random moves: tradeoff exploration / exploitation
+        self.epsilon = EPSILON - self.n_games
+        action = [0, 0, 0]
+        if random.randint(0, 100) < self.epsilon:
+            move = random.randint(0, 2)
+            self.actions_probability = action
+            action[move] = 1
+        else:
+
+            prediction, _ = self.model(torch.tensor(state, dtype=torch.float))
+            self.actions_probability = prediction.detach().numpy()[0]
+            move = torch.argmax(prediction).item()
+            action[move] = 1
+
         return action
 
 
@@ -270,8 +288,8 @@ def train():
             total_score += score
             mean_score = total_score / agent.n_games
             plot_mean_scores.append(mean_score)
-            # plot(plot_scores, plot_mean_scores)
-            last_bias = visualize_biases(agent.model, axs, last_bias, difference_val, loss_buss,epsilon_decay=plot_mean_scores, agent_type=1,loss_1=loss_buss_2)
+            plot(plot_scores, plot_mean_scores)
+            # last_bias = visualize_biases(agent.model, axs, last_bias, difference_val, loss_buss,epsilon_decay=plot_mean_scores, agent_type=1,loss_1=loss_buss_2)
             # net_visualize(agent.model, axs)
             # difference_val[0] = 0
             episode_loss = []

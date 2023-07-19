@@ -1,5 +1,8 @@
 '''
-Deep Q-Network (DQN)
+Action Value Agent:
+ - Model free
+ - off policy
+ - value based : action value
 '''
 
 import torch
@@ -7,7 +10,7 @@ import random
 import numpy as np
 from collections import deque
 from game import SnakeGameAI, Direction, Point, pygame
-from model import Linear_QNet, QTrainer
+from model import Linear_Net, Value_Trainer_A
 from helper import all_plot,plot,heat_map_step,distance_collapse,visualize_biases,net_visualize,activation_visualize
 from sklearn import preprocessing
 import math
@@ -29,15 +32,15 @@ NUM_ACTIONS = 3  # Number of possible actions (up, down, left, right)
 STATE_VEC_SIZE = 11
 HIDDEN_LAYER = 256
 
-class AgentDQN:
+class Action_Value:
 
     def __init__(self):
         self.n_games = 0
         self.epsilon = 0 # randomness
         self.gamma = 0.9 # discount rate
         self.memory = deque(maxlen=MAX_MEMORY) # popleft()
-        self.model = Linear_QNet(STATE_VEC_SIZE, HIDDEN_LAYER, NUM_ACTIONS)
-        self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
+        self.net = Linear_Net(STATE_VEC_SIZE, HIDDEN_LAYER, NUM_ACTIONS)
+        self.trainer = Value_Trainer_A(self.net, lr=LR, gamma=self.gamma)
         self.actions_probability = [0,0,0]
 
     def get_state(self, game):
@@ -179,7 +182,7 @@ class AgentDQN:
             action[move] = 1
         else:
             state0 = torch.tensor(state, dtype=torch.float)
-            prediction = self.model(state0)
+            prediction = self.net(state0)
             self.actions_probability = prediction.detach().numpy()
             move = torch.argmax(prediction).item()
             action[move] = 1
@@ -193,7 +196,7 @@ def train():
     plot_mean_scores = []
     total_score = 0
     record = 0
-    agent = AgentDQN()
+    agent = Action_Value()
     game = SnakeGameAI(arrow=True,agentID=0)
     mean_score=0
     loss_buss = []
@@ -221,7 +224,7 @@ def train():
 
         # perform move and get new state
         reward, done, score = game.play_step(action)
-        state_new = agent.get_state(game)
+        state = agent.get_state(game)
 
         # update heatmap
         if heat_flag:
@@ -229,8 +232,8 @@ def train():
                 # reset heatmap
                 heatmap[:] = 1
             else:
-                X,Y  = distance_collapse(state_new[-2:], game.w, game.h, game.direction.value)
-                heatmap = heat_map_step(heatmap,game.direction.value,game.w//10, game.h//10,int(game.head.x)//10,int(game.head.y)//10,any(state_new[:3]),X//10,Y//10)
+                X,Y  = distance_collapse(state[-2:], game.w, game.h, game.direction.value)
+                heatmap = heat_map_step(heatmap,game.direction.value,game.w//10, game.h//10,int(game.head.x)//10,int(game.head.y)//10,any(state[:3]),X//10,Y//10)
 
         if (record >=20 and mean_score>4) and heat_flag:
             heat_flag = True
@@ -242,10 +245,10 @@ def train():
             # counter+=1
 
         # train short memory
-        agent.train_short_memory(state_old, action, reward, state_new, done)
+        agent.train_short_memory(state_old, action, reward, state, done)
 
         # remember
-        agent.remember(state_old, action, reward, state_new, done)
+        agent.remember(state_old, action, reward, state, done)
 
         if done:
             # train long memory, plot result
@@ -254,8 +257,8 @@ def train():
             agent.train_long_memory()
             loss_buss.append(agent.trainer.loss_bus)
             epsilon_decay.append(agent.epsilon/200)
-            # last_bias = visualize_biases(agent.model, axs, last_bias, difference_val,loss_buss,epsilon_decay)
-            # net_visualize(agent.model, axs)
+            # last_bias = visualize_biases(agent.net, axs, last_bias, difference_val,loss_buss,epsilon_decay)
+            # net_visualize(agent.net, axs)
             # difference_val[0]=0
             # reset heatmap
             if heat_flag:
@@ -315,7 +318,7 @@ def play():
             #print('Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:')
 
 if __name__ == '__main__':
-    agent = AgentDQN()
+    agent = Action_Value()
     scores = []
     for i in range(10):
         train()
@@ -327,14 +330,14 @@ if __name__ == '__main__':
     # plt.ion()
     # fig, axs = plt.subplots(1, 3, width_ratios=[1, 5,1], figsize=(8, 6))
     # plt.subplots_adjust(wspace=0.1)
-    # activate_names = ['Danger Straight','Danger Right','Danger Left','Direction Left','Direction Right','Direction Up','Direction Down','Food location Left' ,'Food location Right','Food location Up','Food location Down' ]
+    # # activate_names = ['Danger Straight','Danger Right','Danger Left','Direction Left','Direction Right','Direction Up','Direction Down','Food location Left' ,'Food location Right','Food location Up','Food location Down' ]
     # for i in range(STATE_VEC_SIZE):
     #     state_vector = torch.zeros(STATE_VEC_SIZE)
     #     state_vector[i] = 1
     #     state_vector = state_vector.reshape((1, -1))
-    #     layer_1_activation = agent.model.linear1(state_vector)
-    #     layer_2_activation = agent.model.linear2(torch.relu(layer_1_activation)).detach().numpy()
+    #     layer_1_activation = agent.net.linear1(state_vector)
+    #     layer_2_activation = agent.net.linear2(torch.relu(layer_1_activation)).detach().numpy()
     #     layer_1_activation = layer_1_activation.detach().numpy()
-    #     activation_visualize(state_vector, layer_1_activation, layer_2_activation, axs,i,activate_names[i])
+    #     activation_visualize(state_vector, layer_1_activation, layer_2_activation, axs,i,i)
 
 

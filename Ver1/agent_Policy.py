@@ -1,5 +1,8 @@
 '''
- Deep Dyna-Q algorithm
+Agent Policy:
+ - Model free
+ - on policy
+ - value based : ?
 '''
 
 import torch
@@ -7,13 +10,10 @@ import random
 import numpy as np
 from collections import deque
 from game import SnakeGameAI, Direction, Point, pygame
-from model import Dyna_QNet, QTrainer
-from helper import plot, heat_map_step, distance_collapse
-from sklearn import preprocessing
-import math
-import pygame
+from model import Linear_Net_Policy, Policy_Trainer_A
+from helper import plot
 import matplotlib.pyplot as plt
-import statistics
+
 
 ##
 BLOCK_SIZE = 20
@@ -25,22 +25,19 @@ MAX_MEMORY = 100_000
 BATCH_SIZE = 1000
 LR = 0.001
 NUM_ACTIONS = 3  # Number of possible actions (up, down, left, right)
-ALPHA = 0.1  # Learning rate
-GAMMA = 0.9  # Discount factor
-EPSILON = 80 # Exploration rate
-NUM_EPISODES = 10  # Number of training episodes
-STATE_VEC_SIZE =13
+STATE_VEC_SIZE = 11
+HIDDEN_LAYER = 256
 
 
-class Agent_Deep_Dyna_Q:
+class Agent_Policy:
 
     def __init__(self):
         self.n_games = 0
         self.epsilon = 0  # randomness
         self.gamma = 0.9  # discount rate
         self.memory = deque(maxlen=MAX_MEMORY)  # popleft()
-        self.model = Dyna_QNet(STATE_VEC_SIZE+NUM_ACTIONS, 256, NUM_ACTIONS)
-        self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
+        self.net = Linear_Net_Policy(STATE_VEC_SIZE, HIDDEN_LAYER, NUM_ACTIONS)
+        self.trainer = Policy_Trainer_A(self.net, lr=LR, gamma=self.gamma)
         self.actions_probability = [0, 0, 0]
 
     def get_state(self, game):
@@ -90,11 +87,11 @@ class Agent_Deep_Dyna_Q:
             game.food.x < game.head.x,  # food left
             game.food.x > game.head.x,  # food right
             game.food.y < game.head.y,  # food up
-            game.food.y > game.head.y,  # food down
+            game.food.y > game.head.y  # food down
 
             # Food distance from head - X axis, Y axis and both
-            preprocessing.normalize([[math.dist([game.head.x], [game.food.x]), 0, game.w]])[0][0],
-            preprocessing.normalize([[math.dist([game.head.y], [game.food.y]), 0, game.h]])[0][0]
+            # preprocessing.normalize([[math.dist([game.head.x],[game.food.x]),0,game.w]])[0][0],
+            # preprocessing.normalize([[math.dist([game.head.y],[game.food.y]),0,game.h]])[0][0]
         ]
 
         return np.array(state, dtype=float)
@@ -106,10 +103,10 @@ class Agent_Deep_Dyna_Q:
         point_u = Point(head.x, head.y - 20)
         point_d = Point(head.x, head.y + 20)
 
-        dir_l = game.direction[id] == Direction.LEFT
-        dir_r = game.direction[id] == Direction.RIGHT
-        dir_u = game.direction[id] == Direction.UP
-        dir_d = game.direction[id] == Direction.DOWN
+        dir_l = game.direction[id].value == Direction.LEFT.value
+        dir_r = game.direction[id].value == Direction.RIGHT.value
+        dir_u = game.direction[id].value == Direction.UP.value
+        dir_d = game.direction[id].value == Direction.DOWN.value
 
         # env = pygame.surfarray.array3d(game.display)
         # min_env = np.zeros((HEIGHT//BLOCK_SIZE,WIDTH//BLOCK_SIZE))
@@ -146,11 +143,11 @@ class Agent_Deep_Dyna_Q:
             game.food.x < game.head[id].x,  # food left
             game.food.x > game.head[id].x,  # food right
             game.food.y < game.head[id].y,  # food up
-            game.food.y > game.head[id].y,  # food down
+            game.food.y > game.head[id].y  # food down
 
             # Food distance from head - X axis, Y axis and both
-            preprocessing.normalize([[math.dist([game.head[id].x], [game.food.x]), 0, game.w]])[0][0],
-            preprocessing.normalize([[math.dist([game.head[id].y], [game.food.y]), 0, game.h]])[0][0]
+            # preprocessing.normalize([[math.dist([game.head[id].x], [game.food.x]), 0, game.w]])[0][0],
+            # preprocessing.normalize([[math.dist([game.head[id].y], [game.food.y]), 0, game.h]])[0][0]
         ]
 
         return np.array(state, dtype=float)
@@ -170,35 +167,37 @@ class Agent_Deep_Dyna_Q:
     def train_short_memory(self, state, action, reward, next_state, done):
         self.trainer.train_step(state, action, reward, next_state, done)
 
-    def get_action(self, state,action):
+    def get_action(self, state):
         # random moves: tradeoff exploration / exploitation
         self.epsilon = 80 - self.n_games
-        action_next = [0, 0, 0]
-        #if random.randint(0, 200) < self.epsilon:
-        if 0 < self.epsilon:
+        action = [0, 0, 0]
+        if random.randint(0, 200) < self.epsilon:
             move = random.randint(0, 2)
-            self.actions_probability = action_next
-            action_next[move] = 1
+            self.actions_probability = action
+            action[move] = 1
         else:
             state0 = torch.tensor(state, dtype=torch.float)
-            prediction = self.model(state0,action)
+            prediction = self.net(state0)
             self.actions_probability = prediction.detach().numpy()
             move = torch.argmax(prediction).item()
-            action_next[move] = 1
+            action[move] = 1
 
-        return action_next
+        return action
 
 
 def train():
     plot_scores = []
     plot_mean_scores = []
     total_score = 0
-    mean_score = 0
     record = 0
-    agent = Agent_Deep_Dyna_Q()
+    agent = Agent_Policy()
     game = SnakeGameAI(arrow=True, agentID=0)
+    mean_score = 0
 
-    action = [0,0,0]
+    plt.ion()
+
+    # fig, axs = plt.subplots(1, 3,width_ratios=[4,1,6], figsize=(8, 6))
+    ####fig, axs = plt.subplots(1, 4,width_ratios=[12,4,8,1], figsize=(8, 6))
 
 
     while True:
@@ -206,7 +205,7 @@ def train():
         state_old = agent.get_state(game)
 
         # get move
-        action = agent.get_action(state_old,action)
+        action = agent.get_action(state_old)
         game.actions_probability = agent.actions_probability
 
         # perform move and get new state
@@ -226,19 +225,49 @@ def train():
             agent.n_games += 1
             agent.train_long_memory()
 
+
             if score > record:
                 record = score
 
 
-            print('Game', agent.n_games, 'Score', score, 'Record:', record)
-
             plot_scores.append(score)
             total_score += score
             mean_score = total_score / agent.n_games
+            print('Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:', round(mean_score, 3))
             plot_mean_scores.append(mean_score)
-            plot(plot_scores, plot_mean_scores)
 
+            plot(plot_scores, plot_mean_scores)
+            if mean_score > 8:
+
+                break
+
+def play():
+    plot_scores = []
+    record = 0
+    game = SnakeGameAI(arrow=True, obstacle_flag=True)
+
+    while True:
+        # get old state
+        state = agent.get_state(game)
+        # get move
+        action = agent.get_action(state)
+        game.actions_probability = agent.actions_probability
+        # perform move and get new state
+        reward, done, score = game.play_step(action)
+        if done:
+            game.reset()
+            agent.n_games += 1
+
+            if score > record:
+                record = score
+            plot_scores.append(score)
+
+            # plot(plot_scores, plot_mean_scores)
+            # print('Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:')
 
 
 if __name__ == '__main__':
-    train()
+    agent = Agent_Policy()
+    # play()
+
+

@@ -1,5 +1,8 @@
 '''
-Agent Value
+Agent Value:
+ - Model based
+ - off policy
+ - value based : state value
 '''
 
 import torch
@@ -7,7 +10,7 @@ import random
 import numpy as np
 from collections import deque
 from game import SnakeGameAI, Direction, Point, pygame
-from model import Linear_QNet, Value_Trainer,nn
+from model import Linear_Net, Value_Trainer_V
 from helper import plot, heat_map_step, distance_collapse, visualize_biases, net_visualize, activation_visualize,normalizer
 from sklearn import preprocessing
 import math
@@ -39,8 +42,8 @@ class Agent_Value:
         self.gamma = GAMMA  # discount rate
         self.alpha = ALPHA #
         self.memory = deque(maxlen=MAX_MEMORY)  # popleft()
-        self.model = Linear_QNet(STATE_VEC_SIZE, HIDDEN_LAYER, NUM_ACTIONS)
-        self.trainer = Value_Trainer(self.model, lr=LR, gamma=self.gamma,alpha=self.alpha)
+        self.net = Linear_Net(STATE_VEC_SIZE, HIDDEN_LAYER, NUM_ACTIONS)
+        self.trainer = Value_Trainer_V(self.net, lr=LR, gamma=self.gamma,alpha=self.alpha)
         self.states_value = [0, 0, 0]
         self.env_model = SnakeGameAI()
 
@@ -169,7 +172,7 @@ class Agent_Value:
             action[move] = 1
         else:
             state0 = torch.tensor(state, dtype=torch.float)
-            prediction = self.model(state0)
+            prediction = self.net(state0)
             self.states_value = prediction.detach().numpy()
             move = torch.argmax(prediction).item()
             action[move] = 1

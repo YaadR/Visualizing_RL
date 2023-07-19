@@ -218,39 +218,3 @@ def activation_visualize(state_vector,layer1,layer2,axs,index=0,activation_name=
 
     plt.pause(2)
     # return last_bias
-
-
-def all_plot(scores):
-    min_length = min(len(sublist) for sublist in scores)
-
-    cut_list = [sublist[:min_length] for sublist in scores]
-    padded_list = [sublist + [np.nan] * (min_length - len(sublist)) for sublist in cut_list]
-    mean_list = np.nanmean(padded_list, axis=0)
-    # for n in range(num_lists):
-    #     for i in range(100):
-    #         scores[n][i] *= 5 * i
-
-    #mean_scores = np.mean(scores, axis=0)
-
-    # Plotting parameters
-    alpha_value = 0.2  # Alpha value for faded background
-    average_color = 'blue'  # Color for the average line
-
-    # Plot each list of mean scores with a faded background
-    for i, score in enumerate(scores):
-        plt.plot(score, color='orange', alpha=alpha_value)
-
-    # Plot the average line with a solid color
-    # average_scores = np.mean(mean_scores, axis=0)
-    plt.plot(mean_list, color=average_color, label='Average')
-
-    # Add labels and title
-    plt.xlabel('Iterations')
-    plt.ylabel('Mean Score')
-    plt.title('Average of Multiple Lists of Mean Scores')
-
-    # Add legend
-    plt.legend()
-
-    # Show the plot
-    plt.show()

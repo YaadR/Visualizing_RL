@@ -90,6 +90,11 @@ def normalize(array):
         return array
     return [(value - min_value) / (max_value - min_value) for value in array]
 
+def normalizer(values):
+    total_sum = sum(values)
+    normalized_values = [value / total_sum for value in values]
+    return normalized_values
+
 def softmax(x):
     e_x = np.exp(x - np.max(x))
     return e_x / np.sum(e_x, axis=0)

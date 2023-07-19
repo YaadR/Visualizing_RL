@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import agentDQN
 import agent_Q
 import agent_Q_Lambda
+import agent_Value
 
 
 BLACK = (0, 0, 0)
@@ -11,7 +12,7 @@ WIDTH = 480
 HEIGHT = 360
 
 TRAIN_STOP = 6
-plot_colors = ['blue','purple','green']
+plot_colors = ['blue','green','purple']
 
 def train(agent_num=1):
     trained = [False]*agent_num
@@ -26,7 +27,7 @@ def train(agent_num=1):
     arena = SnakeGameArena(arrow=True,agent_num=agent_num)
 
     plt.ion()
-    figure, axis = plt.subplots(2, 1, figsize=(6, 5.5))
+    figure, axis = plt.subplots(agent_num, 1, figsize=(6, 5.5))
     plt.subplots_adjust(hspace=1)
 
 
@@ -36,7 +37,7 @@ def train(agent_num=1):
             if not trained[i]:
                 state = agent.get_state(arena.env[i])
 
-                if i and agent.array_tobinary(state) not in agent.Q.keys():
+                if i>1 and agent.array_tobinary(state) not in agent.Q.keys():
                     agent.Q[agent.array_tobinary(state)] = [0,0,0]
                     if i:
                         agent.eligibility_trace[agent.array_tobinary(state)] = [0, 0, 0]
@@ -50,14 +51,20 @@ def train(agent_num=1):
                 reward, done, score = arena.env[i].play_step(action)
                 arena.displays[i] = pygame.surfarray.array3d(arena.env[i].display)
                 state_next = agent.get_state(arena.env[i])
-                if i and agent.array_tobinary(state_next) not in agent.Q.keys():
+                if i>1 and agent.array_tobinary(state_next) not in agent.Q.keys():
                     agent.Q[agent.array_tobinary(state_next)] = [0,0,0]
                     if i:
                         agent.eligibility_trace[agent.array_tobinary(state_next)] = [0, 0, 0]
 
-                if i:
+                if i==2:
                     agent.update_Q(state,action,reward,state_next)
-                else:
+                elif i==1:
+                    # perform move and get new state
+                    _reward, _done, _state_next = agent.get_states_value(arena.env[i])
+
+                    # train short memory
+                    agent.train_short_memory(state, _reward, _state_next, _done)
+                elif i==0:
                     # train short memory
                     agent.train_short_memory(state, action, reward, state_next, done)
 
@@ -72,8 +79,6 @@ def train(agent_num=1):
 
                     if score > record[i]:
                         record[i] = score
-
-
 
                     plot_scores[i].append(score)
                     total_score[i] += score
@@ -135,7 +140,7 @@ def play(agent_num=1):
             state = agent.get_state_arena(arena,i)
             # print(state)
 
-            if i and agent.array_tobinary(state) not in agent.Q.keys():
+            if i>1 and agent.array_tobinary(state) not in agent.Q.keys():
                 agent.Q[agent.array_tobinary(state)] = np.random.dirichlet(np.ones(3))
                 if i:
                     agent.eligibility_trace[agent.array_tobinary(state)] = np.random.dirichlet(np.ones(3))
@@ -168,15 +173,16 @@ def play(agent_num=1):
 
 
 if __name__ == '__main__':
-    # AGENT_NAMES = ["DQN","Q(0)","Q(Lambda)"]
-    AGENT_NAMES = ["DQN","Q(Lambda)"]
+    # AGENT_NAMES = ["DQN","Value Based","Q(Lambda)"]
+    AGENT_NAMES = ["DQN","Value Based"]
+    # AGENT_NAMES = ["DQN","Q(Lambda)"]
     # AGENT_NAMES = ["DQN"]
 
     agent_DQN = agentDQN.AgentDQN()
-    # agent_Q = agent_Q.Agent_Q()
-    agent_Q_Lambda = agent_Q_Lambda.Agent_Q_Lambda()
+    agent_Q = agent_Value.Agent_Value()# agent_Q.Agent_Q()
+    # agent_Q_Lambda = agent_Q_Lambda.Agent_Q_Lambda()
     # Agents = [agent_DQN,agent_Q,agent_Q_Lambda]
-    Agents = [agent_DQN,agent_Q_Lambda]
+    Agents = [agent_DQN,agent_Q]
     # Agents = [agent_DQN]
     train(agent_num=len(Agents))
     # train()

@@ -8,7 +8,7 @@ import numpy as np
 from collections import deque
 from game import SnakeGameAI, Direction, Point, pygame
 from model import Linear_QNet, QTrainer
-from helper import plot,heat_map_step,distance_collapse,visualize_biases,net_visualize,activation_visualize
+from helper import all_plot,plot,heat_map_step,distance_collapse,visualize_biases,net_visualize,activation_visualize
 from sklearn import preprocessing
 import math
 import matplotlib.pyplot as plt
@@ -205,7 +205,7 @@ def train():
     plt.ion()
 
     # fig, axs = plt.subplots(1, 3,width_ratios=[4,1,6], figsize=(8, 6))
-    fig, axs = plt.subplots(1, 4,width_ratios=[12,4,8,1], figsize=(8, 6))
+    ####fig, axs = plt.subplots(1, 4,width_ratios=[12,4,8,1], figsize=(8, 6))
     heat_flag = False
     if heat_flag:
         figure, axis = plt.subplots(1,2,width_ratios=[2,3],figsize=(10,4))
@@ -277,6 +277,7 @@ def train():
 
             plot(plot_scores, plot_mean_scores)
             if mean_score > 8:
+                scores.append(list(plot_scores))
                 break
             if heat_flag:
                 axis[1].cla()
@@ -312,27 +313,29 @@ def play():
             plot_scores.append(score)
 
             # plot(plot_scores, plot_mean_scores)
-            print('Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:')
+            #print('Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:')
 
 if __name__ == '__main__':
     agent = AgentDQN()
+    scores = []
+    for i in range(10):
+        train()
+    all_plot(scores)
+    #play()
 
-    train()
-    # play()
 
-
-    plt.close()
-    plt.ion()
-    fig, axs = plt.subplots(1, 3, width_ratios=[1, 5,1], figsize=(8, 6))
-    plt.subplots_adjust(wspace=0.1)
-    activate_names = ['Danger Straight','Danger Right','Danger Left','Direction Left','Direction Right','Direction Up','Direction Down','Food location Left' ,'Food location Right','Food location Up','Food location Down' ]
-    for i in range(STATE_VEC_SIZE):
-        state_vector = torch.zeros(STATE_VEC_SIZE)
-        state_vector[i] = 1
-        state_vector = state_vector.reshape((1, -1))
-        layer_1_activation = agent.model.linear1(state_vector)
-        layer_2_activation = agent.model.linear2(torch.relu(layer_1_activation)).detach().numpy()
-        layer_1_activation = layer_1_activation.detach().numpy()
-        activation_visualize(state_vector, layer_1_activation, layer_2_activation, axs,i,activate_names[i])
+    # plt.close()
+    # plt.ion()
+    # fig, axs = plt.subplots(1, 3, width_ratios=[1, 5,1], figsize=(8, 6))
+    # plt.subplots_adjust(wspace=0.1)
+    # activate_names = ['Danger Straight','Danger Right','Danger Left','Direction Left','Direction Right','Direction Up','Direction Down','Food location Left' ,'Food location Right','Food location Up','Food location Down' ]
+    # for i in range(STATE_VEC_SIZE):
+    #     state_vector = torch.zeros(STATE_VEC_SIZE)
+    #     state_vector[i] = 1
+    #     state_vector = state_vector.reshape((1, -1))
+    #     layer_1_activation = agent.model.linear1(state_vector)
+    #     layer_2_activation = agent.model.linear2(torch.relu(layer_1_activation)).detach().numpy()
+    #     layer_1_activation = layer_1_activation.detach().numpy()
+    #     activation_visualize(state_vector, layer_1_activation, layer_2_activation, axs,i,activate_names[i])
 
 

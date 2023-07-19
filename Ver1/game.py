@@ -3,6 +3,7 @@ import random
 from enum import Enum
 from collections import namedtuple
 import numpy as np
+import copy
 from pygame.locals import *
 
 pygame.init()
@@ -35,7 +36,7 @@ YELLOW = (128, 0, 128)
 BLOCK_SIZE = 20
 WIDTH = 480
 HEIGHT = 360
-SPEED = 30
+SPEED = 50
 
 OBSTACLE_HEIGHT = 60
 OBSTACLE_WIDTH = 80
@@ -44,7 +45,7 @@ BROWN = (139, 69, 19)
 AGENT_UI = [[BLUE, RED], [BLUE, BLUE_FOOD], [PURPLE, PURPLE_FOOD], [GREEN, GREEN_FOOD]]
 
 text_position = [[0, 0],[WIDTH//2 -50, 0],[WIDTH-160, 0]]
-AGENT_NAMES = ["DQN","Q(0)","Q(Lambda)"]
+AGENT_NAMES = ["DQN","Value Based","Q(Lambda)"]
 
 class SnakeGameAI:
 
@@ -62,6 +63,16 @@ class SnakeGameAI:
         self.probability_clock = [0, 0, 0, 0]
         self.agentID = agentID
 
+    def copy(self,copied_game):
+        # copied_game = SnakeGameAI()
+        excluded_attributes = ["clock"]  # Add any other attribute names you want to exclude
+        for name, attr in self.__dict__.items():
+            if name not in excluded_attributes:
+                if hasattr(attr, 'copy') and callable(getattr(attr, 'copy')):
+                    copied_game.__dict__[name] = attr.copy()
+                else:
+                    copied_game.__dict__[name] = copy.deepcopy(attr)
+        return copied_game
 
     def place_obstacle(self):
         # self.obstacle = [Point(80, 60), Point(80, 240), Point(320, 60), Point(320, 240)]
@@ -122,7 +133,7 @@ class SnakeGameAI:
         # 5. update ui and clock
         self._update_ui()
 
-        self.clock.tick(SPEED)
+        # self.clock.tick(SPEED)
 
         # 6. return game over and score
         return reward, game_over, self.score

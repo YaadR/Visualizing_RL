@@ -241,7 +241,6 @@ def train():
             #     pygame.image.save(game.display, "screenshot"+str(counter)+".jpeg")
             # counter+=1
 
-
         # train short memory
         agent.train_short_memory(state_old, action, reward, state_new, done)
 
@@ -264,6 +263,8 @@ def train():
 
             if score > record:
                 record = score
+
+
 
 
             # print('Game', agent.n_games, 'Score', score, 'Record:', record)

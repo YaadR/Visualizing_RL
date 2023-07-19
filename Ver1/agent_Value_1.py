@@ -1,5 +1,5 @@
 '''
-Value Function
+Agent Value
 '''
 
 import torch
@@ -7,12 +7,14 @@ import random
 import numpy as np
 from collections import deque
 from game import SnakeGameAI, Direction, Point, pygame
-from model import Linear_QNet, ValueTrainer
-from helper import plot, net_visualize, activation_visualize,softmax
+from model import Linear_Net, Value_Trainer_1,nn
+from helper import plot, heat_map_step, distance_collapse, visualize_biases, net_visualize, activation_visualize,normalizer
 from sklearn import preprocessing
 import math
 import matplotlib.pyplot as plt
+import itertools
 import statistics
+
 
 ALPHA = 0.5  # Learning rate
 GAMMA = 0.9  # Discount factor
@@ -30,18 +32,18 @@ STATE_VEC_SIZE = 11
 HIDDEN_LAYER = 256
 
 
-class AgentValue:
+class Agent_Value_1:
 
     def __init__(self):
         self.n_games = 0
         self.epsilon = 0  # randomness
         self.gamma = GAMMA  # discount rate
-        self.alpha = ALPHA
-
+        self.alpha = ALPHA #
         self.memory = deque(maxlen=MAX_MEMORY)  # popleft()
-        self.model = Linear_QNet(STATE_VEC_SIZE, HIDDEN_LAYER, NUM_ACTIONS)
-        self.trainer = ValueTrainer(self.model, lr=LR, gamma=self.gamma,alpha=self.alpha)
+        self.model = Linear_Net(STATE_VEC_SIZE, HIDDEN_LAYER, 1)
+        self.trainer = Value_Trainer_1(self.model, lr=LR, gamma=self.gamma,alpha=self.alpha)
         self.actions_probability = [0, 0, 0]
+        self.env_model = SnakeGameAI()
 
     def get_state(self, game):
         head = game.snake[0]
@@ -155,46 +157,54 @@ class AgentValue:
 
         return np.array(state, dtype=float)
 
-    def remember(self, state, action, reward, next_state, done):
-        self.memory.append((state, action, reward, next_state, done))  # popleft if MAX_MEMORY is reached
-
-    def train_long_memory(self):
-        if len(self.memory) > BATCH_SIZE:
-            mini_sample = random.sample(self.memory, BATCH_SIZE)  # list of tuples
-        else:
-            mini_sample = self.memory
-
-        states, actions, rewards, next_states, dones = zip(*mini_sample)
-        self.trainer.train_step(states, actions, rewards, next_states, dones)
-
-    def train_short_memory(self, state, action, reward, next_state, done):
-        self.trainer.train_step(state, action, reward, next_state, done)
+    def train_short_memory(self, state, reward, next_state, done):
+        self.trainer.train_step(state, reward, next_state, done)
 
     def get_action(self, state):
         # random moves: tradeoff exploration / exploitation
-        self.epsilon = 80 - self.n_games
+        self.epsilon = 10 - self.n_games
         action = [0, 0, 0]
-        # if self.epsilon <0 and self.epsilon  > -200:
-        #     values = self.model(torch.tensor(state, dtype=torch.float))
-        #     probabilities = softmax(values.detach().numpy())
-        #     action = np.random.choice(range(NUM_ACTIONS), p=probabilities)
-        #     return action
-        if self.epsilon <0:
-            self.epsilon=5
+        prediction = list(itertools.chain.from_iterable(self.model(torch.tensor(state, dtype=torch.float)).detach().numpy()))
         if random.randint(0, 200) < self.epsilon:
             move = random.randint(0, 2)
             self.actions_probability = action
             action[move] = 1
         else:
-            state0 = torch.tensor(state, dtype=torch.float)
-            prediction = self.model(state0)
-            self.actions_probability = prediction.detach().numpy()
-            move = torch.argmax(prediction).item()
+            self.actions_probability = prediction
+            move = np.argmax(prediction)
             action[move] = 1
 
-
-
         return action
+
+    def get_states_value(self,game):
+        # [Straight, Right, Left]
+        rewards, dones,next_states = [],[],[]
+        actions = [[1, 0, 0],[0, 1, 0],[0, 0, 1]]
+        # for i in range(len(env_models)):
+        #     env_models[i] = game.copy(env_models[i])
+        for i,action in enumerate(actions):
+            self.env_model = game.copy(self.env_model)
+            reward, done, score = self.env_model.play_step(action)
+            next_state = self.get_state(self.env_model)
+            rewards.append(reward), dones.append(done), next_states.append(next_state)
+
+        dones = np.array(dones).astype(int)
+        return rewards, dones,next_states
+
+    def get_states_value_EX(self,game):
+        # [Straight, Right, Left]
+        rewards, dones,next_states = [],[],[]
+        actions = [[1, 0, 0],[0, 1, 0],[0, 0, 1]]
+        # for i in range(len(env_models)):
+        #     env_models[i] = game.copy(env_models[i])
+        for i,action in enumerate(actions):
+            self.env_model = game.copy(self.env_model)
+            reward, done, score = self.env_model.play_step(action)
+            next_state = self.get_state(self.env_model)
+            rewards.append(reward), dones.append(done), next_states.append(next_state)
+
+        dones = np.array(dones).astype(int)
+        return rewards, dones,next_states
 
 
 def train():
@@ -202,50 +212,38 @@ def train():
     plot_mean_scores = []
     total_score = 0
     record = 0
-    # agent = AgentValue()
+    # agent = Agent_Value()
     game = SnakeGameAI(arrow=True, agentID=0)
-    mean_score = 0
-    cumulative_reward = 0
 
+
+    mean_score = 0
 
     plt.ion()
 
     # fig, axs = plt.subplots(1, 3,width_ratios=[4,1,6], figsize=(8, 6))
-    fig, axs = plt.subplots(1, 4, width_ratios=[12, 4, 8, 1], figsize=(8, 6))
+    # fig, axs = plt.subplots(1, 4, width_ratios=[12, 4, 8, 1], figsize=(8, 6))
 
     while True:
         # get old state
-        state_old = agent.get_state(game)
+        state = agent.get_state(game)
 
         # get move
-        action = agent.get_action(state_old)
+        _reward, _done, _state_next = agent.get_states_value(game)
+        action = agent.get_action(_state_next)
         game.actions_probability = agent.actions_probability
 
         # perform move and get new state
-        reward, done, score = game.play_step(action)
-        state_new = agent.get_state(game)
+        # _reward, _done, _state_next = agent.get_states_value(game)
 
-        #### Altering the reward function
-        # if not done and False:
-        #     # if np.any(state_new[:3]) and not reward: # warning over danger ahead
-        #     #     reward = -1
-        #     if distance_collapse > 2*np.sum(state_new[-2:]) and not reward: # Distance collapse towards food
-        #         distance_collapse = np.sum(state_new[-2:])
-        #         reward = 0.1
-        #     elif reward > 0.1: # reset food distance after food was reached
-        #         distance_collapse = 2
+        reward, done, score = game.play_step(action)
 
         # train short memory
-        agent.train_short_memory(state_old, action, reward, state_new, done)
-
-        # remember
-        # agent.remember(state_old, action, reward, state_new, done)
+        agent.train_short_memory(state, _reward, _state_next, _done)
 
         if done:
             # train long memory, plot result
             game.reset()
             agent.n_games += 1
-            # agent.train_long_memory()
 
             if score > record:
                 record = score
@@ -257,9 +255,8 @@ def train():
             plot_mean_scores.append(mean_score)
 
             plot(plot_scores, plot_mean_scores)
-            if mean_score > 6:
+            if mean_score > 12:
                 break
-
 
 
 def play():
@@ -288,9 +285,8 @@ def play():
 
 
 if __name__ == '__main__':
-    agent = AgentValue()
+    agent = Agent_Value_1()
+
     train()
     # play()
-
-
 

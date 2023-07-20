@@ -287,16 +287,16 @@ class Value_Trainer_A:
         self.criterion = nn.MSELoss()
         self.loss_bus = 0
 
-    def train_step(self, state_old, action, reward, state, done):
-        state_old = torch.tensor(state_old, dtype=torch.float)
+    def train_step(self, state_prev, action, reward, state, done):
+        state_prev = torch.tensor(state_prev, dtype=torch.float)
         state = torch.tensor(state, dtype=torch.float)
         action = torch.tensor(action, dtype=torch.long)
         reward = torch.tensor(reward, dtype=torch.float)
         # (n, x)
         loss_bus_flag = False
-        if len(state_old.shape) == 1:
+        if len(state_prev.shape) == 1:
             # (1, x)
-            state_old = torch.unsqueeze(state_old, 0)
+            state_prev = torch.unsqueeze(state_prev, 0)
             state = torch.unsqueeze(state, 0)
             action = torch.unsqueeze(action, 0)
             reward = torch.unsqueeze(reward, 0)
@@ -305,7 +305,7 @@ class Value_Trainer_A:
             loss_bus_flag = True
 
         # predicted Q values with current state
-        pred = self.net(state_old)
+        pred = self.net(state_prev)
 
         target = pred.clone()
         for idx in range(len(done)):

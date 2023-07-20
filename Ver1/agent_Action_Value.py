@@ -11,7 +11,7 @@ import numpy as np
 from collections import deque
 from game import SnakeGameAI, Direction, Point, pygame
 from model import Linear_Net, Value_Trainer_A
-from helper import all_plot,plot,heat_map_step,distance_collapse,visualize_biases,net_visualize,activation_visualize
+from helper import plot_mean_scores_buffer,plot,heat_map_step,distance_collapse,visualize_biases,net_visualize,activation_visualize
 from sklearn import preprocessing
 import math
 import matplotlib.pyplot as plt
@@ -216,10 +216,10 @@ def train():
 
     while True:
         # get old state
-        state_old = agent.get_state(game)
+        state_prev = agent.get_state(game)
 
         # get move
-        action = agent.get_action(state_old)
+        action = agent.get_action(state_prev)
         game.actions_probability = agent.actions_probability
 
         # perform move and get new state
@@ -245,10 +245,10 @@ def train():
             # counter+=1
 
         # train short memory
-        agent.train_short_memory(state_old, action, reward, state, done)
+        agent.train_short_memory(state_prev, action, reward, state, done)
 
         # remember
-        agent.remember(state_old, action, reward, state, done)
+        agent.remember(state_prev, action, reward, state, done)
 
         if done:
             # train long memory, plot result
@@ -277,9 +277,9 @@ def train():
             print('Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:',round(mean_score, 3) )
             plot_mean_scores.append(mean_score)
 
-            plot(plot_scores, plot_mean_scores)
-            if mean_score > 8:
-                scores.append(list(plot_scores))
+            # plot(plot_scores, plot_mean_scores)
+            if mean_score > 3 and agent.n_games>300:
+                mean_scores.append(list(plot_mean_scores))
                 break
             if heat_flag:
                 axis[1].cla()
@@ -319,10 +319,10 @@ def play():
 
 if __name__ == '__main__':
     agent = Action_Value()
-    scores = []
-    for i in range(10):
+    mean_scores = []
+    for i in range(20):
         train()
-    all_plot(scores)
+    plot_mean_scores_buffer(mean_scores)
     #play()
 
 
@@ -330,10 +330,7 @@ if __name__ == '__main__':
     # plt.ion()
     # fig, axs = plt.subplots(1, 3, width_ratios=[1, 5,1], figsize=(8, 6))
     # plt.subplots_adjust(wspace=0.1)
-    # # activate_names = ['Danger Straight','Danger Right','Danger Left','Direction Left','Direction Right','Direction Up','Direction Down','Food location Left' ,'Food location Right','Food location Up','Food location Down' ]
-    # for i in range(STATE_VEC_SIZE):
-    #     state_vector = torch.zeros(STATE_VEC_SIZE)
-    #     state_vector[i] = 1
+
     #     state_vector = state_vector.reshape((1, -1))
     #     layer_1_activation = agent.net.linear1(state_vector)
     #     layer_2_activation = agent.net.linear2(torch.relu(layer_1_activation)).detach().numpy()

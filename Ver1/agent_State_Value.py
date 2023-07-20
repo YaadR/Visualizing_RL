@@ -11,7 +11,7 @@ import numpy as np
 from collections import deque
 from game import SnakeGameAI, Direction, Point, pygame
 from model import Linear_Net, Value_Trainer_1,nn
-from helper import plot, heat_map_step, distance_collapse, visualize_biases, net_visualize, activation_visualize,normalizer
+from helper import plot,net_visualize, activation_visualize,array_tobinary
 from sklearn import preprocessing
 import math
 import matplotlib.pyplot as plt
@@ -42,6 +42,7 @@ class Agent_Value_1:
         self.epsilon = 0  # randomness
         self.gamma = GAMMA  # discount rate
         self.alpha = ALPHA #
+        self.Q = dict()     # Q table
         self.memory = deque(maxlen=MAX_MEMORY)  # popleft()
         self.net = Linear_Net(STATE_VEC_SIZE, HIDDEN_LAYER, NUM_ACTIONS)
         self.trainer = Value_Trainer_1(self.net, lr=LR, gamma=self.gamma,alpha=self.alpha)
@@ -165,7 +166,7 @@ class Agent_Value_1:
 
     def get_action(self, state):
         # random moves: tradeoff exploration / exploitation
-        self.epsilon = 10 - self.n_games
+        self.epsilon = 80 - self.n_games
         action = [0, 0, 0]
         prediction = list(itertools.chain.from_iterable(self.net(torch.tensor(state, dtype=torch.float)).detach().numpy()))
         if random.randint(0, 200) < self.epsilon:
@@ -213,8 +214,10 @@ def train():
 
     while True:
         # get old state
-        state = agent.get_state(game)
+        state_prev = agent.get_state(game)
 
+        if array_tobinary(state_prev) not in agent.Q.keys():
+            agent.Q[array_tobinary(state_prev)] = [0,0,0]
         # get move
         _reward, _done, _state_next = agent.get_states_value_EX(game)
         action = agent.get_action(_state_next)
@@ -226,7 +229,7 @@ def train():
         reward, done, score = game.play_step(action)
 
         # train short memory
-        agent.train_short_memory(state, _reward, _state_next, _done)
+        agent.train_short_memory(state_prev, _reward, _state_next, _done)
 
         if done:
             # train long memory, plot result

@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
+import numpy as np
 import os
 import warnings
 
@@ -215,16 +216,16 @@ class Value_Trainer_1:
             next_state = torch.unsqueeze(next_state, 0)
             reward = torch.unsqueeze(reward, 0)
             # done = (done, )
+            done = int(done)
+
 
         # predicted values with current state
         state_value = self.net(state)
-        next_state_value = self.net(*next_state)
-
+        next_state_value = self.net(next_state)
 
         target = state_value.clone()
-        for idx in range(len(done)):
-            state_value_prime = state_value + self.alpha * (reward[0][idx] + (1-done[idx])*(self.gamma * next_state_value[idx] - state_value))
-            target[0][0] = max(state_value_prime[0])
+        state_value_prime = state_value + self.alpha * (reward[0] + (1-done)*(self.gamma * next_state_value - state_value))
+        target[0][0] = state_value_prime[0]
 
         self.optimizer.zero_grad()
         loss = self.criterion(target, state_value)
@@ -233,21 +234,24 @@ class Value_Trainer_1:
 
 # Model free trainer on policy
 class Policy_Trainer_A:
-    def __init__(self, net, lr, gamma):
+    def __init__(self, net, lr, gamma,alpha):
         self.lr = lr
+        self.theta = np.random.rand(3)
         self.gamma = gamma
+        self.alpha = alpha
         self.net = net
         self.optimizer = optim.Adam(net.parameters(), lr=self.lr)
         self.criterion = nn.MSELoss()
         self.loss_bus = 0
 
-    def train_step(self, state, action, reward, next_state, done):
-        state = torch.tensor(state, dtype=torch.float)
+
+    def train_step(self, _state, _action, reward, next_state, done):
+        state = torch.tensor(_state, dtype=torch.float)
         next_state = torch.tensor(next_state, dtype=torch.float)
-        action = torch.tensor(action, dtype=torch.long)
+        action = torch.tensor(_action, dtype=torch.long)
         reward = torch.tensor(reward, dtype=torch.float)
         # (n, x)
-        loss_bus_flag = False
+
         if len(state.shape) == 1:
             # (1, x)
             state = torch.unsqueeze(state, 0)
@@ -255,25 +259,15 @@ class Policy_Trainer_A:
             action = torch.unsqueeze(action, 0)
             reward = torch.unsqueeze(reward, 0)
             done = (done, )
-        else:
-            loss_bus_flag = True
 
         # predicted Q values with current state
-        pred = self.net(state)
-
-        target = pred.clone()
-        for idx in range(len(done)):
-            Q_new = reward[idx]
-            if not done[idx]:
-                Q_new = reward[idx] + self.gamma * torch.max(self.net(next_state[idx]))
-
-            target[idx][torch.argmax(action[idx]).item()] = Q_new
+        probs = self.net(state)
+        preferences = probs.clone()
 
 
         self.optimizer.zero_grad()
-        loss = self.criterion(target, pred)
-        if loss_bus_flag:
-            self.loss_bus = loss.detach().numpy()
+        loss = self.criterion(preferences, probs)
+
         loss.backward()
         self.optimizer.step()
 

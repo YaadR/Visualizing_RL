@@ -2,6 +2,7 @@
 Agent Policy:
  - Model free
  - on policy
+  - online
  - value based : ?
 '''
 
@@ -14,15 +15,14 @@ from model import Linear_Net_Policy, Policy_Trainer_A
 from helper import plot
 import matplotlib.pyplot as plt
 
-
+ALPHA = 0.5  # Learning rate
+GAMMA = 0.9  # Discount factor
 ##
 BLOCK_SIZE = 20
 WIDTH = 480
 HEIGHT = 360
 ##
 
-MAX_MEMORY = 100_000
-BATCH_SIZE = 1000
 LR = 0.001
 NUM_ACTIONS = 3  # Number of possible actions (up, down, left, right)
 STATE_VEC_SIZE = 11
@@ -34,10 +34,10 @@ class Agent_Policy:
     def __init__(self):
         self.n_games = 0
         self.epsilon = 0  # randomness
-        self.gamma = 0.9  # discount rate
-        self.memory = deque(maxlen=MAX_MEMORY)  # popleft()
+        self.alpha = ALPHA
+        self.gamma = GAMMA  # discount rate
         self.net = Linear_Net_Policy(STATE_VEC_SIZE, HIDDEN_LAYER, NUM_ACTIONS)
-        self.trainer = Policy_Trainer_A(self.net, lr=LR, gamma=self.gamma)
+        self.trainer = Policy_Trainer_A(self.net, lr=LR, gamma=self.gamma, alpha=self.alpha)
         self.actions_probability = [0, 0, 0]
 
     def get_state(self, game):
@@ -152,17 +152,6 @@ class Agent_Policy:
 
         return np.array(state, dtype=float)
 
-    def remember(self, state, action, reward, next_state, done):
-        self.memory.append((state, action, reward, next_state, done))  # popleft if MAX_MEMORY is reached
-
-    def train_long_memory(self):
-        if len(self.memory) > BATCH_SIZE:
-            mini_sample = random.sample(self.memory, BATCH_SIZE)  # list of tuples
-        else:
-            mini_sample = self.memory
-
-        states, actions, rewards, next_states, dones = zip(*mini_sample)
-        self.trainer.train_step(states, actions, rewards, next_states, dones)
 
     def train_short_memory(self, state, action, reward, next_state, done):
         self.trainer.train_step(state, action, reward, next_state, done)
@@ -171,17 +160,22 @@ class Agent_Policy:
         # random moves: tradeoff exploration / exploitation
         self.epsilon = 80 - self.n_games
         action = [0, 0, 0]
-        if random.randint(0, 200) < self.epsilon:
-            move = random.randint(0, 2)
-            self.actions_probability = action
-            action[move] = 1
-        else:
-            state0 = torch.tensor(state, dtype=torch.float)
-            prediction = self.net(state0)
-            self.actions_probability = prediction.detach().numpy()
-            move = torch.argmax(prediction).item()
-            action[move] = 1
+        # if random.randint(0, 200) < self.epsilon:
+        #     move = random.randint(0, 2)
+        #     self.actions_probability = action
+        #     action[move] = 1
+        # else:
+        #     pass
+            # state0 = torch.tensor(state, dtype=torch.float)
+            # prediction = self.net(state0)
+            # self.actions_probability = prediction.detach().numpy()
+            # move = torch.argmax(prediction).item()
+            # action[move] = 1
 
+        action_probs = self.net(torch.tensor(state, dtype=torch.float))
+        action_dist = torch.distributions.Categorical(action_probs)
+        _action = action_dist.sample().detach().numpy()
+        action[_action]=1
         return action
 
 
@@ -197,7 +191,7 @@ def train():
     plt.ion()
 
     # fig, axs = plt.subplots(1, 3,width_ratios=[4,1,6], figsize=(8, 6))
-    ####fig, axs = plt.subplots(1, 4,width_ratios=[12,4,8,1], figsize=(8, 6))
+    ##fig, axs = plt.subplots(1, 4,width_ratios=[12,4,8,1], figsize=(8, 6))
 
 
     while True:
@@ -216,14 +210,13 @@ def train():
         # train short memory
         agent.train_short_memory(state_old, action, reward, state_new, done)
 
-        # remember
-        agent.remember(state_old, action, reward, state_new, done)
+
 
         if done:
-            # train long memory, plot result
+            # plot result
             game.reset()
             agent.n_games += 1
-            agent.train_long_memory()
+
 
 
             if score > record:
@@ -268,6 +261,7 @@ def play():
 
 if __name__ == '__main__':
     agent = Agent_Policy()
+    train()
     # play()
 
 

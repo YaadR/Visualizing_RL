@@ -2,6 +2,7 @@
 Agent Value:
  - Model free
  - off policy
+  - online
  - value based : state value
 '''
 
@@ -19,7 +20,7 @@ import itertools
 import statistics
 
 
-ALPHA = 0.5  # Learning rate
+ALPHA = 0.3  # Learning rate
 GAMMA = 0.9  # Discount factor
 ##
 BLOCK_SIZE = 20
@@ -27,15 +28,13 @@ WIDTH = 480
 HEIGHT = 360
 ##
 
-MAX_MEMORY = 100_000
-BATCH_SIZE = 1000
 LR = 0.001
-NUM_ACTIONS = 1  # Number of possible actions (up, down, left, right)
+STATE_VALUE = 1  # Number of possible actions (up, down, left, right)
 STATE_VEC_SIZE = 11
 HIDDEN_LAYER = 256
 
 
-class Agent_Value_1:
+class Agent_State_Value:
 
     def __init__(self):
         self.n_games = 0
@@ -43,11 +42,10 @@ class Agent_Value_1:
         self.gamma = GAMMA  # discount rate
         self.alpha = ALPHA #
         self.Q = dict()     # Q table
-        self.memory = deque(maxlen=MAX_MEMORY)  # popleft()
-        self.net = Linear_Net(STATE_VEC_SIZE, HIDDEN_LAYER, NUM_ACTIONS)
+        self.net = Linear_Net(STATE_VEC_SIZE, HIDDEN_LAYER, STATE_VALUE)
         self.trainer = Value_Trainer_1(self.net, lr=LR, gamma=self.gamma,alpha=self.alpha)
         self.actions_probability = [0, 0, 0]
-        self.env_model = SnakeGameAI()
+
 
     def get_state(self, game):
         head = game.snake[0]
@@ -103,7 +101,7 @@ class Agent_Value_1:
             # preprocessing.normalize([[math.dist([game.head.y],[game.food.y]),0,game.h]])[0][0]
         ]
 
-        return np.array(state, dtype=float)
+        return np.array(state, dtype=int)
 
     def get_state_arena(self, game, id=0):
         head = game.snake[id][0]
@@ -159,41 +157,31 @@ class Agent_Value_1:
             # preprocessing.normalize([[math.dist([game.head[id].y], [game.food.y]), 0, game.h]])[0][0]
         ]
 
-        return np.array(state, dtype=float)
+        return np.array(state, dtype=int)
 
-    def train_short_memory(self, state, reward, next_state, done):
+    def train_online(self, state, reward, next_state, done):
         self.trainer.train_step(state, reward, next_state, done)
 
     def get_action(self, state):
         # random moves: tradeoff exploration / exploitation
         self.epsilon = 80 - self.n_games
         action = [0, 0, 0]
-        prediction = list(itertools.chain.from_iterable(self.net(torch.tensor(state, dtype=torch.float)).detach().numpy()))
+        # prediction = list(itertools.chain.from_iterable(self.net(torch.tensor(state, dtype=torch.float)).detach().numpy()))
+        # prediction = self.net(torch.tensor(state, dtype=torch.float)).detach().numpy()
         if random.randint(0, 200) < self.epsilon:
             move = random.randint(0, 2)
             self.actions_probability = action
             action[move] = 1
         else:
+            prediction = self.Q[array_tobinary(state)]
             self.actions_probability = prediction
             move = np.argmax(prediction)
             action[move] = 1
 
         return action
 
-    def get_states_value_EX(self,game):
-        # [Straight, Right, Left]
-        rewards, dones,next_states = [],[],[]
-        actions = [[1, 0, 0],[0, 1, 0],[0, 0, 1]]
-        # for i in range(len(env_model)):
-        #     env_models[i] = game.copy(env_models[i])
-        for i,action in enumerate(actions):
-            self.env_model = game.copy(self.env_model)
-            reward, done, score = self.env_model.play_step(action)
-            next_state = self.get_state(self.env_model)
-            rewards.append(reward), dones.append(done), next_states.append(next_state)
-
-        dones = np.array(dones).astype(int)
-        return rewards, dones,next_states
+    def update_Q(self,s,a,s_prime):
+        self.Q[array_tobinary(s)][np.argmax(a)] = self.net(torch.tensor(s_prime, dtype=torch.float)).detach().numpy()[0]
 
 
 def train():
@@ -201,10 +189,7 @@ def train():
     plot_mean_scores = []
     total_score = 0
     record = 0
-    # agent = Agent_Value()
     game = SnakeGameAI(arrow=True, agentID=0)
-
-
     mean_score = 0
 
     plt.ion()
@@ -219,20 +204,23 @@ def train():
         if array_tobinary(state_prev) not in agent.Q.keys():
             agent.Q[array_tobinary(state_prev)] = [0,0,0]
         # get move
-        _reward, _done, _state_next = agent.get_states_value_EX(game)
-        action = agent.get_action(_state_next)
+
+        action = agent.get_action(state_prev)
         game.actions_probability = agent.actions_probability
 
         # perform move and get new state
         # _reward, _done, _state_next = agent.get_states_value(game)
 
         reward, done, score = game.play_step(action)
+        state = agent.get_state(game)
 
-        # train short memory
-        agent.train_short_memory(state_prev, _reward, _state_next, _done)
+        # train value approximation
+        agent.train_online(state_prev, reward, state, done)
+
+        agent.update_Q(state_prev,action,state)
 
         if done:
-            # train long memory, plot result
+            # plot result
             game.reset()
             agent.n_games += 1
 
@@ -276,7 +264,7 @@ def play():
 
 
 if __name__ == '__main__':
-    agent = Agent_Value_1()
+    agent = Agent_State_Value()
 
     train()
     # play()

@@ -9,7 +9,7 @@ import random
 import numpy as np
 from collections import deque
 from game import SnakeGameAI, Direction, Point
-from model import ActorCritic, ActorNetwork, CriticNetwork, DPN_Trainer, DPN_Trainer
+from model import ActorCritic, A2C_Trainer
 from helper import plot, visualize_biases,net_visualize
 from sklearn import preprocessing
 import math
@@ -50,7 +50,7 @@ class AgentDPN:
         self.model = ActorCritic(STATE_VEC_SIZE, NUM_ACTIONS)  # Linear_QNet(13, 256, 3)
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=LR)
         # self.scheduler = StepLR(self.optimizer, step_size=5, gamma=0.1)
-        self.trainer = DPN_Trainer(model=self.model, optimizer=self.optimizer, lr=LR, gamma=self.gamma)
+        self.trainer = A2C_Trainer(model=self.model, optimizer=self.optimizer, lr=LR, gamma=self.gamma)
 
         # Actor Critic apart
         # self.critic_network = CriticNetwork(STATE_VEC_SIZE,hidden_size=HIDDEN_LAYER)

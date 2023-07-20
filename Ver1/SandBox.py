@@ -77,24 +77,6 @@ def visualize_weights(model):
 # # Show the plot
 # plt.show()
 
-import torch
-import torch.nn as nn
-import torch.optim as optim
-import torch.nn.functional as F
-import numpy as np
-
-# Define the Policy Network
-class PolicyNetwork(nn.Module):
-    def __init__(self, state_dim, action_dim, hidden_dim):
-        super(PolicyNetwork, self).__init__()
-        self.fc1 = nn.Linear(state_dim, hidden_dim)
-        self.fc2 = nn.Linear(hidden_dim, action_dim)
-
-    def forward(self, state):
-        x = F.relu(self.fc1(state))
-        action_probs = F.softmax(self.fc2(x), dim=-1)
-        return action_probs
-
 # PPO Algorithm
 def ppo_algorithm(env, num_episodes, max_timesteps, batch_size, epsilon, hidden_dim, gamma, lr, clip_ratio, num_epochs):
     state_dim = env.observation_space.shape[0]
@@ -162,18 +144,89 @@ def ppo_algorithm(env, num_episodes, max_timesteps, batch_size, epsilon, hidden_
 
     env.close()
 
-# Example usage
+
 import gym
+import numpy as np
+import torch
+import torch.nn as nn
+import torch.optim as optim
 
-env = gym.make('CartPole-v1')
-num_episodes = 100
-max_timesteps = 200
-batch_size = 32
-epsilon = 0.2
-hidden_dim = 64
+# Environment
+
+
+# Hyperparameters
+learning_rate = 0.0003
 gamma = 0.99
-lr = 0.001
-clip_ratio = 0.2
-num_epochs = 10
+epsilon_clip = 0.2
+epochs = 10
+steps_per_epoch = 2048
+lambda_gae = 0.95
 
-ppo_algorithm(env, num_episodes, max_timesteps, batch_size, epsilon, hidden_dim, gamma, lr, clip_ratio, num_epochs)
+# Policy network
+class PolicyNetwork(nn.Module):
+    def __init__(self):
+        super(PolicyNetwork, self).__init__()
+        self.fc1 = nn.Linear(state_dim, 64)
+        self.fc2 = nn.Linear(64, 64)
+        self.fc3 = nn.Linear(64, action_dim)
+        self.softmax = nn.Softmax(dim=-1)
+
+    def forward(self, x):
+        x = torch.relu(self.fc1(x))
+        x = torch.relu(self.fc2(x))
+        x = self.softmax(self.fc3(x))
+        return x
+
+# Function to compute advantages using GAE
+def compute_advantages(reward, value, next_values, done):
+    delta = reward + gamma * next_values * (1 - done) - value
+
+    return delta
+
+# Main PPO function with online updates
+def ppo():
+    policy = PolicyNetwork()
+    optimizer = optim.Adam(policy.parameters(), lr=learning_rate)
+
+    for epoch in range(epochs):
+        state = env.reset()
+        state_batch, action_batch, reward_batch, prob_batch, value_batch, done_batch = [], [], [], [], [], []
+        for _ in range(steps_per_epoch):
+            state = torch.FloatTensor(state)
+            action_probs = policy(state)
+            action = torch.multinomial(action_probs, 1).item()
+            next_state, reward, done = env.step(action)
+
+            _state = state
+            _action = action
+            _reward = reward
+            _prob = action_probs[action]
+            _done = done
+
+            state = next_state
+
+            if done:
+                state_tensor = _state
+                action_tensor = torch.LongTensor(_action)
+                reward_tensor = torch.FloatTensor(reward_batch)
+                prob_tensor = torch.stack(prob_batch)
+
+                # Compute state values (you can use a separate neural network or use the same policy network)
+                values = policy(state_tensor)
+                next_values = torch.cat((values[1:], torch.zeros(1)))
+
+                # Compute advantages using GAE
+                advantages = compute_advantages(reward_tensor, values, next_values, done_batch)
+
+                # Calculate surrogate objective
+                ratio = torch.exp(torch.log(prob_tensor) - torch.log(prob_tensor.detach()))
+                surr1 = ratio * advantages
+                surr2 = torch.clamp(ratio, 1 - epsilon_clip, 1 + epsilon_clip) * advantages
+                loss = -torch.mean(torch.min(surr1, surr2))
+
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
+
+# Run the PPO algorithm
+ppo()

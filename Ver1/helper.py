@@ -269,15 +269,15 @@ def plot_mean_scores_buffer(scores):
     # Show the plot
     plt.show()
 
-def plot_std_mean_scores_buffer(data1_mean, data1_std, data1_label, x_label, y_label, title):
+def plot_std_mean_scores_buffer(data_mean, data_std, data_label, x_label, y_label, title):
 
     plt.figure(figsize=(8,5))
     plt.title(title)
 
     alpha = 0.3
 
-    plt.plot(range(len(data1_mean)), data1_mean, '-', color = 'purple', label = data1_label)
-    plt.fill_between(range(len(data1_mean)), data1_mean - data1_std, data1_mean + data1_std, facecolor = 'blue',alpha = alpha)
+    plt.plot(range(len(data_mean)), data_mean, '-', color = 'purple', label = data_label)
+    plt.fill_between(range(len(data_mean)), data_mean - data_std, data_mean + data_std, facecolor = 'blue',alpha = alpha)
 
     plt.xlabel(x_label)
     plt.ylabel(y_label)

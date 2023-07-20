@@ -2,6 +2,7 @@
 Action Value Agent:
  - Model free
  - off policy
+  - online
  - value based : action value
 '''
 
@@ -25,8 +26,6 @@ WIDTH =  480
 HEIGHT = 360
 ##
 
-MAX_MEMORY = 100_000
-BATCH_SIZE = 1000
 LR = 0.001
 NUM_ACTIONS = 3  # Number of possible actions (up, down, left, right)
 STATE_VEC_SIZE = 11
@@ -38,7 +37,6 @@ class Action_Value:
         self.n_games = 0
         self.epsilon = 0 # randomness
         self.gamma = 0.9 # discount rate
-        self.memory = deque(maxlen=MAX_MEMORY) # popleft()
         self.net = Linear_Net(STATE_VEC_SIZE, HIDDEN_LAYER, NUM_ACTIONS)
         self.trainer = Value_Trainer_A(self.net, lr=LR, gamma=self.gamma)
         self.actions_probability = [0,0,0]
@@ -157,24 +155,13 @@ class Action_Value:
 
         return np.array(state, dtype=float)
 
-    def remember(self, state, action, reward, next_state, done):
-        self.memory.append((state, action, reward, next_state, done)) # popleft if MAX_MEMORY is reached
-
-    def train_long_memory(self):
-        if len(self.memory) > BATCH_SIZE:
-            mini_sample = random.sample(self.memory, BATCH_SIZE) # list of tuples
-        else:
-            mini_sample = self.memory
-
-        states, actions, rewards, next_states, dones = zip(*mini_sample)
-        self.trainer.train_step(states, actions, rewards, next_states, dones)
 
     def train_short_memory(self, state, action, reward, next_state, done):
         self.trainer.train_step(state, action, reward, next_state, done)
 
     def get_action(self, state):
         # random moves: tradeoff exploration / exploitation
-        self.epsilon = 80 - self.n_games
+        self.epsilon = 30 - self.n_games
         action = [0,0,0]
         if random.randint(0, 200) < self.epsilon:
             move = random.randint(0, 2)
@@ -247,14 +234,11 @@ def train():
         # train short memory
         agent.train_short_memory(state_prev, action, reward, state, done)
 
-        # remember
-        agent.remember(state_prev, action, reward, state, done)
 
         if done:
-            # train long memory, plot result
+            # plot result
             game.reset()
             agent.n_games += 1
-            agent.train_long_memory()
             loss_buss.append(agent.trainer.loss_bus)
             epsilon_decay.append(agent.epsilon/200)
             # last_bias = visualize_biases(agent.net, axs, last_bias, difference_val,loss_buss,epsilon_decay)
@@ -277,7 +261,7 @@ def train():
             print('Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:',round(mean_score, 3) )
             plot_mean_scores.append(mean_score)
 
-            # plot(plot_scores, plot_mean_scores)
+            plot(plot_scores, plot_mean_scores)
             if mean_score > 3 and agent.n_games>300:
                 mean_scores.append(list(plot_mean_scores))
                 break
@@ -320,9 +304,10 @@ def play():
 if __name__ == '__main__':
     agent = Action_Value()
     mean_scores = []
-    for i in range(20):
-        train()
-    plot_mean_scores_buffer(mean_scores)
+    train()
+    # for i in range(20):
+    #     train()
+    # plot_mean_scores_buffer(mean_scores)
     #play()
 
 

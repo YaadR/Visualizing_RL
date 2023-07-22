@@ -48,7 +48,8 @@ class ActorCritic(nn.Module):
     def forward(self, state):
         x = F.relu(self.fc1(state))
         x = F.relu(self.fc2(x))
-        policy = torch.log(F.softmax(self.fc_actor(x), dim=-1))
+        # policy = torch.log(F.softmax(self.fc_actor(x), dim=-1))
+        policy = F.softmax(self.fc_actor(x), dim=-1)
         value = self.fc_critic(x)
         return policy, value
 
@@ -86,7 +87,8 @@ class A2C_Trainer:
         advantages = reward + (1 - done)*(self.gamma * next_values - values)
 
         # Actor loss
-        log_probs, _ = self.net(state)
+        probs, _ = self.net(state)
+        log_probs = torch.log(probs)
         log_probs = log_probs.gather(1, action.unsqueeze(1))
         actor_loss = -(log_probs * advantages.detach()).mean()
 

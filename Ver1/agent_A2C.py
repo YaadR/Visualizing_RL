@@ -12,7 +12,6 @@ Policy Gradient Network | A2C Network
 
 #
 import torch
-import torch.nn.functional as F
 import random
 import numpy as np
 from collections import deque
@@ -24,7 +23,6 @@ import math
 import matplotlib.pyplot as plt
 import statistics
 import warnings
-from torch.optim.lr_scheduler import StepLR
 
 warnings.filterwarnings("ignore")
 
@@ -57,10 +55,8 @@ class AgentDPN:
         # Actor Critic combined
         self.net = ActorCritic(STATE_VEC_SIZE, NUM_ACTIONS)  # Linear_QNet(11, 256, 3)
         self.optimizer = torch.optim.Adam(self.net.parameters(), lr=LR)
-        # self.scheduler = StepLR(self.optimizer, step_size=5, gamma=0.1)
         self.trainer = A2C_Trainer(net=self.net, optimizer=self.optimizer, lr=LR, gamma=self.gamma)
-
-        self.actions_probability = [0, 0, 0]
+        self.actions_prediction = [0, 0, 0]
 
     def get_state(self, game):
         head = game.snake[0]
@@ -169,27 +165,21 @@ class AgentDPN:
         self.trainer.train_step(state, action, reward, next_state, done)
 
     def get_action(self, state):
-        state = torch.tensor(state, dtype=torch.float).unsqueeze(0)
-        self.actions_probability = [0, 0, 0]
-
-        # action_probs,_ = self.net(state)
-        # action = action_probs[0].squeeze().detach().numpy()
-        # self.actions_probability = action
-        #
         # action_probs = action_probs.squeeze().detach().numpy()
         # action = np.random.choice(NUM_ACTIONS, p=action_probs)
         # return action
 
         # random moves: tradeoff exploration / exploitation
-        self.epsilon = EPSILON - self.n_games
+        self.epsilon = 40 - self.n_games
         action = [0, 0, 0]
-        if random.randint(0, 100) < self.epsilon:
+        if random.randint(0, 200) < self.epsilon:
             move = random.randint(0, 2)
-            self.actions_probability = action
+            self.actions_prediction = action
             action[move] = 1
         else:
             prediction, _ = self.net(torch.tensor(state, dtype=torch.float))
-            self.actions_probability = prediction.detach().numpy()[0]
+            self.actions_prediction = prediction.detach().numpy()
+            # move = np.random.choice(NUM_ACTIONS, p= self.actions_prediction)
             move = torch.argmax(prediction).item()
             action[move] = 1
 
@@ -214,7 +204,7 @@ def train():
         state_old = agent.get_state(game)
         # get move
         action = agent.get_action(state_old)
-        game.actions_probability = agent.actions_probability
+        game.actions_probability = agent.actions_prediction
 
         # perform move and get new state
         reward, done, score = game.play_step(action)

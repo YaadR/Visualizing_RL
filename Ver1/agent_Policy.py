@@ -153,29 +153,27 @@ class Agent_Policy:
         return np.array(state, dtype=float)
 
 
-    def train_short_memory(self, state, action, reward, next_state, done):
+    def train_online(self, state, action, reward, next_state, done):
         self.trainer.train_step(state, action, reward, next_state, done)
 
     def get_action(self, state):
         # random moves: tradeoff exploration / exploitation
         self.epsilon = 80 - self.n_games
         action = [0, 0, 0]
-        # if random.randint(0, 200) < self.epsilon:
-        #     move = random.randint(0, 2)
-        #     self.actions_probability = action
-        #     action[move] = 1
-        # else:
-        #     pass
-            # state0 = torch.tensor(state, dtype=torch.float)
-            # prediction = self.net(state0)
-            # self.actions_probability = prediction.detach().numpy()
-            # move = torch.argmax(prediction).item()
-            # action[move] = 1
+        if random.randint(0, 200) < self.epsilon:
+            move = random.randint(0, 2)
+            self.actions_probability = action
+            action[move] = 1
+        else:
+            action_probs, _ = self.net(torch.tensor(state, dtype=torch.float))
+            self.actions_probability = action_probs.detach().numpy()
+            move = torch.argmax(action_probs).item()
+            action[move] = 1
 
-        action_probs = self.net(torch.tensor(state, dtype=torch.float))
-        action_dist = torch.distributions.Categorical(action_probs)
-        _action = action_dist.sample().detach().numpy()
-        action[_action]=1
+        # action_dist = torch.distributions.Categorical(action_probs)
+        # _action = action_dist.sample().detach().numpy()
+        # action[_action]=1
+
         return action
 
 
@@ -200,38 +198,31 @@ def train():
 
         # get move
         action = agent.get_action(state_old)
-        game.actions_probability = agent.actions_probability
+        # game.actions_probability = agent.actions_probability
 
         # perform move and get new state
         reward, done, score = game.play_step(action)
         state_new = agent.get_state(game)
 
-
         # train short memory
-        agent.train_short_memory(state_old, action, reward, state_new, done)
-
-
+        agent.train_online(state_old, action, reward, state_new, done)
 
         if done:
             # plot result
             game.reset()
             agent.n_games += 1
 
-
-
             if score > record:
                 record = score
-
 
             plot_scores.append(score)
             total_score += score
             mean_score = total_score / agent.n_games
-            print('Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:', round(mean_score, 3))
+            # print('Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:', round(mean_score, 3))
             plot_mean_scores.append(mean_score)
 
             plot(plot_scores, plot_mean_scores)
             if mean_score > 8:
-
                 break
 
 def play():

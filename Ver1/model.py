@@ -31,9 +31,9 @@ class Linear_Net_Policy(nn.Module):
     def forward(self, x):
         x=self.linear1(x)
         x = F.relu(x)
-        x = self.linear2(x)
-        x = F.softmax(x)
-        return x
+        value = self.linear2(x)
+        policy = F.softmax(value)
+        return policy,value
 
 
 # Define the Actor-Critic network
@@ -72,7 +72,6 @@ class A2C_Trainer:
         reward = torch.tensor(reward, dtype=torch.float)
         done = torch.tensor([done], dtype=torch.int)
         # (n, x)
-        loss_bus_flag = False
 
         if len(state.shape) == 1:
             # (1, x)
@@ -82,8 +81,7 @@ class A2C_Trainer:
             reward = torch.unsqueeze(reward, 0)
             done = torch.unsqueeze(done, 0)
             #done =  (done, )
-        else:
-            loss_bus_flag = True
+
 
         _, values = self.net(state)
         _, next_values = self.net(next_state)
@@ -106,51 +104,6 @@ class A2C_Trainer:
         self.optimizer.step()
         self.loss_critic = critic_loss.detach().numpy()
         self.loss_actor = actor_loss.detach().numpy()
-
-    def train_step_(self, state, action, reward, next_state, done):
-        # state = torch.tensor(state, dtype=torch.float).unsqueeze(0)
-        # action = torch.tensor([action], dtype=torch.long)
-        # reward = torch.tensor([reward], dtype=torch.float)
-        # next_state = torch.tensor(next_state, dtype=torch.float).unsqueeze(0)
-
-        state = torch.tensor(state, dtype=torch.float)
-        next_state = torch.tensor(next_state, dtype=torch.float)
-        action = torch.tensor(action, dtype=torch.long)
-        reward = torch.tensor(reward, dtype=torch.float)
-        done = torch.tensor([done], dtype=torch.int)
-        # (n, x)
-        loss_bus_flag = False
-
-        if len(state.shape) == 1:
-            # (1, x)
-            state = torch.unsqueeze(state, 0)
-            next_state = torch.unsqueeze(next_state, 0)
-            action = torch.unsqueeze(action, 0)
-            reward = torch.unsqueeze(reward, 0)
-            done = torch.unsqueeze(done, 0)
-            #done =  (done, )
-        else:
-            loss_bus_flag = True
-
-
-        # Compute the predicted action probabilities and state value
-        action_probs, state_value = self.net(state)
-
-        # Compute the TD error
-        next_action_probs, next_state_value = self.net(next_state)
-        td_error = reward + self.gamma * next_state_value * (1 - done) - state_value
-
-        # Compute the actor and critic losses
-        log_action_probs = torch.log(action_probs)
-        actor_loss = -log_action_probs[0][action] * td_error
-        critic_loss = F.smooth_l1_loss(state_value, reward + self.gamma * next_state_value * (1 - done))
-
-        # Update the networks
-        self.optimizer.zero_grad()
-        loss = actor_loss + critic_loss
-        loss = torch.mean(loss)
-        loss.backward()
-        self.optimizer.step()
 
 
 # Model based trainer state value
@@ -242,33 +195,38 @@ class Policy_Trainer_A:
         self.net = net
         self.optimizer = optim.Adam(net.parameters(), lr=self.lr)
         self.criterion = nn.MSELoss()
-        self.loss_bus = 0
 
-
-    def train_step(self, _state, _action, reward, next_state, done):
-        state = torch.tensor(_state, dtype=torch.float)
-        next_state = torch.tensor(next_state, dtype=torch.float)
+    def train_step(self, _state_prev, _action, reward, state, done):
+        state_prev = torch.tensor(_state_prev, dtype=torch.float)
+        state = torch.tensor(state, dtype=torch.float)
         action = torch.tensor(_action, dtype=torch.long)
         reward = torch.tensor(reward, dtype=torch.float)
         # (n, x)
 
-        if len(state.shape) == 1:
+        if len(state_prev.shape) == 1:
             # (1, x)
+            state_prev = torch.unsqueeze(state_prev, 0)
             state = torch.unsqueeze(state, 0)
-            next_state = torch.unsqueeze(next_state, 0)
             action = torch.unsqueeze(action, 0)
             reward = torch.unsqueeze(reward, 0)
-            done = (done, )
+            # done = (done, )
+            done = int(done)
 
-        # predicted Q values with current state
-        probs = self.net(state)
-        preferences = probs.clone()
+        probs, values = self.net(state_prev)
+        probs_next,next_values = self.net(state)
+
+        target = probs.clone()
+        # Q' = Reward + lmbda*max(Actions_Value)
+        Q_new = reward + (1-done)*self.gamma * torch.max(probs_next)
+        target[0][torch.argmax(action).item()] = Q_new
 
 
         self.optimizer.zero_grad()
-        loss = self.criterion(preferences, probs)
+        loss = self.criterion(target, probs)
 
+        self.optimizer.zero_grad()
         loss.backward()
+        print(loss.detach().numpy())
         self.optimizer.step()
 
 # Model free trainer action value

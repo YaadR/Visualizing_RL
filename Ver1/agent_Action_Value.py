@@ -12,7 +12,7 @@ import numpy as np
 from collections import deque
 from game import SnakeGameAI, Direction, Point, pygame
 from model import Linear_Net, Value_Trainer_A
-from helper import plot_mean_scores_buffer,plot,heat_map_step,distance_collapse,visualize_biases,net_visualize,activation_visualize
+from helper import plot_mean_scores_buffer,plot,heat_map_step,distance_collapse,visualize_biases,net_visualize,activation_visualize,array_tobinary
 from sklearn import preprocessing
 import math
 import matplotlib.pyplot as plt
@@ -97,7 +97,7 @@ class Action_Value:
             #preprocessing.normalize([[math.dist([game.head.y],[game.food.y]),0,game.h]])[0][0]
             ]
 
-        return np.array(state, dtype=float)
+        return np.array(state, dtype=int)
 
     def get_state_arena(self, game,id=0):
         head = game.snake[id][0]
@@ -153,7 +153,7 @@ class Action_Value:
             #preprocessing.normalize([[math.dist([game.head[id].y], [game.food.y]), 0, game.h]])[0][0]
         ]
 
-        return np.array(state, dtype=float)
+        return np.array(state, dtype=int)
 
 
     def train_short_memory(self, state, action, reward, next_state, done):
@@ -161,15 +161,14 @@ class Action_Value:
 
     def get_action(self, state):
         # random moves: tradeoff exploration / exploitation
-        self.epsilon = 30 - self.n_games
+        self.epsilon = 50 - self.n_games
         action = [0,0,0]
         if random.randint(0, 200) < self.epsilon:
             move = random.randint(0, 2)
             self.actions_probability = action
             action[move] = 1
         else:
-            state0 = torch.tensor(state, dtype=torch.float)
-            prediction = self.net(state0)
+            prediction = self.net(torch.tensor(state, dtype=torch.float))
             self.actions_probability = prediction.detach().numpy()
             move = torch.argmax(prediction).item()
             action[move] = 1
@@ -184,12 +183,13 @@ def train():
     total_score = 0
     record = 0
     agent = Action_Value()
-    game = SnakeGameAI(arrow=True,agentID=0)
+    game = SnakeGameAI(arrow=False,agentID=0)
     mean_score=0
     loss_buss = []
     last_bias = np.zeros((16,16))
     difference_val = []
     epsilon_decay = []
+    seen_states = set()
 
     heatmap = np.ones((game.w//10,game.h//10))      # Heatmap init
     plt.ion()
@@ -234,13 +234,25 @@ def train():
         # train short memory
         agent.train_short_memory(state_prev, action, reward, state, done)
 
+        if mean_score > 15 and len(game.snake)>20:
+            if array_tobinary(state) not in seen_states:
+                plt.close()
+                plt.ion()
+                fig, axs = plt.subplots(1, 4, width_ratios=[1, 3,1,5], figsize=(10,6))
+                # plt.subplots_adjust(wspace=0.1)
+                seen_states.add(array_tobinary(state))
+                env = pygame.surfarray.array3d(game.display)
+                layer_1_activation = agent.net.linear1(torch.tensor(state, dtype=torch.float))
+                layer_2_activation = agent.net.linear2(torch.relu(layer_1_activation)).detach().numpy()
+                layer_1_activation = layer_1_activation.detach().numpy()
+                activation_visualize(state.reshape((1, -1)), layer_1_activation, layer_2_activation.reshape((1, -1)),axs,env,array_tobinary(state))
 
         if done:
             # plot result
             game.reset()
             agent.n_games += 1
-            loss_buss.append(agent.trainer.loss_bus)
-            epsilon_decay.append(agent.epsilon/200)
+            # loss_buss.append(agent.trainer.loss_bus)
+            # epsilon_decay.append(agent.epsilon/200)
             # last_bias = visualize_biases(agent.net, axs, last_bias, difference_val,loss_buss,epsilon_decay)
             # net_visualize(agent.net, axs)
             # difference_val[0]=0
@@ -252,6 +264,7 @@ def train():
                 record = score
 
 
+
             # print('Game', agent.n_games, 'Score', score, 'Record:', record)
 
 
@@ -261,10 +274,10 @@ def train():
             print('Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:',round(mean_score, 3) )
             plot_mean_scores.append(mean_score)
 
-            plot(plot_scores, plot_mean_scores)
-            if mean_score > 3 and agent.n_games>300:
-                mean_scores.append(list(plot_mean_scores))
-                break
+            # plot(plot_scores, plot_mean_scores)
+            # if mean_score > 3 and agent.n_games>300:
+            #     mean_scores.append(list(plot_mean_scores))
+            #     break
             if heat_flag:
                 axis[1].cla()
                 axis[1].set_title("Training")

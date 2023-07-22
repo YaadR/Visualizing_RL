@@ -54,15 +54,12 @@ class ActorCritic(nn.Module):
 
 
 class A2C_Trainer:
-    def __init__(self, net, lr, gamma, optimizer,scheduler = None):
+    def __init__(self, net, lr, gamma, optimizer):
         self.lr = lr
         self.gamma = gamma
         self.net = net
         self.optimizer = optimizer
-        self.criterion = None
-        self.loss_actor = 0
-        self.loss_critic = 0
-        self.scheduler = scheduler
+        self.critic_criterion = nn.MSELoss()
 
     def train_step(self, state, action, reward, next_state, done):
 
@@ -86,8 +83,7 @@ class A2C_Trainer:
         _, values = self.net(state)
         _, next_values = self.net(next_state)
 
-        td_targets = reward + self.gamma * next_values * (1 - done)
-        advantages = td_targets - values
+        advantages = reward + (1 - done)*(self.gamma * next_values - values)
 
         # Actor loss
         log_probs, _ = self.net(state)
@@ -95,15 +91,14 @@ class A2C_Trainer:
         actor_loss = -(log_probs * advantages.detach()).mean()
 
         # Critic loss
-        critic_loss = F.mse_loss(values, td_targets.detach())
-
+        critic_loss = self.critic_criterion(values, advantages.detach())
+        loss = actor_loss + critic_loss
         # Update the network
         self.optimizer.zero_grad()
-        actor_loss.backward()
-        critic_loss.backward()
+        # actor_loss.backward()
+        # critic_loss.backward()
+        loss.backward()
         self.optimizer.step()
-        self.loss_critic = critic_loss.detach().numpy()
-        self.loss_actor = actor_loss.detach().numpy()
 
 
 # Model based trainer state value

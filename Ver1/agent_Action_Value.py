@@ -234,7 +234,7 @@ def train():
         # train short memory
         agent.train_short_memory(state_prev, action, reward, state, done)
 
-        if mean_score > 15 and len(game.snake)>20:
+        if heat_flag and mean_score > 15 and len(game.snake)>20:
             if array_tobinary(state) not in seen_states:
                 plt.close()
                 plt.ion()
@@ -274,10 +274,10 @@ def train():
             print('Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:',round(mean_score, 3) )
             plot_mean_scores.append(mean_score)
 
-            # plot(plot_scores, plot_mean_scores)
-            # if mean_score > 3 and agent.n_games>300:
-            #     mean_scores.append(list(plot_mean_scores))
-            #     break
+            plot(plot_scores, plot_mean_scores)
+            if mean_score > 3 and agent.n_games>300:
+                mean_scores.append(list(plot_mean_scores))
+                break
             if heat_flag:
                 axis[1].cla()
                 axis[1].set_title("Training")

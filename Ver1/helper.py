@@ -201,7 +201,7 @@ def table_visualize(table,axs,mean_score,plot_scores):
     # return last_bias
 
 
-def activation_visualize(state_vector,layer1,layer2,axs,index=0,activation_name='State vector activation'):
+def activation_visualize(state_vector,layer1,layer2,axs,snapshot,index="",activation_name='Valid State'):
     # Extract the biases from the model
     layer_widen = np.zeros((len(layer1.T),50))
     for i,v in enumerate(layer1.T):
@@ -212,20 +212,28 @@ def activation_visualize(state_vector,layer1,layer2,axs,index=0,activation_name=
 
 
     axs[1].imshow(layer_widen, cmap='viridis')
-    axs[1].set_title(f'Layer 1 activation')
+    axs[1].set_title('Layer 1')
 
     axs[2].imshow(layer2.T, cmap='viridis')
-    axs[2].set_title(f'Layer 2 activation')
+    axs[2].set_title('Layer 2')
+
+    axs[3].imshow(snapshot)
 
     plt.tight_layout()
-    plt.savefig(f'{activation_name}.jpg')  # Specify the desired file name and extension
+    plt.savefig(f'D:\GitHub\Reposetories\Visualizing_RL\Ver1\data\plots\\valid activation\state_{index}.jpg')  # Specify the desired file name and extension
     plt.show()
 
     plt.pause(2)
     # return last_bias
 
+def array_tobinary(state):
+    sb = ""
+    for i in state:
+        sb += str(i)
+    return int(sb, 2)
 
-def all_plot(scores):
+
+def plot_mean_scores_buffer(scores):
     min_length = min(len(sublist) for sublist in scores)
 
     cut_list = [sublist[:min_length] for sublist in scores]
@@ -239,11 +247,11 @@ def all_plot(scores):
 
     # Plotting parameters
     alpha_value = 0.2  # Alpha value for faded background
-    average_color = 'blue'  # Color for the average line
+    average_color = 'purple'  # Color for the average line
 
     # Plot each list of mean scores with a faded background
     for i, score in enumerate(scores):
-        plt.plot(score, color='orange', alpha=alpha_value)
+        plt.plot(score, color='green', alpha=alpha_value)
 
     # Plot the average line with a solid color
     # average_scores = np.mean(mean_scores, axis=0)
@@ -257,5 +265,25 @@ def all_plot(scores):
     # Add legend
     plt.legend()
 
+    #Save fig
+    plt.savefig(r'D:\GitHub\Reposetories\Visualizing_RL\Ver1\data\plots\Buffers\buffer.jpg')  # Specify the desired file name and extension
+
     # Show the plot
+    plt.show()
+
+def plot_std_mean_scores_buffer(data_mean, data_std, data_label, x_label, y_label, title):
+
+    plt.figure(figsize=(8,5))
+    plt.title(title)
+
+    alpha = 0.3
+
+    plt.plot(range(len(data_mean)), data_mean, '-', color = 'purple', label = data_label)
+    plt.fill_between(range(len(data_mean)), data_mean - data_std, data_mean + data_std, facecolor = 'blue',alpha = alpha)
+
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
+
+    plt.legend()
+    plt.tight_layout()
     plt.show()

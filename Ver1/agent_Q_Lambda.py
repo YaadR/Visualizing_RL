@@ -5,7 +5,7 @@ Q(Lambda) Algorithm
 import numpy as np
 from collections import deque
 from game import SnakeGameAI, Direction, Point, pygame
-from helper import plot,heat_map_step,distance_collapse,table_visualize
+from helper import plot,heat_map_step,distance_collapse,table_visualize,array_tobinary
 import matplotlib.pyplot as plt
 import json
 import statistics
@@ -146,7 +146,7 @@ class Agent_Q_Lambda:
         # if self.n_games < self.epsilon:
             return np.random.randint(NUM_ACTIONS)
         else:
-            state_idx = self.array_tobinary(state)
+            state_idx = array_tobinary(state)
             self.actions_probability = self.Q[state_idx]
             return np.argmax(self.Q[state_idx])
 
@@ -154,21 +154,12 @@ class Agent_Q_Lambda:
     # Function to update Q-values using TD(0) learning
     def update_Q(self,state, action, reward, next_state):
 
-        delta = reward + self.gamma * np.max(self.Q[self.array_tobinary(next_state)]) - self.Q[self.array_tobinary(state)][action]
-        self.eligibility_trace[self.array_tobinary(state)][action] += 1
+        delta = reward + self.gamma * np.max(self.Q[array_tobinary(next_state)]) - self.Q[array_tobinary(state)][action]
+        self.eligibility_trace[array_tobinary(state)][action] += 1
         for key in self.Q.keys():
             for act in range(self.num_actions):
                 self.Q[key][act] += self.alpha * delta * self.eligibility_trace[key][act]
                 self.eligibility_trace[key][act] *= self.gamma * self.Lambda
-
-
-    def array_tobinary(self,state):
-        sb = ""
-        for i in state:
-            sb += str(i)
-        return int(sb, 2)
-
-
 
 def train():
     plot_scores = []
@@ -185,9 +176,9 @@ def train():
     while True:
         # get old state
         state = agent.get_state(game)
-        if agent.array_tobinary(state) not in agent.Q.keys():
-            agent.Q[agent.array_tobinary(state)] = [0,0,0]
-            agent.eligibility_trace[agent.array_tobinary(state)] = [0,0,0]
+        if array_tobinary(state) not in agent.Q.keys():
+            agent.Q[array_tobinary(state)] = [0,0,0]
+            agent.eligibility_trace[array_tobinary(state)] = [0,0,0]
 
         # get move
         action = agent.get_action(state)
@@ -196,9 +187,9 @@ def train():
         # perform move and get new state
         reward, done, score = game.play_step(action)
         state_next = agent.get_state(game)
-        if agent.array_tobinary(state_next) not in agent.Q.keys():
-            agent.Q[agent.array_tobinary(state_next)] = [0,0,0]
-            agent.eligibility_trace[agent.array_tobinary(state_next)] = [0, 0, 0]
+        if array_tobinary(state_next) not in agent.Q.keys():
+            agent.Q[array_tobinary(state_next)] = [0,0,0]
+            agent.eligibility_trace[array_tobinary(state_next)] = [0, 0, 0]
 
 
         agent.update_Q(state,action,reward,state_next)
@@ -233,9 +224,9 @@ def play():
     while True:
         # get old state
         state = agent.get_state(game)
-        if agent.array_tobinary(state) not in agent.Q.keys():
-            agent.Q[agent.array_tobinary(state)] = [0,0,0]
-            agent.eligibility_trace[agent.array_tobinary(state)] = [0,0,0]
+        if array_tobinary(state) not in agent.Q.keys():
+            agent.Q[array_tobinary(state)] = [0,0,0]
+            agent.eligibility_trace[array_tobinary(state)] = [0,0,0]
 
         # get move
         action = agent.get_action(state)
@@ -244,9 +235,9 @@ def play():
         # perform move and get new state
         reward, done, score = game.play_step(action)
         # state_next = agent.get_state(game)
-        # if agent.array_tobinary(state_next) not in agent.Q.keys():
-        #     agent.Q[agent.array_tobinary(state_next)] = [0,0,0]
-        #     agent.eligibility_trace[agent.array_tobinary(state_next)] = [0, 0, 0]
+        # if array_tobinary(state_next) not in agent.Q.keys():
+        #     agent.Q[array_tobinary(state_next)] = [0,0,0]
+        #     agent.eligibility_trace[array_tobinary(state_next)] = [0, 0, 0]
 
         if done:
             game.reset()

@@ -1,5 +1,9 @@
 '''
-Agent Value
+Agent Value:
+ - Model based
+ - off policy
+ - online
+ - value based : state value
 '''
 
 import torch
@@ -7,7 +11,7 @@ import random
 import numpy as np
 from collections import deque
 from game import SnakeGameAI, Direction, Point, pygame
-from model import Linear_QNet, Value_Trainer,nn
+from model import Linear_Net, Value_Trainer_V
 from helper import plot, heat_map_step, distance_collapse, visualize_biases, net_visualize, activation_visualize,normalizer
 from sklearn import preprocessing
 import math
@@ -23,8 +27,6 @@ WIDTH = 480
 HEIGHT = 360
 ##
 
-MAX_MEMORY = 100_000
-BATCH_SIZE = 1000
 LR = 0.001
 NUM_ACTIONS = 3  # Number of possible actions (up, down, left, right)
 STATE_VEC_SIZE = 11
@@ -38,9 +40,8 @@ class Agent_Value:
         self.epsilon = 0  # randomness
         self.gamma = GAMMA  # discount rate
         self.alpha = ALPHA #
-        self.memory = deque(maxlen=MAX_MEMORY)  # popleft()
-        self.model = Linear_QNet(STATE_VEC_SIZE, HIDDEN_LAYER, NUM_ACTIONS)
-        self.trainer = Value_Trainer(self.model, lr=LR, gamma=self.gamma,alpha=self.alpha)
+        self.net = Linear_Net(STATE_VEC_SIZE, HIDDEN_LAYER, NUM_ACTIONS)
+        self.trainer = Value_Trainer_V(self.net, lr=LR, gamma=self.gamma,alpha=self.alpha)
         self.states_value = [0, 0, 0]
         self.env_model = SnakeGameAI()
 
@@ -169,7 +170,7 @@ class Agent_Value:
             action[move] = 1
         else:
             state0 = torch.tensor(state, dtype=torch.float)
-            prediction = self.model(state0)
+            prediction = self.net(state0)
             self.states_value = prediction.detach().numpy()
             move = torch.argmax(prediction).item()
             action[move] = 1
@@ -225,7 +226,7 @@ def train():
         agent.train_short_memory(state, _reward, _state_next, _done)
 
         if done:
-            # train long memory, plot result
+            # plot result
             game.reset()
             agent.n_games += 1
 

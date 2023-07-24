@@ -1,7 +1,7 @@
 from game_multi import SnakeGameArena, SnakeGameAICompetition,pygame
 import numpy as np
 import matplotlib.pyplot as plt
-import agentDQN
+import agent_Action_Value
 import agent_Q
 import agent_Q_Lambda
 import agent_Value
@@ -173,17 +173,16 @@ def play(agent_num=1):
 
 
 if __name__ == '__main__':
-    # AGENT_NAMES = ["DQN","Value Based","Q(Lambda)"]
-    AGENT_NAMES = ["DQN","Value Based"]
-    # AGENT_NAMES = ["DQN","Q(Lambda)"]
-    # AGENT_NAMES = ["DQN"]
+    # AGENT_NAMES = ["Action Value","Value Based","Q(Lambda)"]
+    AGENT_NAMES = ["Action Value","Value Based"]
+    # AGENT_NAMES = ["Action Value"]
 
-    agent_DQN = agentDQN.AgentDQN()
-    agent_Q = agent_Value.Agent_Value()# agent_Q.Agent_Q()
+    agentActionValue = agent_Action_Value.Action_Value()
+    agent_Q = agent_Value.Agent_Value()
     # agent_Q_Lambda = agent_Q_Lambda.Agent_Q_Lambda()
-    # Agents = [agent_DQN,agent_Q,agent_Q_Lambda]
-    Agents = [agent_DQN,agent_Q]
-    # Agents = [agent_DQN]
+    # Agents = [agent_Action_Value,agent_Q,agent_Q_Lambda]
+    Agents = [agent_Action_Value,agent_Q]
+    # Agents = [agent_Action_Value]
     train(agent_num=len(Agents))
     # train()
     plt.close()

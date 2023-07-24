@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 # Create the Actor Network
 '''
 Defines a class "Actor" that implements a deep neural network model 
-a simple feedforward neural network with 3 linear layers and ReLU activation functions
+a simple feedforward neural network with 3 linear layers and ReLU activation single indicator functions
 outputs the probability of taking a specific action given the current state.
 '''
 
@@ -41,7 +41,7 @@ class Actor(nn.Module):
 # Deines the Critic Network
 '''
 The critic network estimates the expected return or value of a state or a state-action pair
-a simple feedforward neural network with 3 linear layers and ReLU activation functions
+a simple feedforward neural network with 3 linear layers and ReLU activation single indicator functions
 outputs a scalar value, representing the estimated value of a state or a state-action pair
 '''
 

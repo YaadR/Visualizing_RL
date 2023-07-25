@@ -12,7 +12,7 @@ import numpy as np
 from collections import deque
 from game import SnakeGameAI, Direction, Point, pygame
 from model import Linear_Net, Value_Trainer_A
-from helper import plot_mean_scores_buffer,plot,heat_map_step,distance_collapse,visualize_biases,net_visualize,activation_visualize,array_tobinary
+from helper import plot_std_mean_scores_buffer,plot_mean_scores_buffer,plot,heat_map_step,distance_collapse,visualize_biases,net_visualize,activation_visualize,array_tobinary
 from sklearn import preprocessing
 import math
 import matplotlib.pyplot as plt
@@ -39,7 +39,7 @@ class Action_Value:
         self.gamma = 0.9 # discount rate
         self.net = Linear_Net(STATE_VEC_SIZE, HIDDEN_LAYER, NUM_ACTIONS)
         self.trainer = Value_Trainer_A(self.net, lr=LR, gamma=self.gamma)
-        self.actions_probability = [0,0,0]
+        self.prediction = [0,0,0]
 
     def get_state(self, game):
         head = game.snake[0]
@@ -156,20 +156,20 @@ class Action_Value:
         return np.array(state, dtype=int)
 
 
-    def train_short_memory(self, state, action, reward, next_state, done):
+    def train_online(self, state, action, reward, next_state, done):
         self.trainer.train_step(state, action, reward, next_state, done)
 
     def get_action(self, state):
         # random moves: tradeoff exploration / exploitation
-        self.epsilon = 50 - self.n_games
+        self.epsilon = 80 - self.n_games
         action = [0,0,0]
         if random.randint(0, 200) < self.epsilon:
             move = random.randint(0, 2)
-            self.actions_probability = action
+            self.prediction = action
             action[move] = 1
         else:
             prediction = self.net(torch.tensor(state, dtype=torch.float))
-            self.actions_probability = prediction.detach().numpy()
+            self.prediction = prediction.detach().numpy()
             move = torch.argmax(prediction).item()
             action[move] = 1
 
@@ -185,10 +185,6 @@ def train():
     agent = Action_Value()
     game = SnakeGameAI(arrow=False,agentID=0)
     mean_score=0
-    loss_buss = []
-    last_bias = np.zeros((16,16))
-    difference_val = []
-    epsilon_decay = []
     seen_states = set()
 
     heatmap = np.ones((game.w//10,game.h//10))      # Heatmap init
@@ -207,7 +203,7 @@ def train():
 
         # get move
         action = agent.get_action(state_prev)
-        game.actions_probability = agent.actions_probability
+        game.actions_probability = agent.prediction
 
         # perform move and get new state
         reward, done, score = game.play_step(action)
@@ -232,7 +228,7 @@ def train():
             # counter+=1
 
         # train short memory
-        agent.train_short_memory(state_prev, action, reward, state, done)
+        agent.train_online(state_prev, action, reward, state, done)
 
         if heat_flag and mean_score > 15 and len(game.snake)>20:
             if array_tobinary(state) not in seen_states:
@@ -251,22 +247,12 @@ def train():
             # plot result
             game.reset()
             agent.n_games += 1
-            # loss_buss.append(agent.trainer.loss_bus)
-            # epsilon_decay.append(agent.epsilon/200)
-            # last_bias = visualize_biases(agent.net, axs, last_bias, difference_val,loss_buss,epsilon_decay)
-            # net_visualize(agent.net, axs)
-            # difference_val[0]=0
-            # reset heatmap
             if heat_flag:
                 heatmap[:] = 1
 
             if score > record:
                 record = score
-
-
-
             # print('Game', agent.n_games, 'Score', score, 'Record:', record)
-
 
             plot_scores.append(score)
             total_score += score
@@ -300,7 +286,7 @@ def play():
         state = agent.get_state(game)
         # get move
         action = agent.get_action(state)
-        game.actions_probability = agent.actions_probability
+        game.actions_probability = agent.prediction
         # perform move and get new state
         reward, done, score = game.play_step(action)
         if done:
@@ -317,10 +303,15 @@ def play():
 if __name__ == '__main__':
     agent = Action_Value()
     mean_scores = []
-    train()
-    # for i in range(20):
-    #     train()
-    # plot_mean_scores_buffer(mean_scores)
+    # data_std = np.std(mean_scores,axis=1)
+    # data_mean = np.mean(data_std,axis=1)
+
+
+    # train()
+    for i in range(20):
+        train()
+    plot_mean_scores_buffer(mean_scores)
+
     #play()
 
 

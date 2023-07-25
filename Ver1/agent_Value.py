@@ -42,7 +42,7 @@ class Agent_Value:
         self.alpha = ALPHA #
         self.net = Linear_Net(STATE_VEC_SIZE, HIDDEN_LAYER, NUM_ACTIONS)
         self.trainer = Value_Trainer_V(self.net, lr=LR, gamma=self.gamma,alpha=self.alpha)
-        self.states_value = [0, 0, 0]
+        self.prediction = [0, 0, 0]
         self.env_model = SnakeGameAI()
 
     def get_state(self, game):
@@ -157,7 +157,7 @@ class Agent_Value:
 
         return np.array(state, dtype=float)
 
-    def train_short_memory(self, state, reward, next_state, done):
+    def train_online(self, state, reward, next_state, done):
         self.trainer.train_step(state, reward, next_state, done)
 
     def get_action(self, state):
@@ -169,10 +169,8 @@ class Agent_Value:
             self.states_value = action
             action[move] = 1
         else:
-            state0 = torch.tensor(state, dtype=torch.float)
-            prediction = self.net(state0)
-            self.states_value = prediction.detach().numpy()
-            move = torch.argmax(prediction).item()
+            self.prediction = self.net(torch.tensor(state, dtype=torch.float)).detach().numpy()
+            move = np.argmax(self.prediction)
             action[move] = 1
 
         return action
@@ -181,8 +179,6 @@ class Agent_Value:
         # [Straight, Right, Left]
         rewards, dones,next_states = [],[],[]
         actions = [[1, 0, 0],[0, 1, 0],[0, 0, 1]]
-        # for i in range(len(env_models)):
-        #     env_models[i] = game.copy(env_models[i])
         for i,action in enumerate(actions):
             self.env_model = game.copy(self.env_model)
             reward, done, score = self.env_model.play_step(action)
@@ -201,7 +197,6 @@ def train():
     # agent = Agent_Value()
     game = SnakeGameAI(arrow=True, agentID=0)
 
-
     mean_score = 0
 
     plt.ion()
@@ -215,7 +210,7 @@ def train():
 
         # get move
         action = agent.get_action(state)
-        game.actions_probability = agent.states_value
+        game.actions_probability = agent.prediction
 
         # perform move and get new state
         _reward, _done, _state_next = agent.get_states_value(game)
@@ -223,7 +218,7 @@ def train():
         reward, done, score = game.play_step(action)
 
         # train short memory
-        agent.train_short_memory(state, _reward, _state_next, _done)
+        agent.train_online(state, _reward, _state_next, _done)
 
         if done:
             # plot result
@@ -254,7 +249,6 @@ def play():
         state = agent.get_state(game)
         # get move
         action = agent.get_action(state)
-        game.actions_probability = agent.actions_probability
         # perform move and get new state
         reward, done, score = game.play_step(action)
         if done:

@@ -27,7 +27,7 @@ BLUE = (0, 0, 255)
 BLACK = (0, 0, 0)
 
 BLUE_FOOD = (0, 0, 150)
-GREEN = (0, 255, 0)
+GREEN = (0, 100, 0)
 GREEN_FOOD = (0, 150, 0)
 PURPLE = (128, 0, 128)
 PURPLE_FOOD = (224, 0, 224)
@@ -45,7 +45,7 @@ BROWN = (139, 69, 19)
 AGENT_UI = [[BLUE, RED], [BLUE, BLUE_FOOD], [PURPLE, PURPLE_FOOD], [GREEN, GREEN_FOOD]]
 
 text_position = [[0, 0],[WIDTH//2 -50, 0],[WIDTH-160, 0]]
-AGENT_NAMES = ["DQN","Value Based","Q(Lambda)"]
+AGENT_NAMES = ["Action Value", "A2C","State Value"]
 
 class SnakeGameAI:
 

@@ -44,8 +44,7 @@ STATE_VEC_SIZE = 11
 HIDDEN_LAYER = 256
 
 
-class AgentDPN:
-
+class Agent_A2C:
     def __init__(self):
         self.n_games = 0
         self.gamma = GAMMA  # discount rate
@@ -56,7 +55,7 @@ class AgentDPN:
         self.net = ActorCritic(STATE_VEC_SIZE, NUM_ACTIONS)  # Linear_QNet(11, 256, 3)
         self.optimizer = torch.optim.Adam(self.net.parameters(), lr=LR)
         self.trainer = A2C_Trainer(net=self.net, optimizer=self.optimizer, lr=LR, gamma=self.gamma)
-        self.actions_prediction = [0, 0, 0]
+        self.prediction = [0, 0, 0]
 
     def get_state(self, game):
         head = game.snake[0]
@@ -161,26 +160,24 @@ class AgentDPN:
 
         return np.array(state, dtype=int)
 
-    def train_short_memory(self, state, action, reward, next_state, done):
+    def train_online(self, state, action, reward, next_state, done):
         self.trainer.train_step(state, action, reward, next_state, done)
 
     def get_action(self, state):
-        # action_probs = action_probs.squeeze().detach().numpy()
-        # action = np.random.choice(NUM_ACTIONS, p=action_probs)
-        # return action
-
-        # random moves: tradeoff exploration / exploitation
+        # policy based exploration / exploitation
         self.epsilon = 40 - self.n_games
         action = [0, 0, 0]
         if random.randint(0, 200) < self.epsilon:
-            move = random.randint(0, 2)
-            self.actions_prediction = action
+            # move = random.randint(0, 2)
+            prediction, _ = self.net(torch.tensor(state, dtype=torch.float))
+            self.prediction = prediction.squeeze().detach().numpy()
+            move = np.random.choice(NUM_ACTIONS, p=self.prediction)
             action[move] = 1
         else:
             prediction, _ = self.net(torch.tensor(state, dtype=torch.float))
-            self.actions_prediction = prediction.detach().numpy()
+            self.prediction = prediction.detach().numpy()
             # move = np.random.choice(NUM_ACTIONS, p= self.actions_prediction)
-            move = torch.argmax(prediction).item()
+            move = np.argmax(self.prediction)
             action[move] = 1
 
         return action
@@ -192,47 +189,70 @@ def train():
     total_score = 0
     record = 0
     mean_score = 0
-    agent = AgentDPN()
+    # agent = Agent_A2C()
     game = SnakeGameAI(arrow=True, agentID=0)
-
     plt.ion()
 
-    fig, axs = plt.subplots(1, 5, width_ratios=[4, 4, 1, 1, 7], figsize=(8, 6))
-    # fig, axs = plt.subplots(1, 8, width_ratios=[16, 8, 12,1], figsize=(8, 6))
     while True:
         # get old state
         state_old = agent.get_state(game)
         # get move
         action = agent.get_action(state_old)
-        game.actions_probability = agent.actions_prediction
+        game.actions_probability = agent.prediction
 
         # perform move and get new state
         reward, done, score = game.play_step(action)
         state_new = agent.get_state(game)
 
         # train short memory
-        agent.train_short_memory(state_old, np.argmax(action), reward, state_new, int(done))
+        agent.train_online(state_old, np.argmax(action), reward, state_new, int(done))
 
         if done:
-            # train long memory, plot result
+            # plot result
             game.reset()
             agent.n_games += 1
 
             if score > record:
                 record = score
-
-            # print('Game', agent.n_games, 'Score', score, 'Record:', record)
-
+            if mean_score > 3:
+                break
             plot_scores.append(score)
             total_score += score
             mean_score = total_score / agent.n_games
             plot_mean_scores.append(mean_score)
             plot(plot_scores, plot_mean_scores)
-            # last_bias = visualize_biases(agent.net, axs, last_bias, difference_val, loss_buss,epsilon_decay=plot_mean_scores, agent_type=1,loss_1=loss_buss_2)
             # net_visualize(agent.net, axs)
-            # difference_val[0] = 0
             print('Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:', round(mean_score, 3))
 
+def play():
+    plot_scores = []
+    record = 0
+    game = SnakeGameAI(arrow=True,obstacle_flag=True)
+
+    while True:
+        # get old state
+        state = agent.get_state(game)
+        # get move
+        action = agent.get_action(state)
+        game.actions_probability = agent.prediction
+        # perform move and get new state
+        reward, done, score = game.play_step(action)
+        if done:
+            game.reset()
+            agent.n_games += 1
+
+            if score > record:
+                record = score
+            plot_scores.append(score)
+
+
+            # plot(plot_scores, plot_mean_scores)
+            #print('Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:')
 
 if __name__ == '__main__':
+    agent = Agent_A2C()
     train()
+    plt.close()
+    play()
+
+

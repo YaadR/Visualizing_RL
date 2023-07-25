@@ -27,7 +27,7 @@ BLUE = (0, 0, 255)
 BLACK = (0, 0, 0)
 
 BLUE_FOOD = (0, 0, 150)
-GREEN = (0, 255, 0)
+GREEN = (0, 100, 0)
 GREEN_FOOD = (0, 150, 0)
 PURPLE = (128, 0, 128)
 PURPLE_FOOD = (224, 0, 224)
@@ -57,7 +57,7 @@ class SnakeGameArena:
             self.env.append(SnakeGameAI(arrow=arrow, agentID=i))
 
 text_position = [[0, 0],[0, 25],[0, 50]]
-AGENT_NAMES = ["DQN","Value Based","Q(Lambda)"]
+AGENT_NAMES = ["Action Value", "A2C","State Value"]
 
 class SnakeGameAICompetition:
 
@@ -245,7 +245,7 @@ class SnakeGameAICompetition:
         # for pt in self.snake[agentID]:
         #     pygame.draw.rect(self.display, AGENT_UI[agentID+1][0], pygame.Rect(pt.x, pt.y, BLOCK_SIZE, BLOCK_SIZE))
         #
-        snake_color_decay = AGENT_UI[self.agentID][0]
+        snake_color_decay = AGENT_UI[agentID+1][0]
         decay_ratio = 0.90 if len(self.snake[agentID]) < 10 else 0.97
         for pt in self.snake[agentID]:
             pygame.draw.rect(self.display, snake_color_decay, pygame.Rect(pt.x, pt.y, BLOCK_SIZE, BLOCK_SIZE))

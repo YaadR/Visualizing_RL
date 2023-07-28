@@ -182,49 +182,6 @@ class Value_Trainer_1:
         loss.backward()
         self.optimizer.step()
 
-# Model free trainer on policy
-class Policy_Trainer_A:
-    def __init__(self, net, lr, gamma,alpha):
-        self.lr = lr
-        self.theta = np.random.rand(3)
-        self.gamma = gamma
-        self.alpha = alpha
-        self.net = net
-        self.optimizer = optim.Adam(net.parameters(), lr=self.lr)
-        self.criterion = nn.MSELoss()
-
-    def train_step(self, _state_prev, _action, reward, state, done):
-        state_prev = torch.tensor(_state_prev, dtype=torch.float)
-        state = torch.tensor(state, dtype=torch.float)
-        action = torch.tensor(_action, dtype=torch.long)
-        reward = torch.tensor(reward, dtype=torch.float)
-        # (n, x)
-
-        if len(state_prev.shape) == 1:
-            # (1, x)
-            state_prev = torch.unsqueeze(state_prev, 0)
-            state = torch.unsqueeze(state, 0)
-            action = torch.unsqueeze(action, 0)
-            reward = torch.unsqueeze(reward, 0)
-            # done = (done, )
-            done = int(done)
-
-        probs, values = self.net(state_prev)
-        probs_next,next_values = self.net(state)
-
-        target = probs.clone()
-        # Q' = Reward + lmbda*max(Actions_Value)
-        Q_new = reward + (1-done)*self.gamma * torch.max(probs_next)
-        target[0][torch.argmax(action).item()] = Q_new
-
-
-        self.optimizer.zero_grad()
-        loss = self.criterion(target, probs)
-
-        self.optimizer.zero_grad()
-        loss.backward()
-        print(loss.detach().numpy())
-        self.optimizer.step()
 
 # Model free trainer action value
 class Value_Trainer_A:

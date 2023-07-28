@@ -268,7 +268,7 @@ def train():
             plot_mean_scores.append(system_entropy)
             plot_system_entropy(mean_entropy)
             # plot(plot_scores, plot_mean_scores)
-            if mean_score > 3 and agent.n_games>300:
+            if mean_score > 20 and agent.n_games>500:
                 mean_scores.append(list(plot_mean_scores))
                 break
             if heat_flag:

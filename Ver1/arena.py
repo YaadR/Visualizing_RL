@@ -2,14 +2,14 @@ from game_multi import SnakeGameArena, SnakeGameAICompetition, pygame
 import numpy as np
 import matplotlib.pyplot as plt
 import agent_Action_Value
-import agent_A2C
+import agent_Policy
 import agent_Value
 
 BLACK = (0, 0, 0)
 WIDTH = 480
 HEIGHT = 360
 
-TRAIN_STOP = 5
+TRAIN_STOP = 15
 plot_colors = ['blue', 'purple', 'green']
 
 
@@ -147,9 +147,9 @@ def play(agent_num=1):
 
 
 if __name__ == '__main__':
-    AGENT_NAMES = ["Action Value", "A2C","State Value"]
+    AGENT_NAMES = ["Action Value", "Policy","State Value"]
     agentActionValue = agent_Action_Value.Action_Value()
-    agentA2C = agent_A2C.Agent_A2C()
+    agentA2C = agent_Policy.Agent_Policy()
     agentValue = agent_Value.Agent_Value()
     Agents = [agentActionValue, agentA2C, agentValue]
     train(agent_num=len(Agents))

@@ -57,7 +57,7 @@ class SnakeGameArena:
             self.env.append(SnakeGameAI(arrow=arrow, agentID=i))
 
 text_position = [[0, 0],[0, 25],[0, 50]]
-AGENT_NAMES = ["Action Value", "A2C","State Value"]
+AGENT_NAMES = ["Action Value", "Policy","State Value"]
 
 class SnakeGameAICompetition:
 

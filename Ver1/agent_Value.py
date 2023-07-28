@@ -12,7 +12,7 @@ import numpy as np
 from collections import deque
 from game import SnakeGameAI, Direction, Point, pygame
 from model import Linear_Net, Value_Trainer_V
-from helper import plot, heat_map_step, distance_collapse, visualize_biases, net_visualize, activation_visualize,normalizer
+from helper import plot, heat_map_step, distance_collapse, net_visualize, activation_visualize,normalizer,plot_mean_scores_buffer
 from sklearn import preprocessing
 import math
 import matplotlib.pyplot as plt
@@ -202,7 +202,7 @@ def train():
     plt.ion()
 
     # fig, axs = plt.subplots(1, 3,width_ratios=[4,1,6], figsize=(8, 6))
-    fig, axs = plt.subplots(1, 4, width_ratios=[12, 4, 8, 1], figsize=(8, 6))
+    # fig, axs = plt.subplots(1, 4, width_ratios=[12, 4, 8, 1], figsize=(8, 6))
 
     while True:
         # get old state
@@ -234,8 +234,10 @@ def train():
             print('Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:', round(mean_score, 3))
             plot_mean_scores.append(mean_score)
 
-            plot(plot_scores, plot_mean_scores)
-            if mean_score > 12:
+            # plot(plot_scores, plot_mean_scores)
+
+            if mean_score > 25 and agent.n_games>=400:
+                mean_scores.append(list(plot_mean_scores))
                 break
 
 
@@ -263,9 +265,14 @@ def play():
             print('Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:')
 
 
+
 if __name__ == '__main__':
     agent = Agent_Value()
-
+    mean_scores = []
+    # for i in range(5):
+    #     print(f'\n\n Rum number {i+1}  \n\n')
+    #     train()
+    # plot_mean_scores_buffer(mean_scores)
     train()
-    play()
+    # play()
 

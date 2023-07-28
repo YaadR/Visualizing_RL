@@ -45,7 +45,7 @@ BROWN = (139, 69, 19)
 AGENT_UI = [[BLUE, RED], [BLUE, BLUE_FOOD], [PURPLE, PURPLE_FOOD], [GREEN, GREEN_FOOD]]
 
 text_position = [[0, 0],[WIDTH//2 -50, 0],[WIDTH-160, 0]]
-AGENT_NAMES = ["Action Value", "A2C","State Value"]
+AGENT_NAMES = ["Action Value", "Policy","State Value"]
 
 class SnakeGameAI:
 
@@ -55,7 +55,7 @@ class SnakeGameAI:
         self.arrow = arrow
         # init display
         self.display = pygame.display.set_mode((self.w, self.h))
-        pygame.display.set_caption('Game')
+        pygame.display.set_caption('Environment')
         self.clock = pygame.time.Clock()
         self.obst_flag = obstacle_flag
         self.reset()

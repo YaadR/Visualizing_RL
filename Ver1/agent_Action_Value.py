@@ -12,7 +12,8 @@ import numpy as np
 from collections import deque
 from game import SnakeGameAI, Direction, Point, pygame
 from model import Linear_Net, Value_Trainer_A
-from helper import plot_std_mean_scores_buffer,plot_mean_scores_buffer,plot,heat_map_step,distance_collapse,visualize_biases,net_visualize,activation_visualize,array_tobinary
+from helper import plot_std_mean_scores_buffer,plot_mean_scores_buffer,plot,heat_map_step,distance_collapse,net_visualize,activation_visualize,\
+    array_tobinary,plot_system_entropy,entropy,softmax
 from sklearn import preprocessing
 import math
 import matplotlib.pyplot as plt
@@ -186,6 +187,8 @@ def train():
     game = SnakeGameAI(arrow=False,agentID=0)
     mean_score=0
     seen_states = set()
+    system_entropy =[]
+    mean_entropy = []
 
     heatmap = np.ones((game.w//10,game.h//10))      # Heatmap init
     plt.ion()
@@ -204,6 +207,7 @@ def train():
         # get move
         action = agent.get_action(state_prev)
         game.actions_probability = agent.prediction
+        mean_entropy.append(entropy(softmax(agent.prediction)))
 
         # perform move and get new state
         reward, done, score = game.play_step(action)
@@ -254,13 +258,16 @@ def train():
                 record = score
             # print('Game', agent.n_games, 'Score', score, 'Record:', record)
 
+            system_entropy.append(np.mean(mean_entropy))
+            mean_entropy = []
+
             plot_scores.append(score)
             total_score += score
             mean_score = total_score / agent.n_games
             print('Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:',round(mean_score, 3) )
-            plot_mean_scores.append(mean_score)
-
-            plot(plot_scores, plot_mean_scores)
+            plot_mean_scores.append(system_entropy)
+            plot_system_entropy(mean_entropy)
+            # plot(plot_scores, plot_mean_scores)
             if mean_score > 3 and agent.n_games>300:
                 mean_scores.append(list(plot_mean_scores))
                 break

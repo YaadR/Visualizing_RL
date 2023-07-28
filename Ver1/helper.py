@@ -23,21 +23,6 @@ def plot(scores, mean_scores, save=False,index=100):
         plt.savefig('edvance_'+str(index)+'.jpg')
         plt.close()
 
-def plot_multi(mean_scores, maxmean = 5):
-    display.clear_output(wait=True)
-    display.display(plt.gcf())
-    # plt.clf()
-    plt.title('Training')
-    plt.xlabel('Number of Games')
-    plt.ylabel('Mean Score')
-    # plt.plot(scores)
-    plt.plot(mean_scores)
-    plt.ylim(ymin=0)
-    # plt.text(len(scores)-1, max(scores), str(max(scores)))
-    plt.text(len(mean_scores)-1, maxmean, str(maxmean))
-    plt.show(block=False)
-    plt.pause(.1)
-
 
 def heat_map_step(matrix,direction,W,H,head_x,head_y, danger_ahead=False,X=0,Y=0):
 
@@ -99,54 +84,6 @@ def softmax(x):
     e_x = np.exp(x - np.max(x))
     return e_x / np.sum(e_x, axis=0)
 
-def visualize_biases(model,axs,last_bias,diff,loss,epsilon_decay=None,agent_type=1,loss_1=None,):
-    # Extract the biases from the model
-    biases = []
-    j=-1
-    for param in model.parameters():
-        biases.append(param.data.cpu().numpy())
-    # Plot the biases
-    for i, bias in enumerate(biases):
-        if len(bias.shape)==1:
-            j += 1
-            bias_img = np.reshape(bias, (-1, len(bias)))
-            if len(bias)>32:
-
-                bias_img = np.reshape(bias_img,(int(np.sqrt(len(bias))),int(np.sqrt(len(bias)))))
-                if j==0:
-                    diff.append(np.mean(np.abs(bias_img-last_bias)))
-                    last_bias = bias_img.copy()
-            else:
-                bias_img = bias_img.reshape(-1,1)
-            axs[j].imshow(bias_img, cmap='gray')
-            axs[j].set_title(f'Layer {j + 1} biases')
-            # axs[j].axis('off')
-    axs[j + 1].clear()
-    loss = normalize(loss)
-    # print(loss)
-    axs[j + 1].plot(loss, 'orange')
-    diff = normalize(diff)
-    # print(diff[-1])
-    axs[j + 1].plot(diff, 'b')
-    # loss_1 = normalize(loss_1)
-    # axs[j+1].plot(loss_1,'b')
-    if agent_type:
-        if max(epsilon_decay)>1:
-            epsilon_decay = normalize(epsilon_decay)
-        # epsilon_decay[-1] = 0 if epsilon_decay[-1]<0 else epsilon_decay[-1]
-        axs[j + 1].plot(epsilon_decay, 'pink')
-    axs[j + 1].set_title('Mean layer 1 difference')
-
-    for g in range(len(axs)-1):
-        axs[g].set_xticks([])
-        axs[g].set_yticks([])
-    plt.tight_layout()
-    plt.show(block=False)
-    plt.pause(0.1)
-
-    return last_bias
-
-
 def net_visualize(model,axs):
     # Extract the biases from the model
     layers = []
@@ -183,24 +120,6 @@ def net_visualize(model,axs):
 
     # return last_bias
 
-def table_visualize(table,axs,mean_score,plot_scores):
-    # Extract the biases from the model
-
-    layers = []
-    axs[0].imshow(table, cmap='gray')
-    axs[0].set_title("Q-Table")
-
-    axs[1].plot(plot_scores, 'b')
-    axs[1].plot(mean_score, 'orange')
-    axs[1].set_title('Scores')
-
-    plt.tight_layout()
-    plt.show()
-    plt.pause(0.1)
-
-    # return last_bias
-
-
 def activation_visualize(state_vector,layer1,layer2,axs,snapshot,index="",activation_name='Valid State'):
     # Extract the biases from the model
     layer_widen = np.zeros((len(layer1.T),50))
@@ -231,7 +150,6 @@ def array_tobinary(state):
     for i in state:
         sb += str(i)
     return int(sb, 2)
-
 
 def plot_mean_scores_buffer(scores):
     min_length = min(len(sublist) for sublist in scores)
@@ -287,3 +205,27 @@ def plot_std_mean_scores_buffer(data_mean, data_std, data_label, x_label, y_labe
     plt.legend()
     plt.tight_layout()
     plt.show()
+
+def entropy(probabilities):
+    # Ensure that probabilities sum up to 1
+    assert np.isclose(np.sum(probabilities), 1.0)
+
+    # Convert generator to NumPy array
+    probabilities_array = np.fromiter((p * np.log2(p) if p != 0 else 0 for p in probabilities), float)
+
+    # Compute the entropy
+    entropy = - np.sum(probabilities_array)
+
+    return entropy
+
+def plot_system_entropy(entropies):
+    display.clear_output(wait=True)
+    display.display(plt.gcf())
+    # plt.clf()
+    plt.title('System Entropy')
+    plt.xlabel('Games')
+    plt.ylabel('Entropy')
+    plt.plot(entropies)
+    plt.ylim(ymin=0)
+    plt.show(block=False)
+    plt.pause(.1)

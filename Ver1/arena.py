@@ -65,7 +65,7 @@ def train(agent_num=1):
                     plot_scores[i].append(score)
                     total_score[i] += score
                     mean_score = total_score[i] / agent.n_games
-                    plot_mean_scores[i].append(mean_score)
+                    plot_mean_scores[i].append(round(mean_score,3))
                     trained[i] = mean_score > TRAIN_STOP
 
                     axis[i].cla()
@@ -136,7 +136,7 @@ def play(agent_num=1):
                 plot_scores[i].append(score[i])
                 total_score[i] += score[i]
                 mean_score = total_score[i] / agent.n_games
-                plot_mean_scores[i].append(mean_score)
+                plot_mean_scores[i].append(round(mean_score,3))
 
                 # arena.display.fill(BLACK)
                 print('Agent:', i, 'Game:', agent.n_games, 'Score:', score[i], 'Record:', record[i], 'Mean Score:',

@@ -1,23 +1,23 @@
-# Visualizing_RL
+## Visualizing RL : How the agent perceive the environment during training
 
 
-### Authors:
+#### Authors:
 * [Yaad Rebhun](https://github.com/YaadR)
 * [Itai Zeitouni](https://github.com/Itaize33)
 
-## Project description:
+### Project description:
 Visualizing how different agents perceives their environment in the game Snake : algorithms in Reinforcement Learning
 
 
 
-## Algorithms:
-### Value-Based:
+### Algorithms:
+#### Value-Based:
 
 the Bellman equation to compute the value at each iteration:
 $$V(S_t) = V(S_t) + \alpha \left[ R_{t+1} + \gamma V(S_{t+1}) - V(S_t) \right]$$
 
 
-#### Evaluation after X games played:
+##### Evaluation after X games played:
 
 The Bellman equation is:
 

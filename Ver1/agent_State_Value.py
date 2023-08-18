@@ -11,7 +11,7 @@ import random
 import numpy as np
 from collections import deque
 from game import SnakeGameAI, Direction, Point, pygame
-from model import Linear_Net, Value_Trainer_1,nn
+from model import Linear_Net, State_Value_Trainer,nn
 from helper import plot,net_visualize, activation_visualize,array_tobinary
 from sklearn import preprocessing
 import math
@@ -43,7 +43,7 @@ class Agent_State_Value:
         self.alpha = ALPHA #
         self.Q = dict()     # Q table
         self.net = Linear_Net(STATE_VEC_SIZE, HIDDEN_LAYER, STATE_VALUE)
-        self.trainer = Value_Trainer_1(self.net, lr=LR, gamma=self.gamma,alpha=self.alpha)
+        self.trainer = State_Value_Trainer(self.net, lr=LR, gamma=self.gamma,alpha=self.alpha)
         self.actions_probability = [0, 0, 0]
 
 

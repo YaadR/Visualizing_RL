@@ -16,7 +16,7 @@ import numpy as np
 from collections import deque
 from game import SnakeGameAI, Direction, Point
 from model import ActorCritic, A2C_Trainer
-from helper import plot, net_visualize
+from helper import plot, net_visualize,plot_mean_scores_buffer,plot_std_mean_scores_buffer
 from sklearn import preprocessing
 import math
 import matplotlib.pyplot as plt
@@ -213,15 +213,17 @@ def train():
 
             if score > record:
                 record = score
-            if mean_score > 3:
-                break
+
             plot_scores.append(score)
             total_score += score
             mean_score = total_score / agent.n_games
             plot_mean_scores.append(mean_score)
-            plot(plot_scores, plot_mean_scores)
+            if agent.n_games>=400:
+                mean_scores.append(list(plot_mean_scores))
+                break
+            # plot(plot_scores, plot_mean_scores)
             # net_visualize(agent.net, axs)
-            print('Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:', round(mean_score, 3))
+            print('Games:', i,'Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:', round(mean_score, 3))
 
 def play():
     plot_scores = []
@@ -250,8 +252,16 @@ def play():
 
 if __name__ == '__main__':
     agent = Agent_Policy()
-    train()
-    plt.close()
-    play()
+    # train()
+    mean_scores = []
+    # train()
+    for i in range(20):
+        agent = Agent_Policy()
+        train()
+    name = 'Action Policy Agents'
+    plot_mean_scores_buffer(mean_scores,name)
+    plot_std_mean_scores_buffer(mean_scores,name)
+    # plt.close()
+    # play()
 
 

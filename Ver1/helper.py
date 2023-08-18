@@ -151,17 +151,12 @@ def array_tobinary(state):
         sb += str(i)
     return int(sb, 2)
 
-def plot_mean_scores_buffer(scores):
+def plot_mean_scores_buffer(scores, title):
     min_length = min(len(sublist) for sublist in scores)
 
     cut_list = [sublist[:min_length] for sublist in scores]
     padded_list = [sublist + [np.nan] * (min_length - len(sublist)) for sublist in cut_list]
     mean_list = np.nanmean(padded_list, axis=0)
-    # for n in range(num_lists):
-    #     for i in range(100):
-    #         scores[n][i] *= 5 * i
-
-    #mean_scores = np.mean(scores, axis=0)
 
     # Plotting parameters
     alpha_value = 0.2  # Alpha value for faded background
@@ -173,35 +168,38 @@ def plot_mean_scores_buffer(scores):
 
     # Plot the average line with a solid color
     # average_scores = np.mean(mean_scores, axis=0)
-    plt.plot(mean_list, color=average_color, label='Average')
+    plt.plot(mean_list, color=average_color, label='Mean')
 
     # Add labels and title
     plt.xlabel('Iterations')
     plt.ylabel('Mean Score')
-    plt.title('Average of Multiple Lists of Mean Scores')
+    plt.title('Multiple Training Mean '+title)
 
     # Add legend
     plt.legend()
 
     #Save fig
-    plt.savefig(r'D:\GitHub\Reposetories\Visualizing_RL\Ver1\data\plots\Buffers\buffer.jpg')  # Specify the desired file name and extension
+    plt.savefig(r'D:\GitHub\Reposetories\Visualizing_RL\Ver1\data\plots\Buffers\Mean '+title+'.jpg')  # Specify the desired file name and extension
 
     # Show the plot
     plt.show()
 
-def plot_std_mean_scores_buffer(data_mean, data_std, data_label, x_label, y_label, title):
+def plot_std_mean_scores_buffer(mean_scores,title):
 
+    data_std = np.std(mean_scores,axis=0)
+    data_mean = np.mean(mean_scores,axis=0)
     plt.figure(figsize=(8,5))
-    plt.title(title)
+    plt.title("Multiple Training STD "+title)
 
-    alpha = 0.3
+    alpha = 0.2
 
-    plt.plot(range(len(data_mean)), data_mean, '-', color = 'purple', label = data_label)
-    plt.fill_between(range(len(data_mean)), data_mean - data_std, data_mean + data_std, facecolor = 'blue',alpha = alpha)
+    plt.plot(range(len(data_mean)), data_mean, '-', color = 'r',label='Mean')
+    plt.fill_between(range(len(data_mean)), data_mean - data_std, data_mean + data_std, facecolor = 'b',alpha = alpha)
 
-    plt.xlabel(x_label)
-    plt.ylabel(y_label)
+    plt.xlabel("Games")
+    plt.ylabel("Mean Score")
 
+    plt.savefig(r'D:\GitHub\Reposetories\Visualizing_RL\Ver1\data\plots\Buffers\STD '+title+'.jpg')  # Specify the desired file name and extension
     plt.legend()
     plt.tight_layout()
     plt.show()

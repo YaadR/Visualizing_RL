@@ -12,7 +12,7 @@ import numpy as np
 from collections import deque
 from game import SnakeGameAI, Direction, Point, pygame
 from model import Linear_Net, Value_Trainer_V
-from helper import plot, heat_map_step, distance_collapse, net_visualize, activation_visualize,normalizer,plot_mean_scores_buffer
+from helper import plot, heat_map_step, distance_collapse, net_visualize, activation_visualize,normalizer,plot_mean_scores_buffer,plot_std_mean_scores_buffer
 from sklearn import preprocessing
 import math
 import matplotlib.pyplot as plt
@@ -194,9 +194,7 @@ def train():
     plot_mean_scores = []
     total_score = 0
     record = 0
-    # agent = Agent_Value()
     game = SnakeGameAI(arrow=True, agentID=0)
-
     mean_score = 0
 
     plt.ion()
@@ -231,12 +229,12 @@ def train():
             plot_scores.append(score)
             total_score += score
             mean_score = total_score / agent.n_games
-            print('Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:', round(mean_score, 3))
+            print('Games:', i,'Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:', round(mean_score, 3))
             plot_mean_scores.append(mean_score)
 
             # plot(plot_scores, plot_mean_scores)
 
-            if mean_score > 25 and agent.n_games>=400:
+            if agent.n_games>=400:
                 mean_scores.append(list(plot_mean_scores))
                 break
 
@@ -269,10 +267,17 @@ def play():
 if __name__ == '__main__':
     agent = Agent_Value()
     mean_scores = []
-    # for i in range(5):
-    #     print(f'\n\n Rum number {i+1}  \n\n')
-    #     train()
-    # plot_mean_scores_buffer(mean_scores)
-    train()
+
+    # train()
     # play()
+
+    for i in range(20):
+        agent = Agent_Value()
+        train()
+    name = 'State Value Agents'
+    plot_mean_scores_buffer(mean_scores,name)
+    plot_std_mean_scores_buffer(mean_scores,name)
+
+
+
 

@@ -145,7 +145,7 @@ class Value_Trainer_V:
         self.optimizer.step()
 
 # Model free trainer state value
-class Value_Trainer_1:
+class State_Value_Trainer:
     def __init__(self, net, lr, gamma,alpha=1):
         self.lr = lr
         self.gamma = gamma
@@ -200,28 +200,19 @@ class Value_Trainer_A:
         reward = torch.tensor(reward, dtype=torch.float)
         # (n, x)
         loss_bus_flag = False
-        if len(state_prev.shape) == 1:
-            # (1, x)
-            state_prev = torch.unsqueeze(state_prev, 0)
-            state = torch.unsqueeze(state, 0)
-            action = torch.unsqueeze(action, 0)
-            reward = torch.unsqueeze(reward, 0)
-            done = (done, )
-        else:
-            loss_bus_flag = True
+
+        state_prev = torch.unsqueeze(state_prev, 0)
+        state = torch.unsqueeze(state, 0)
+        action = torch.unsqueeze(action, 0)
+        reward = torch.unsqueeze(reward, 0)
 
         # predicted Q values with current state
         pred = self.net(state_prev)
 
         target = pred.clone()
-        for idx in range(len(done)):
-            # Q' = Reward : Terminal state
-            Q_new = reward[idx]
-            if not done[idx]:
-                # Q' = Reward + lmbda*max(Actions_Value)
-                Q_new = reward[idx] + self.gamma * torch.max(self.net(state[idx]))
-
-            target[idx][torch.argmax(action[idx]).item()] = Q_new
+        # Q' = Reward + (1-terminal)*lmbda*max(Actions_Value)
+        Q_new = reward[0] + (1-done)*self.gamma * torch.max(self.net(state[0]))
+        target[0][torch.argmax(action[0]).item()] = Q_new
 
 
         self.optimizer.zero_grad()

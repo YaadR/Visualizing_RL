@@ -183,7 +183,6 @@ def train():
     plot_mean_scores = []
     total_score = 0
     record = 0
-    agent = Action_Value()
     game = SnakeGameAI(arrow=False,agentID=0)
     mean_score=0
     seen_states = set()
@@ -207,7 +206,7 @@ def train():
         # get move
         action = agent.get_action(state_prev)
         game.actions_probability = agent.prediction
-        mean_entropy.append(entropy(softmax(agent.prediction)))
+        # mean_entropy.append(entropy(softmax(agent.prediction)))
 
         # perform move and get new state
         reward, done, score = game.play_step(action)
@@ -258,17 +257,18 @@ def train():
                 record = score
             # print('Game', agent.n_games, 'Score', score, 'Record:', record)
 
-            system_entropy.append(np.mean(mean_entropy))
+            # system_entropy.append(np.mean(mean_entropy))
             mean_entropy = []
 
             plot_scores.append(score)
             total_score += score
             mean_score = total_score / agent.n_games
-            print('Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:',round(mean_score, 3) )
-            plot_mean_scores.append(system_entropy)
-            plot_system_entropy(mean_entropy)
+            print('Games:', i,'Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:')
+            # print('Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:',round(mean_score, 3) )
+            plot_mean_scores.append(mean_score)
+            # plot_system_entropy(mean_entropy)
             # plot(plot_scores, plot_mean_scores)
-            if mean_score > 20 and agent.n_games>500:
+            if agent.n_games>=400:
                 mean_scores.append(list(plot_mean_scores))
                 break
             if heat_flag:
@@ -305,19 +305,19 @@ def play():
             plot_scores.append(score)
 
             # plot(plot_scores, plot_mean_scores)
-            #print('Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:')
+            print('Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:')
 
 if __name__ == '__main__':
     agent = Action_Value()
     mean_scores = []
-    # data_std = np.std(mean_scores,axis=1)
-    # data_mean = np.mean(data_std,axis=1)
-
 
     # train()
     for i in range(20):
+        agent = Action_Value()
         train()
-    plot_mean_scores_buffer(mean_scores)
+    name = 'Action Value Agents'
+    plot_mean_scores_buffer(mean_scores,name)
+    plot_std_mean_scores_buffer(mean_scores,name)
 
     #play()
 

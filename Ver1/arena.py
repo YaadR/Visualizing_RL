@@ -10,6 +10,8 @@ WIDTH = 480
 HEIGHT = 360
 
 TRAIN_STOP = 15
+MAX_GAMES = 300
+MIN_GAMES = 150
 plot_colors = ['blue', 'purple', 'green']
 
 
@@ -66,7 +68,7 @@ def train(agent_num=1):
                     total_score[i] += score
                     mean_score = total_score[i] / agent.n_games
                     plot_mean_scores[i].append(round(mean_score,3))
-                    trained[i] = mean_score > TRAIN_STOP
+                    trained[i] = ((mean_score > TRAIN_STOP) and (agent.n_games>=MIN_GAMES)) or (agent.n_games>=MAX_GAMES)
 
                     axis[i].cla()
                     axis[i].set_title(AGENT_NAMES[i])
@@ -75,6 +77,10 @@ def train(agent_num=1):
                     axis[i].plot(plot_scores[i], color=plot_colors[i])
                     axis[i].plot(plot_mean_scores[i])
                     axis[i].axhline(y=TRAIN_STOP, color='orange', linestyle='--')
+                    if agent.n_games > MIN_GAMES - 10:
+                        axis[i].axvline(x=MIN_GAMES, color='green', linestyle='--')
+                    if agent.n_games > MAX_GAMES - 20:
+                        axis[i].axvline(x=MIN_GAMES, color='red', linestyle='--')
                     axis[i].set_ylim(ymin=0)
                     axis[i].text(len(plot_scores[i]) - 1, plot_scores[i][-1], str(plot_scores[i][-1]))
                     axis[i].text(len(plot_mean_scores[i]) - 1, plot_mean_scores[i][-1], str(plot_mean_scores[i][-1]))
@@ -109,16 +115,11 @@ def play(agent_num=1):
     record = [0] * agent_num
     arena = SnakeGameAICompetition(arrow=False, agent_num=agent_num, obstacle_flag=True)
 
-    # plt.ion()
-    # figure, axis = plt.subplots(3, 1, figsize=(6, 5.5))
-    # plt.subplots_adjust(hspace=1)
-
     while True:
         # get old state
         for i, agent in enumerate(Agents):
 
             state = agent.get_state_arena(arena, i)
-            # print(state)
 
             # get action
             action = agent.get_action(state)

@@ -310,17 +310,17 @@ def play():
 if __name__ == '__main__':
     agent = Action_Value()
     mean_scores = []
+    i=0
 
-    # train()
-    for i in range(20):
-        agent = Action_Value()
-        train()
-    name = 'Action Value Agents'
-    plot_mean_scores_buffer(mean_scores,name)
-    plot_std_mean_scores_buffer(mean_scores,name)
-
-    #play()
-
+    train()
+    plt.close()
+    play()
+    # for i in range(20):
+    #     agent = Action_Value()
+    #     train()
+    # name = 'Action Value Agents'
+    # plot_mean_scores_buffer(mean_scores,name)
+    # plot_std_mean_scores_buffer(mean_scores,name)
 
     # plt.close()
     # plt.ion()

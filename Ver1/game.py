@@ -36,7 +36,7 @@ YELLOW = (128, 0, 128)
 BLOCK_SIZE = 20
 WIDTH = 480
 HEIGHT = 360
-SPEED = 50
+SPEED = 60
 
 OBSTACLE_HEIGHT = 60
 OBSTACLE_WIDTH = 80
@@ -133,7 +133,7 @@ class SnakeGameAI:
         # 5. update ui and clock
         self._update_ui()
 
-        # self.clock.tick(SPEED)
+        self.clock.tick(SPEED)
 
         # 6. return game over and score
         return reward, game_over, self.score
@@ -236,6 +236,7 @@ class SnakeGameAI:
 
         # user_control = font.render("Agent", True, WHITE)
         # self.display.blit(user_control, [self.w-80, 0])
+
         if self.arrow:
             self.arrow_ui()
 

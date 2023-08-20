@@ -114,10 +114,10 @@ class Agent_Policy:
         point_u = Point(head.x, head.y - 20)
         point_d = Point(head.x, head.y + 20)
 
-        dir_l = game.direction[id] == Direction.LEFT
-        dir_r = game.direction[id] == Direction.RIGHT
-        dir_u = game.direction[id] == Direction.UP
-        dir_d = game.direction[id] == Direction.DOWN
+        dir_l = game.direction[id].value == Direction.LEFT.value
+        dir_r = game.direction[id].value == Direction.RIGHT.value
+        dir_u = game.direction[id].value == Direction.UP.value
+        dir_d = game.direction[id].value == Direction.DOWN.value
 
         # env = pygame.surfarray.array3d(game.display)
         # min_env = np.zeros((HEIGHT//BLOCK_SIZE,WIDTH//BLOCK_SIZE))
@@ -164,10 +164,9 @@ class Agent_Policy:
 
     def get_action(self, state):
         # policy based exploration / exploitation
-        self.epsilon = 40 - self.n_games
+        self.epsilon = 50 - self.n_games
         action = [0, 0, 0]
         if random.randint(0, 200) < self.epsilon:
-            # move = random.randint(0, 2)
             prediction, _ = self.net(torch.tensor(state, dtype=torch.float))
             self.prediction = prediction.squeeze().detach().numpy()
             move = np.random.choice(NUM_ACTIONS, p=self.prediction)
@@ -175,7 +174,6 @@ class Agent_Policy:
         else:
             prediction, _ = self.net(torch.tensor(state, dtype=torch.float))
             self.prediction = prediction.detach().numpy()
-            # move = np.random.choice(NUM_ACTIONS, p= self.actions_prediction)
             move = np.argmax(self.prediction)
             action[move] = 1
 
@@ -188,7 +186,6 @@ def train():
     total_score = 0
     record = 0
     mean_score = 0
-    # agent = Agent_A2C()
     game = SnakeGameAI(arrow=True, agentID=0)
     plt.ion()
 
@@ -221,8 +218,8 @@ def train():
             if agent.n_games>=400:
                 mean_scores.append(list(plot_mean_scores))
                 break
+
             # plot(plot_scores, plot_mean_scores)
-            # net_visualize(agent.net, axs)
             print('Games:', i,'Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:', round(mean_score, 3))
 
 def play():
@@ -246,22 +243,23 @@ def play():
                 record = score
             plot_scores.append(score)
 
-
             # plot(plot_scores, plot_mean_scores)
             #print('Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:')
 
 if __name__ == '__main__':
     agent = Agent_Policy()
-    # train()
     mean_scores = []
-    # train()
-    for i in range(20):
-        agent = Agent_Policy()
-        train()
-    name = 'Action Policy Agents'
-    plot_mean_scores_buffer(mean_scores,name)
-    plot_std_mean_scores_buffer(mean_scores,name)
-    # plt.close()
-    # play()
+    i=0
+
+    # for i in range(20):
+    #     agent = Agent_Policy()
+    #     train()
+    # name = 'Action Policy Agents'
+    # plot_mean_scores_buffer(mean_scores,name)
+    # plot_std_mean_scores_buffer(mean_scores,name)
+
+    train()
+    plt.close()
+    play()
 
 

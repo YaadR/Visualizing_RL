@@ -234,7 +234,7 @@ def train():
 
             # plot(plot_scores, plot_mean_scores)
 
-            if agent.n_games>=400:
+            if agent.n_games>=80:
                 mean_scores.append(list(plot_mean_scores))
                 break
 
@@ -267,16 +267,18 @@ def play():
 if __name__ == '__main__':
     agent = Agent_Value()
     mean_scores = []
+    i=0
 
-    # train()
-    # play()
+    train()
+    plt.close()
+    play()
 
-    for i in range(20):
-        agent = Agent_Value()
-        train()
-    name = 'State Value Agents'
-    plot_mean_scores_buffer(mean_scores,name)
-    plot_std_mean_scores_buffer(mean_scores,name)
+    # for i in range(20):
+    #     agent = Agent_Value()
+    #     train()
+    # name = 'State Value Agents'
+    # plot_mean_scores_buffer(mean_scores,name)
+    # plot_std_mean_scores_buffer(mean_scores,name)
 
 
 

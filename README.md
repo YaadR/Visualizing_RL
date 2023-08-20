@@ -56,7 +56,10 @@ $$Q(S_t)' = R_{t+1} + (1-S_{t->terminal})(\gamma* Max(Q(S_{t+1},A_{t+1})))$$
   <img src="https://github.com/YaadR/Visualizing_RL/blob/main/Ver1/data/plots/Buffers/STD%20Action%20Value%20Agents.jpg" width="250" />
   <img src="https://github.com/YaadR/Visualizing_RL/blob/main/Ver1/data/plots/Buffers/STD%20Action%20Policy%20Agents.jpg" width="250" />
 </p>
+
 ### Algorithms compete in an Arena
+[![Arena](https://github.com/YaadR/Visualizing_RL/blob/main/Ver1/data/materials/arena-compete-gif.gif)](https://youtu.be/_RmOt_EeuUU)
+
 
 
 

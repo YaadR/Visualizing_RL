@@ -15,24 +15,28 @@ Visualizing how different agents perceives their environment in the game Snake :
 1. Heat Map
 2. Certainty Arrows
 3. Neural network weights visualization (where NN is used)
-4. 
+
+
+
 ## Reinforcement algorithms & concepts:
 #### Agent State Value:
  - Value based : state value
  - Model based
  - off policy
  - online
-   
-The Bellman equation:
-$$V(s) = \max_a \left( R(s,a) + \gamma \sum_{s'} P(s' | s,a) V(s') \right)$$
-Iterative form:
-$$V(S_t) = V(S_t) + \alpha \left[ R_{t+1} + \gamma V(S_{t+1}) - V(S_t) \right]$$
+
+RL Algorithm:
+$$V(S_t)' = V(S_t) + \alpha* \left[ R_{t+1} + (1-S_{t->terminal})(\gamma* V(S_{t+1}) - V(S_t) \right)]$$
+
 
 #### Agent Action Value:
  - Value based : action value
  - Model free
  - off policy
  - online
+
+RL Algorithm:
+$$Q(S_t)' = R_{t+1} + (1-S_{t->terminal})(\gamma* Max(Q(S_{t+1},A_{t+1})))$$
 
 
 #### Agent Policy:
@@ -41,8 +45,17 @@ $$V(S_t) = V(S_t) + \alpha \left[ R_{t+1} + \gamma V(S_{t+1}) - V(S_t) \right]$$
  - on policy
  - online
 
-
-
+#### Training - Stability, Mean & STD - 20 Rounds:
+<p float="left">
+  <img src="https://github.com/YaadR/Visualizing_RL/blob/main/Ver1/data/plots/Buffers/Mean%20State%20Value%20Agents.jpg" width="250" />
+  <img src="https://github.com/YaadR/Visualizing_RL/blob/main/Ver1/data/plots/Buffers/Mean%20Action%20Value%20Agents.jpg?raw=true" width="250" />
+  <img src="https://github.com/YaadR/Visualizing_RL/blob/main/Ver1/data/plots/Buffers/Mean%20Action%20Policy%20Agents.jpg" width="250" />
+</p>
+<p float="left">
+  <img src="https://github.com/YaadR/Visualizing_RL/blob/main/Ver1/data/plots/Buffers/STD%20State%20Value%20Agents.jpg" width="250" />
+  <img src="https://github.com/YaadR/Visualizing_RL/blob/main/Ver1/data/plots/Buffers/STD%20Action%20Value%20Agents.jpg" width="250" />
+  <img src="https://github.com/YaadR/Visualizing_RL/blob/main/Ver1/data/plots/Buffers/STD%20Action%20Policy%20Agents.jpg" width="250" />
+</p>
 ### Algorithms compete in an Arena
 
 

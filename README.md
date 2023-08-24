@@ -21,8 +21,8 @@ Visualizing how different agents perceives their environment in the game Snake :
   <a href="https://youtu.be/ayUZIII4FsM">
     <img src="https://github.com/YaadR/Visualizing_RL/blob/main/Ver1/data/materials/heatmap-giff.gif" width="350" />
   </a>
-  <a href="https://youtu.be/link-to-second-video">
-    <img src="https://github.com/YaadR/Visualizing_RL/blob/main/Ver1/data/materials/arena-compete-gif.gif" width="350" />
+  <a href="https://youtu.be/oC77yQJnOHg">
+    <img src="https://github.com/YaadR/Visualizing_RL/blob/main/Ver1/data/materials/arrows-gif.gif" width="350" />
   </a>
 </p>
 <p float="left">

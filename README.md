@@ -12,9 +12,27 @@ Visualizing how different agents perceives their environment in the game Snake :
 ### Project set ups:
 
 ### Visualization solutions:
-1. Heat Map
+1. Heatmap
 2. Certainty Arrows
 3. Neural network weights visualization (where NN is used)
+4. Certainty Bar (Entropy based)
+ 
+<p float="left">
+  <a href="https://youtu.be/ayUZIII4FsM">
+    <img src="https://github.com/YaadR/Visualizing_RL/blob/main/Ver1/data/materials/heatmap-giff.gif" width="450" />
+  </a>
+  <a href="https://youtu.be/link-to-second-video">
+    <img src="https://github.com/YaadR/Visualizing_RL/blob/main/Ver1/data/materials/arena-compete-gif.gif" width="450" />
+  </a>
+</p>
+<p float="left">
+  <a href="https://youtu.be/link-to-second-video">
+    <img src="https://github.com/YaadR/Visualizing_RL/blob/main/Ver1/data/materials/arena-compete-gif.gif" width="450" />
+  </a>
+  <a href="https://youtu.be/sAIO_uet1lw">
+    <img src="https://github.com/YaadR/Visualizing_RL/blob/main/Ver1/data/materials/certainty-giff.gif" width="450" />
+  </a>
+</p>
 
 
 

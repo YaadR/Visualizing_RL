@@ -19,18 +19,18 @@ Visualizing how different agents perceives their environment in the game Snake :
  
 <p float="left">
   <a href="https://youtu.be/ayUZIII4FsM">
-    <img src="https://github.com/YaadR/Visualizing_RL/blob/main/Ver1/data/materials/heatmap-giff.gif" width="450" />
+    <img src="https://github.com/YaadR/Visualizing_RL/blob/main/Ver1/data/materials/heatmap-giff.gif" width="350" />
   </a>
   <a href="https://youtu.be/link-to-second-video">
-    <img src="https://github.com/YaadR/Visualizing_RL/blob/main/Ver1/data/materials/arena-compete-gif.gif" width="450" />
+    <img src="https://github.com/YaadR/Visualizing_RL/blob/main/Ver1/data/materials/arena-compete-gif.gif" width="350" />
   </a>
 </p>
 <p float="left">
   <a href="https://youtu.be/link-to-second-video">
-    <img src="https://github.com/YaadR/Visualizing_RL/blob/main/Ver1/data/materials/arena-compete-gif.gif" width="450" />
+    <img src="https://github.com/YaadR/Visualizing_RL/blob/main/Ver1/data/materials/arena-compete-gif.gif" width="350" />
   </a>
   <a href="https://youtu.be/sAIO_uet1lw">
-    <img src="https://github.com/YaadR/Visualizing_RL/blob/main/Ver1/data/materials/certainty-giff.gif" width="450" />
+    <img src="https://github.com/YaadR/Visualizing_RL/blob/main/Ver1/data/materials/certainty-giff.gif" width="350" />
   </a>
 </p>
 

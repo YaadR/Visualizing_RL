@@ -36,7 +36,7 @@ YELLOW = (255, 255, 0)
 BLOCK_SIZE = 20
 WIDTH = 480
 HEIGHT = 360
-SPEED = 50
+SPEED = 40
 
 OBSTACLE_HEIGHT = 60
 OBSTACLE_WIDTH = 80
@@ -285,7 +285,7 @@ class SnakeGameAI:
             self.probability_clock[idx] = self.actions_probability[0]
             self.probability_clock[(idx + 1) % 4] = self.actions_probability[1]
             self.probability_clock[(idx - 1) % 4] = self.actions_probability[2]
-            self.probability_clock[(idx + 2) % 4] = 0
+
 
         self.direction = new_dir
 

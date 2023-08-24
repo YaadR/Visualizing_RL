@@ -16,7 +16,7 @@ def plot(scores, mean_scores, save=False,index=100):
     plt.plot(mean_scores)
     plt.ylim(ymin=0)
     plt.text(len(scores)-1, scores[-1], str(scores[-1]))
-    plt.text(len(mean_scores)-1, mean_scores[-1], str(mean_scores[-1]))
+    plt.text(len(mean_scores)-1, mean_scores[-1], str(round(mean_scores[-1],3)))
     plt.show(block=False)
     plt.pause(.1)
     if save:
@@ -90,24 +90,24 @@ def net_visualize(model,axs):
     for param in model.parameters():
         layers.append(param.data.cpu().numpy())
     # Plot the biases
-    for i, bias in enumerate(layers):
-        if len(bias.shape)==1:
-            bias_img = np.reshape(bias, (-1, len(bias)))
-            if len(bias)>32:
-                bias_img = np.reshape(bias_img,(int(np.sqrt(len(bias))),int(np.sqrt(len(bias)))))
+    for i, layer in enumerate(layers):
+        if len(layer.shape)==1:
+            bias_img = np.reshape(layer, (-1, len(layer)))
+            if len(layer)>32:
+                bias_img = np.reshape(bias_img,(int(np.sqrt(len(layer))),int(np.sqrt(len(layer)))))
             else:
                 bias_img = bias_img.reshape(-1,1)
             axs[i].imshow(bias_img, cmap='gray')
             axs[i].set_title(f'Biases {(i + 1)//2} ')
             # axs[j].axis('off')
         else:
-            if bias.shape[0] > bias.shape[1]:
-                bias = bias.T
+            if layer.shape[0] > layer.shape[1]:
+                layer = layer.T
             # if i==0:
             #     bias_img = np.reshape(bias, (16*4,13*4))
             # elif i==2:
             #     bias_img = np.reshape(bias, (16*2, 3*8))
-            axs[i].imshow(bias.T, cmap='gray')
+            axs[i].imshow(layer.T, cmap='gray')
             axs[i].set_title(f'Wights {i + 1}')
     # for g in range(len(axs)):
     #     axs[g].set_xticks([])

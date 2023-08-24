@@ -13,7 +13,7 @@ from collections import deque
 from game import SnakeGameAI, Direction, Point, pygame
 from model import Linear_Net, Value_Trainer_A
 from helper import plot_std_mean_scores_buffer,plot_mean_scores_buffer,plot,heat_map_step,distance_collapse,net_visualize,activation_visualize,\
-    array_tobinary,plot_system_entropy,entropy,softmax,cirtenty_function
+    array_tobinary,plot_system_entropy,entropy,softmax,cirtenty_function,normalize
 from sklearn import preprocessing
 import math
 import matplotlib.pyplot as plt
@@ -170,7 +170,7 @@ class Action_Value:
             action[move] = 1
         else:
             prediction = self.net(torch.tensor(state, dtype=torch.float))
-            self.prediction = prediction.detach().numpy()
+            self.prediction = softmax(prediction.detach().numpy())
             move = torch.argmax(prediction).item()
             action[move] = 1
 
@@ -195,7 +195,7 @@ def train():
     plt.ion()
 
     # fig, axs = plt.subplots(1, 3,width_ratios=[4,1,6], figsize=(8, 6))
-    ####fig, axs = plt.subplots(1, 4,width_ratios=[12,4,8,1], figsize=(8, 6))
+    fig, axs = plt.subplots(1, 4,width_ratios=[12,4,8,1], figsize=(8, 6))
     heat_flag = False
     layers_flag = False
     if heat_flag:
@@ -267,6 +267,7 @@ def train():
 
             # system_entropy.append(np.mean(mean_entropy))
             mean_entropy = []
+            net_visualize(agent.net,axs)
 
             plot_scores.append(score)
             total_score += score
@@ -275,7 +276,7 @@ def train():
             # print('Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:',round(mean_score, 3) )
             plot_mean_scores.append(mean_score)
             # plot_system_entropy(mean_entropy)
-            plot(plot_scores, plot_mean_scores)
+            # plot(plot_scores, plot_mean_scores)
             # if agent.n_games>=400:
             #     mean_scores.append(list(plot_mean_scores))
             #     break
@@ -291,7 +292,7 @@ def train():
                 axis[1].text(len(plot_mean_scores) - 1, plot_mean_scores[-1], str(round(plot_mean_scores[-1],3)))
         if (((mean_score > 12) or (agent.n_games <= 15 and agent.n_games >= 5)) and heat_flag) or done:
             plt.show()
-            plt.pause(0.0000001)
+            plt.pause(0.001)
 
 
 def play():

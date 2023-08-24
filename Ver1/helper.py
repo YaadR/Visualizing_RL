@@ -9,8 +9,8 @@ def plot(scores, mean_scores, save=False,index=100):
     display.clear_output(wait=True)
     display.display(plt.gcf())
     plt.clf()
-    plt.title('Training...')
-    plt.xlabel('Number of Games')
+    plt.title('Training')
+    plt.xlabel('Games')
     plt.ylabel('Score')
     plt.plot(scores)
     plt.plot(mean_scores)
@@ -227,3 +227,10 @@ def plot_system_entropy(entropies):
     plt.ylim(ymin=0)
     plt.show(block=False)
     plt.pause(.1)
+
+def cirtenty_function(certainty):
+    # the decision space is 1 of 3, thus maximal entropy is log(1/3)
+    return -np.log2(1/3) - certainty
+
+
+

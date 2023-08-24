@@ -13,7 +13,7 @@ from collections import deque
 from game import SnakeGameAI, Direction, Point, pygame
 from model import Linear_Net, Value_Trainer_A
 from helper import plot_std_mean_scores_buffer,plot_mean_scores_buffer,plot,heat_map_step,distance_collapse,net_visualize,activation_visualize,\
-    array_tobinary,plot_system_entropy,entropy,softmax
+    array_tobinary,plot_system_entropy,entropy,softmax,cirtenty_function
 from sklearn import preprocessing
 import math
 import matplotlib.pyplot as plt
@@ -29,7 +29,7 @@ HEIGHT = 360
 
 LR = 0.001
 NUM_ACTIONS = 3  # Number of possible actions (up, down, left, right)
-STATE_VEC_SIZE = 11
+STATE_VEC_SIZE = 13
 HIDDEN_LAYER = 256
 
 class Action_Value:
@@ -91,14 +91,14 @@ class Action_Value:
             game.food.x < game.head.x,  # food left
             game.food.x > game.head.x,  # food right
             game.food.y < game.head.y,  # food up
-            game.food.y > game.head.y  # food down
+            game.food.y > game.head.y,  # food down
 
             # Food distance from head - X axis, Y axis and both
-            #preprocessing.normalize([[math.dist([game.head.x],[game.food.x]),0,game.w]])[0][0],
-            #preprocessing.normalize([[math.dist([game.head.y],[game.food.y]),0,game.h]])[0][0]
+            preprocessing.normalize([[math.dist([game.head.x],[game.food.x]),0,game.w]])[0][0],
+            preprocessing.normalize([[math.dist([game.head.y],[game.food.y]),0,game.h]])[0][0]
             ]
 
-        return np.array(state, dtype=int)
+        return np.array(state, dtype=float)
 
     def get_state_arena(self, game,id=0):
         head = game.snake[id][0]
@@ -183,18 +183,21 @@ def train():
     plot_mean_scores = []
     total_score = 0
     record = 0
-    game = SnakeGameAI(arrow=False,agentID=0)
+    game = SnakeGameAI(arrow=False,agentID=0,certainty_flag=False)
     mean_score=0
     seen_states = set()
+    counter = 0
+    screen_sample = 20
     system_entropy =[]
-    mean_entropy = []
+    mean_entropy = deque(maxlen=10) # Moving average of decision entropy
 
     heatmap = np.ones((game.w//10,game.h//10))      # Heatmap init
     plt.ion()
 
     # fig, axs = plt.subplots(1, 3,width_ratios=[4,1,6], figsize=(8, 6))
     ####fig, axs = plt.subplots(1, 4,width_ratios=[12,4,8,1], figsize=(8, 6))
-    heat_flag = False
+    heat_flag = True
+    layers_flag = False
     if heat_flag:
         figure, axis = plt.subplots(1,2,width_ratios=[2,3],figsize=(10,4))
         axis[0].set_title("Heatmap")
@@ -206,7 +209,8 @@ def train():
         # get move
         action = agent.get_action(state_prev)
         game.actions_probability = agent.prediction
-        # mean_entropy.append(entropy(softmax(agent.prediction)))
+        mean_entropy.append(cirtenty_function(entropy(softmax(agent.prediction))))
+        game.certainty = round(np.mean(mean_entropy),5)
 
         # perform move and get new state
         reward, done, score = game.play_step(action)
@@ -221,19 +225,23 @@ def train():
                 X,Y  = distance_collapse(state[-2:], game.w, game.h, game.direction.value)
                 heatmap = heat_map_step(heatmap,game.direction.value,game.w//10, game.h//10,int(game.head.x)//10,int(game.head.y)//10,any(state[:3]),X//10,Y//10)
 
-        if (record >=20 and mean_score>4) and heat_flag:
-            heat_flag = True
+        if ((mean_score>12) or (agent.n_games<=15 and agent.n_games>=5)) and heat_flag:
             axis[0].imshow(heatmap.T, cmap='viridis', interpolation='nearest')
-            # if not counter%10:
-            #     extent = axis[0].get_window_extent().transformed(figure.dpi_scale_trans.inverted())
-            #     figure.savefig('heatmap_'+str(counter), bbox_inches=extent.expanded(1.2, 1.3))
-            #     pygame.image.save(game.display, "screenshot"+str(counter)+".jpeg")
-            # counter+=1
+        #     if not counter%50 and screen_sample>0:
+        #         PATH = 'D:\GitHub\Reposetories\Visualizing_RL\Ver1\data\plots\HeatMap'
+        #         extent = axis[0].get_window_extent().transformed(figure.dpi_scale_trans.inverted())
+        #         figure.savefig(PATH+'\heatmap_'+str(counter), bbox_inches=extent.expanded(1.2, 1.3))
+        #         pygame.image.save(game.display, PATH+"\screenshot"+str(counter)+".jpeg")
+        #     counter+=1
+        #     screen_sample -=1
+        # else:
+        #     screen_sample=25
 
         # train short memory
         agent.train_online(state_prev, action, reward, state, done)
 
-        if heat_flag and mean_score > 15 and len(game.snake)>20:
+        # Activation Layers
+        if layers_flag and mean_score > 15 and len(game.snake)>20:
             if array_tobinary(state) not in seen_states:
                 plt.close()
                 plt.ion()
@@ -268,9 +276,9 @@ def train():
             plot_mean_scores.append(mean_score)
             # plot_system_entropy(mean_entropy)
             # plot(plot_scores, plot_mean_scores)
-            if agent.n_games>=400:
-                mean_scores.append(list(plot_mean_scores))
-                break
+            # if agent.n_games>=400:
+            #     mean_scores.append(list(plot_mean_scores))
+            #     break
             if heat_flag:
                 axis[1].cla()
                 axis[1].set_title("Training")
@@ -280,7 +288,10 @@ def train():
                 axis[1].plot(plot_mean_scores)
                 axis[1].set_ylim(ymin=0)
                 axis[1].text(len(plot_scores) - 1, plot_scores[-1], str(plot_scores[-1]))
-                axis[1].text(len(plot_mean_scores) - 1, plot_mean_scores[-1], str(plot_mean_scores[-1]))
+                axis[1].text(len(plot_mean_scores) - 1, plot_mean_scores[-1], str(round(plot_mean_scores[-1],3)))
+        if (((mean_score > 12) or (agent.n_games <= 15 and agent.n_games >= 5)) and heat_flag) or done:
+            plt.show()
+            plt.pause(0.0000001)
 
 
 def play():

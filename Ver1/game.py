@@ -31,12 +31,12 @@ GREEN = (0, 100, 0)
 GREEN_FOOD = (0, 150, 0)
 PURPLE = (128, 0, 128)
 PURPLE_FOOD = (224, 0, 224)
-YELLOW = (128, 0, 128)
+YELLOW = (255, 255, 0)
 
 BLOCK_SIZE = 20
 WIDTH = 480
 HEIGHT = 360
-SPEED = 60
+SPEED = 30
 
 OBSTACLE_HEIGHT = 60
 OBSTACLE_WIDTH = 80
@@ -49,7 +49,7 @@ AGENT_NAMES = ["Action Value", "Policy","State Value"]
 
 class SnakeGameAI:
 
-    def __init__(self, w=WIDTH, h=HEIGHT, arrow=False, agentID=0,obstacle_flag=False):
+    def __init__(self, w=WIDTH, h=HEIGHT, arrow=False, agentID=0,obstacle_flag=False,certainty_flag=False):
         self.w = w
         self.h = h
         self.arrow = arrow
@@ -62,6 +62,8 @@ class SnakeGameAI:
         self.actions_probability = [0, 0, 0]
         self.probability_clock = [0, 0, 0, 0]
         self.agentID = agentID
+        self.certainty = 0
+        self.certainty_flag = certainty_flag
 
     def copy(self,copied_game):
         # copied_game = SnakeGameAI()
@@ -133,7 +135,7 @@ class SnakeGameAI:
         # 5. update ui and clock
         self._update_ui()
 
-        self.clock.tick(SPEED)
+        # self.clock.tick(SPEED)
 
         # 6. return game over and score
         return reward, game_over, self.score
@@ -228,6 +230,23 @@ class SnakeGameAI:
 
         pygame.draw.rect(self.display, AGENT_UI[self.agentID][1],
                          pygame.Rect(self.food.x, self.food.y, BLOCK_SIZE, BLOCK_SIZE))
+
+
+        if self.certainty_flag:
+            # Update values
+            self.certainty = self.certainty if self.certainty<= 1 else 1
+            color = (int((1 - self.certainty) * 255), int(self.certainty * 255), 0)
+
+            # Draw percentage bar
+            pygame.draw.rect(self.display, color, (10, 10, int(self.certainty * 120), 30), 0)  # Percentage bar
+            pygame.draw.rect(self.display, color, (10, 10, 120, 30), 3)  # Outline of bar
+            certainty_level = round(self.certainty * 100, 2)
+
+            # Draw text
+            text = font.render(f'{int(certainty_level)}%', True, YELLOW)
+            self.display.blit(text, (60, 15))
+            title = font.render('Agent certainty level', True, YELLOW)
+            self.display.blit(title, (140, 15))
 
 
         if self.agentID:

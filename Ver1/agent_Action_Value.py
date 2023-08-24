@@ -29,7 +29,7 @@ HEIGHT = 360
 
 LR = 0.001
 NUM_ACTIONS = 3  # Number of possible actions (up, down, left, right)
-STATE_VEC_SIZE = 13
+STATE_VEC_SIZE = 11
 HIDDEN_LAYER = 256
 
 class Action_Value:
@@ -91,14 +91,14 @@ class Action_Value:
             game.food.x < game.head.x,  # food left
             game.food.x > game.head.x,  # food right
             game.food.y < game.head.y,  # food up
-            game.food.y > game.head.y,  # food down
+            game.food.y > game.head.y  # food down
 
             # Food distance from head - X axis, Y axis and both
-            preprocessing.normalize([[math.dist([game.head.x],[game.food.x]),0,game.w]])[0][0],
-            preprocessing.normalize([[math.dist([game.head.y],[game.food.y]),0,game.h]])[0][0]
+            # preprocessing.normalize([[math.dist([game.head.x],[game.food.x]),0,game.w]])[0][0],
+            # preprocessing.normalize([[math.dist([game.head.y],[game.food.y]),0,game.h]])[0][0]
             ]
 
-        return np.array(state, dtype=float)
+        return np.array(state, dtype=int)
 
     def get_state_arena(self, game,id=0):
         head = game.snake[id][0]
@@ -183,7 +183,7 @@ def train():
     plot_mean_scores = []
     total_score = 0
     record = 0
-    game = SnakeGameAI(arrow=False,agentID=0,certainty_flag=False)
+    game = SnakeGameAI(arrow=True,agentID=0,certainty_flag=False)
     mean_score=0
     seen_states = set()
     counter = 0
@@ -196,7 +196,7 @@ def train():
 
     # fig, axs = plt.subplots(1, 3,width_ratios=[4,1,6], figsize=(8, 6))
     ####fig, axs = plt.subplots(1, 4,width_ratios=[12,4,8,1], figsize=(8, 6))
-    heat_flag = True
+    heat_flag = False
     layers_flag = False
     if heat_flag:
         figure, axis = plt.subplots(1,2,width_ratios=[2,3],figsize=(10,4))
@@ -275,7 +275,7 @@ def train():
             # print('Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:',round(mean_score, 3) )
             plot_mean_scores.append(mean_score)
             # plot_system_entropy(mean_entropy)
-            # plot(plot_scores, plot_mean_scores)
+            plot(plot_scores, plot_mean_scores)
             # if agent.n_games>=400:
             #     mean_scores.append(list(plot_mean_scores))
             #     break

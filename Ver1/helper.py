@@ -120,8 +120,37 @@ def net_visualize(model,axs):
 
     # return last_bias
 
-def activation_visualize(state_vector,layer1,layer2,axs,snapshot,index="",activation_name='Valid State'):
+def weight_visualize(model,axs):
     # Extract the biases from the model
+    layers = []
+    for param in model.parameters():
+        layers.append(param.data.cpu().numpy())
+    # Plot the biases
+    for i, layer in enumerate(layers):
+        if len(layer.shape)==1:
+            weight_layer = np.reshape(layer, (-1, 1))
+
+            if(len(weight_layer) > 32):
+                layer_widen = np.zeros((len(weight_layer), 100))
+                for d, v in enumerate(weight_layer):
+                    layer_widen[d] = v[0]
+
+                weight_layer = layer_widen
+            axs[i//2].imshow(weight_layer, cmap='viridis')
+            axs[i//2].set_title(f"weight layer {i//2}")
+    for g in range(len(axs)):
+        axs[g].set_xticks([])
+        axs[g].set_yticks([])
+
+    plt.tight_layout()
+    plt.subplots_adjust(wspace=0.3)
+    plt.show()
+    plt.pause(0.1)
+
+    # return last_bias
+
+def activation_visualize(state_vector,layer1,layer2,axs,snapshot,index="",activation_name='Valid State'):
+    # Extract the weights from the model
     layer_widen = np.zeros((len(layer1.T),50))
     for i,v in enumerate(layer1.T):
         layer_widen[i] = v

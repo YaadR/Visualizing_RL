@@ -13,7 +13,7 @@ from collections import deque
 from game import SnakeGameAI, Direction, Point, pygame
 from model import Linear_Net, Value_Trainer_A
 from helper import plot_std_mean_scores_buffer,plot_mean_scores_buffer,plot,heat_map_step,distance_collapse,net_visualize,activation_visualize,\
-    array_tobinary,plot_system_entropy,entropy,softmax,cirtenty_function,normalize
+    array_tobinary,plot_system_entropy,entropy,softmax,cirtenty_function,normalize,weight_visualize
 from sklearn import preprocessing
 import math
 import matplotlib.pyplot as plt
@@ -183,7 +183,7 @@ def train():
     plot_mean_scores = []
     total_score = 0
     record = 0
-    game = SnakeGameAI(arrow=True,agentID=0,certainty_flag=False)
+    game = SnakeGameAI(arrow=False,agentID=0,certainty_flag=False)
     mean_score=0
     seen_states = set()
     counter = 0
@@ -194,8 +194,11 @@ def train():
     heatmap = np.ones((game.w//10,game.h//10))      # Heatmap init
     plt.ion()
 
-    # fig, axs = plt.subplots(1, 3,width_ratios=[4,1,6], figsize=(8, 6))
-    fig, axs = plt.subplots(1, 4,width_ratios=[12,4,8,1], figsize=(8, 6))
+    # Weight Visualization
+    fig, axs = plt.subplots(1, 2,width_ratios=[6,1], figsize=(6, 6))
+
+    # Full Net Visualization
+    # fig, axs = plt.subplots(1, 4,width_ratios=[12,4,8,1], figsize=(8, 6))
     heat_flag = False
     layers_flag = False
     if heat_flag:
@@ -240,7 +243,7 @@ def train():
         # train short memory
         agent.train_online(state_prev, action, reward, state, done)
 
-        # Activation Layers
+        # Activation layer of every unique state
         if layers_flag and mean_score > 15 and len(game.snake)>20:
             if array_tobinary(state) not in seen_states:
                 plt.close()
@@ -267,7 +270,7 @@ def train():
 
             # system_entropy.append(np.mean(mean_entropy))
             mean_entropy = []
-            net_visualize(agent.net,axs)
+            weight_visualize(agent.net,axs)
 
             plot_scores.append(score)
             total_score += score

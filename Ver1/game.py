@@ -36,7 +36,7 @@ YELLOW = (255, 255, 0)
 BLOCK_SIZE = 20
 WIDTH = 480
 HEIGHT = 360
-SPEED = 40
+SPEED = 60
 
 OBSTACLE_HEIGHT = 60
 OBSTACLE_WIDTH = 80
@@ -253,8 +253,8 @@ class SnakeGameAI:
             text = font.render(AGENT_NAMES[self.agentID-1]+" Score:" + str(self.score), True, AGENT_UI[self.agentID][0])
             self.display.blit(text, text_position[self.agentID-1])
 
-        # user_control = font.render("Agent", True, WHITE)
-        # self.display.blit(user_control, [self.w-80, 0])
+        text = font.render(f"Score: {self.score}", True, WHITE)
+        self.display.blit(text, [10, 0])
 
         if self.arrow:
             self.arrow_ui()

@@ -16,8 +16,9 @@ Visualizing how different agents perceives their environment in the game Snake :
 2. Certainty Arrows
 3. Neural network weights visualization (where NN is used)
 4. Certainty Bar (Entropy based)
+5. State Activation Layer
  
-<p float="left">
+<p float="center">
   <a href="https://youtu.be/ayUZIII4FsM">
     <img src="https://github.com/YaadR/Visualizing_RL/blob/main/Ver1/data/materials/heatmap-giff.gif" width="350" />
   </a>
@@ -25,7 +26,7 @@ Visualizing how different agents perceives their environment in the game Snake :
     <img src="https://github.com/YaadR/Visualizing_RL/blob/main/Ver1/data/materials/arrows-gif.gif" width="350" />
   </a>
 </p>
-<p float="left">
+<p float="center">
   <a href="https://youtu.be/tZ9F8GUXxgw">
     <img src="https://github.com/YaadR/Visualizing_RL/blob/main/Ver1/data/materials/netviz-gif.gif" width="350" />
   </a>
@@ -33,7 +34,22 @@ Visualizing how different agents perceives their environment in the game Snake :
     <img src="https://github.com/YaadR/Visualizing_RL/blob/main/Ver1/data/materials/certainty-giff.gif" width="350" />
   </a>
 </p>
-
+<p float="center">
+  <img src="https://github.com/YaadR/Visualizing_RL/blob/main/Ver1/data/plots/valid%20activation/state_17.jpg" width="125" />
+  <img src="https://github.com/YaadR/Visualizing_RL/blob/main/Ver1/data/plots/valid%20activation/state_34.jpg" width="125" />
+  <img src="https://github.com/YaadR/Visualizing_RL/blob/main/Ver1/data/plots/valid%20activation/state_129.jpg" width="125" />
+  <img src="https://github.com/YaadR/Visualizing_RL/blob/main/Ver1/data/plots/valid%20activation/state_322.jpg" width="125" />
+  <img src="https://github.com/YaadR/Visualizing_RL/blob/main/Ver1/data/plots/valid%20activation/state_534.jpg" width="125" />
+  <img src="https://github.com/YaadR/Visualizing_RL/blob/main/Ver1/data/plots/valid%20activation/state_584.jpg" width="125" />
+</p>
+<p float="center">
+  <img src="https://github.com/YaadR/Visualizing_RL/blob/main/Ver1/data/plots/valid%20activation/state_788.jpg" width="125" />
+  <img src="https://github.com/YaadR/Visualizing_RL/blob/main/Ver1/data/plots/valid%20activation/state_833.jpg" width="125" />
+  <img src="https://github.com/YaadR/Visualizing_RL/blob/main/Ver1/data/plots/valid%20activation/state_1673.jpg" width="125" />
+  <img src="https://github.com/YaadR/Visualizing_RL/blob/main/Ver1/data/plots/valid%20activation/state_1833.jpg" width="125" />
+  <img src="https://github.com/YaadR/Visualizing_RL/blob/main/Ver1/data/plots/valid%20activation/state_1930.jpg" width="125" />
+  <img src="https://github.com/YaadR/Visualizing_RL/blob/main/Ver1/data/plots/valid%20activation/state_1810.jpg" width="125" />
+</p>
 
 
 ## Reinforcement algorithms & concepts:

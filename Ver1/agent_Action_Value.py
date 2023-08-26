@@ -183,7 +183,7 @@ def train():
     plot_mean_scores = []
     total_score = 0
     record = 0
-    game = SnakeGameAI(arrow=False,agentID=0,certainty_flag=False)
+    game = SnakeGameAI(arrow=False,agentID=0,certainty_flag=True)
     mean_score=0
     seen_states = set()
     counter = 0
@@ -195,7 +195,7 @@ def train():
     plt.ion()
 
     # Weight Visualization
-    fig, axs = plt.subplots(1, 2,width_ratios=[6,1], figsize=(6, 6))
+    # fig, axs = plt.subplots(1, 2,width_ratios=[6,1], figsize=(6, 6))
 
     # Full Net Visualization
     # fig, axs = plt.subplots(1, 4,width_ratios=[12,4,8,1], figsize=(8, 6))
@@ -212,8 +212,9 @@ def train():
         # get move
         action = agent.get_action(state_prev)
         game.actions_probability = agent.prediction
-        mean_entropy.append(cirtenty_function(entropy(softmax(agent.prediction))))
-        game.certainty = round(np.mean(mean_entropy),5)
+        mean_entropy.append(cirtenty_function(entropy(agent.prediction)))
+        game.certainty = np.round(np.mean(mean_entropy),5)
+        # print(game.certainty)
 
         # perform move and get new state
         reward, done, score = game.play_step(action)
@@ -239,6 +240,10 @@ def train():
         #     screen_sample -=1
         # else:
         #     screen_sample=25
+        if (agent.n_games==20 or agent.n_games==80 or agent.n_games==150):
+            if not counter%50:
+                pygame.image.save(game.display, f'D:\GitHub\Reposetories\Visualizing_RL\Ver1\data\plots\Certainty\certain_{counter}.jpg')
+            counter+=1
 
         # train short memory
         agent.train_online(state_prev, action, reward, state, done)
@@ -269,14 +274,14 @@ def train():
             # print('Game', agent.n_games, 'Score', score, 'Record:', record)
 
             # system_entropy.append(np.mean(mean_entropy))
-            mean_entropy = []
-            weight_visualize(agent.net,axs)
+
+            # weight_visualize(agent.net,axs)
 
             plot_scores.append(score)
             total_score += score
             mean_score = total_score / agent.n_games
-            print('Games:', i,'Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:')
-            # print('Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:',round(mean_score, 3) )
+            # print('Games:', i,'Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:')
+            print('Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:',round(mean_score, 3) )
             plot_mean_scores.append(mean_score)
             # plot_system_entropy(mean_entropy)
             # plot(plot_scores, plot_mean_scores)
@@ -293,9 +298,10 @@ def train():
                 axis[1].set_ylim(ymin=0)
                 axis[1].text(len(plot_scores) - 1, plot_scores[-1], str(plot_scores[-1]))
                 axis[1].text(len(plot_mean_scores) - 1, plot_mean_scores[-1], str(round(plot_mean_scores[-1],3)))
-        if (((mean_score > 12) or (agent.n_games <= 15 and agent.n_games >= 5)) and heat_flag) or done:
-            plt.show()
-            plt.pause(0.001)
+        # Uncomment the following code if you want to use the heatmap feature
+        # if (((mean_score > 12) or (agent.n_games <= 15 and agent.n_games >= 5)) and heat_flag) or done:
+        #     plt.show()
+        #     plt.pause(0.001)
 
 
 def play():

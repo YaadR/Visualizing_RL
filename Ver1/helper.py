@@ -144,6 +144,8 @@ def weight_visualize(model,axs):
 
     plt.tight_layout()
     plt.subplots_adjust(wspace=0.3)
+    # if index==50 or index==200:
+    #     plt.savefig(f'D:\GitHub\Reposetories\Visualizing_RL\Ver1\data\plots\\NetViz\\netviz_{index}.jpg')
     plt.show()
     plt.pause(0.1)
 

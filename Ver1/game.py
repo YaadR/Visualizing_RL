@@ -135,7 +135,7 @@ class SnakeGameAI:
         # 5. update ui and clock
         self._update_ui()
 
-        self.clock.tick(SPEED)
+        # self.clock.tick(SPEED)
 
         # 6. return game over and score
         return reward, game_over, self.score
@@ -245,7 +245,7 @@ class SnakeGameAI:
             # Draw text
             text = font.render(f'{int(certainty_level)}%', True, YELLOW)
             self.display.blit(text, (60, 15))
-            title = font.render('Agent certainty level', True, YELLOW)
+            title = font.render('Agent Certainty:', True, YELLOW)
             self.display.blit(title, (140, 15))
 
 
@@ -253,8 +253,8 @@ class SnakeGameAI:
             text = font.render(AGENT_NAMES[self.agentID-1]+" Score:" + str(self.score), True, AGENT_UI[self.agentID][0])
             self.display.blit(text, text_position[self.agentID-1])
 
-        text = font.render(f"Score: {self.score}", True, WHITE)
-        self.display.blit(text, [10, 0])
+        # text = font.render(f"Score: {self.score}", True, WHITE)
+        # self.display.blit(text, [10, 0])
 
         if self.arrow:
             self.arrow_ui()

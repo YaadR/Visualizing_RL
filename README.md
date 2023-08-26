@@ -9,7 +9,16 @@
 ## Project description:
 Visualizing how different agents perceives their environment in the game Snake : algorithms in Reinforcement Learning
 
+### SNAKE:
+The snake game enviroment is a visualizaion tool to evaluate differents RL algorithms on the game Snake.
+the algorithms need to learn how to guide the snake to the food without hitting the wall or eating itself (self loop).
+these algorithms do that by using image processing to create an input vector of values used in determining the best next step for the snake to play.
+each time the snake eats the food the algorithm gets a reward.
+the input vector has 3 values. each value defines the next step (forward,left,right). this is defined differently in each algorithm using state/action values.
+
 ### Project set ups:
+1. Run "pip install -r requirements.txt".
+2. Every agent can run independently. the arena file is the only file that can also run independently. it runs all agents simultaniously in the same arena to compete and determin the best agent for the snake game. 
 
 ### Visualization solutions:
 1. Heatmap
@@ -78,6 +87,9 @@ $$Q(S_t)' = R_{t+1} + (1-S_{t->terminal})(\gamma* Max(Q(S_{t+1},A_{t+1})))$$
  - Model free
  - on policy
  - online
+
+RL Algorithm:
+
 
 #### Training - Stability, Mean & STD - 20 Rounds:
 <p float="left">

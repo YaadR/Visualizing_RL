@@ -1,31 +1,66 @@
-import pygame as pg
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-from scipy.ndimage import gaussian_filter
+import pygame
 import time
-import random
-from urllib.request import proxy_bypass
-from math import pi
+
+pygame.init()
+# Define screen dimensions
+width = 400
+height = 500
+
+# Create the screen
+screen = pygame.display.set_mode((width, height))
+
+# Define colors
+green = (0, 255, 0)
+red = (255, 0, 0)
+yellow = (255, 255, 0)
+
+# Set font
+font = pygame.font.Font(None, 22)
+
+# Initialize clock
+clock = pygame.time.Clock()
+
+# Initial values
+vol = 0
+volb = 20
+volp = 0
+length = 0
+pTime = time.time()
 
 
+running = True
+while running:
+    screen.fill((0, 0, 0))  # Clear the screen
 
-import numpy as np
+    # Update values
+    vol = vol + 1 if vol <250 else vol   # Replace with your logic to update the volume
+    length += 1  # Replace with your logic to update the length
 
-def entropy(probabilities):
-    # Ensure that probabilities sum up to 1
-    assert np.isclose(np.sum(probabilities), 1.0)
+    t = vol / 250
+    color = (int((1-t)*255),int(t*255),0)
 
-    # Convert generator to NumPy array
-    probabilities_array = np.fromiter((p * np.log2(p) if p != 0 else 0 for p in probabilities), float)
 
-    # Compute the entropy
-    entropy = - np.sum(probabilities_array)
+    # Draw percentage bar
+    # pygame.draw.rect(screen, color, (50, int(volb - vol), 35, vol), 0)  # Percentage bar
+    pygame.draw.rect(screen, color, (10, 10, int(t*120), 40), 0)  # Percentage bar
+    pygame.draw.rect(screen, color, (10, 10, 120, 40), 3)  # Outline of bar
 
-    return entropy
 
-# Example usage:
-probabilities = [0.3, 0.4, 0.2, 0.1]
-result = entropy(probabilities)
-print(result)
+    volp = round((vol/250)*100,2)
 
+    # Draw text
+    text = font.render(f'{int(volp)}%', True, yellow)
+    screen.blit(text, (60, 25))
+    title = font.render('Certainty Level', True, yellow)
+    screen.blit(title, (140, 25))
+
+
+    pygame.display.flip()  # Update the display
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+    clock.tick(60)  # Control the frame rate
+
+pygame.quit()

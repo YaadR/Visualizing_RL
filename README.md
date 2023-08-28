@@ -90,6 +90,8 @@ $$Q(S_t)' = R_{t+1} + (1-S_{t->terminal})(\gamma* Max(Q(S_{t+1},A_{t+1})))$$
 
 RL Algorithm:
 
+$$R_{t+1} = R_{t} + (1-S_{t->terminal}) ( \gamma* V(S_{t+1}) - V(S_t) ) $$
+
 
 #### Training - Stability, Mean & STD - 20 Rounds:
 <p float="left">

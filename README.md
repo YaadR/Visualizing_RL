@@ -17,7 +17,7 @@ each time the snake eats the food the algorithm gets a reward.
 the input vector has 3 values. each value defines the next step (forward,left,right). this is defined differently in each algorithm using state/action values.
 
 ### Project set ups:
-1. Run "pip install -r requirements.txt".
+1. Run ```pip install -r requirements.txt```.
 2. Every agent can run independently. the arena file is the only file that can also run independently. it runs all agents simultaniously in the same arena to compete and determin the best agent for the snake game. 
 
 ### Visualization solutions:

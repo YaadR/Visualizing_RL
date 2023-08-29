@@ -1,5 +1,5 @@
 # Visualizing RL: 
-##### How the agent perceive the environment during training
+##### How the agent perceives the environment during training
 
 
 #### Authors:
@@ -7,18 +7,18 @@
 * [Itai Zeitouni](https://github.com/Itaize33)
 
 ## Project description:
-Visualizing how different agents perceives their environment in the game Snake : algorithms in Reinforcement Learning
+Visualizing how different agents perceive their environment in the game Snake: Algorithms in Reinforcement Learning
 
 ### SNAKE:
-The snake game enviroment is a visualizaion tool to evaluate differents RL algorithms on the game Snake.
-the algorithms need to learn how to guide the snake to the food without hitting the wall or eating itself (self loop).
+The snake game environment is a visualization tool to evaluate different RL algorithms on the game Snake.
+the algorithms need to learn how to guide the snake to the food without hitting the wall or eating itself (self-loop).
 these algorithms do that by using image processing to create an input vector of values used in determining the best next step for the snake to play.
 each time the snake eats the food the algorithm gets a reward.
-the input vector has 3 values. each value defines the next step (forward,left,right). this is defined differently in each algorithm using state/action values.
+the input vector has 3 values. each value defines the next step (forward, left, right). this is defined differently in each algorithm using state/action values.
 
-### Project set ups:
+### Project setups:
 1. Run ```pip install -r requirements.txt```.
-2. Every agent can run independently. the arena file is the only file that can also run independently. it runs all agents simultaniously in the same arena to compete and determin the best agent for the snake game. 
+2. Every agent can run independently. The arena file is the only file that can also run independently. it runs all agents simultaneously in the same arena to compete and determine the best agent for the snake game. 
 
 ### Visualization solutions:
 1. Heatmap
@@ -63,34 +63,40 @@ the input vector has 3 values. each value defines the next step (forward,left,ri
 
 ## Reinforcement algorithms & concepts:
 #### Agent State Value:
- - Value based : state value
- - Model based
+ - Value-based: state value
+ - Model-based
  - off policy
  - online
 
 RL Algorithm:
-$$V(S_t)' = V(S_t) + \alpha* \left[ R_{t+1} + (1-S_{t->terminal})(\gamma* V(S_{t+1}) - V(S_t) \right)]$$
+$$V(s_t)' = V(s_t) + \alpha* \left[ R_{t+1} + (1-s_{t->terminal})(\gamma* V(s_{t+1}) - V(s_t) \right)]$$
 
 
 #### Agent Action Value:
- - Value based : action value
- - Model free
+ - Value-based: action value
+ - Model-free
  - off policy
  - online
 
 RL Algorithm:
-$$Q(S_t)' = R_{t+1} + (1-S_{t->terminal})(\gamma* Max(Q(S_{t+1},A_{t+1})))$$
+$$Q(s_t)' = R_{t+1} + (1-s_{t->terminal})(\gamma* Max(Q(S_{t+1},A_{t+1})))$$
 
 
 #### Agent Policy:
- - Policy based
- - Model free
+ - Policy-based
+ - Model-free
  - on policy
  - online
 
 RL Algorithm:
+Critic:
+$$A_{\text{critic}}(s_{t})' = R_{t} + (1-s_{t->terminal}) ( \gamma* V(s_{t+1}) - V(s_{t}) )$$
 
-$$R_{t+1} = R_{t} + (1-S_{t->terminal}) ( \gamma* V(S_{t+1}) - V(S_t) ) $$
+Actor:
+$$\theta_{\text{actor}} \leftarrow \theta_{\text{actor}} +\nabla_{\theta_{\text{actor}}} \log(\pi_{\theta_{\text{actor}}}(a_{t}|s_{t})) A_{\text{critic}}(s_{t})$$
+
+
+
 
 
 #### Training - Stability, Mean & STD - 20 Rounds:
@@ -114,9 +120,6 @@ $$R_{t+1} = R_{t} + (1-S_{t->terminal}) ( \gamma* V(S_{t+1}) - V(S_t) ) $$
 ## Additional Notes
 
 Please follow the project steps carefully and ensure that all dependencies are correctly installed before running the solution.
-
-## Disclaimer: 
-This README provides an overview of the project and its approach to_____. For in-depth instructions and code implementations, refer to the source code and accompanying documentation in the repository.
 
 ## Acknowledgments
 The basis for this project is inspired by [Patrick Loeber](https://github.com/patrickloeber) in his work at [Teach AI To Play Snake - Reinforcement Learning Tutorial With PyTorch And Pygame](https://youtube.com/playlist?list=PLqnslRFeH2UrDh7vUmJ60YrmWd64mTTKV)

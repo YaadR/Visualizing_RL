@@ -122,7 +122,7 @@ $$\theta_{\text{actor}} = \nabla_{\theta_{\text{actor}}} \log(\pi_{\theta_{\text
 Please follow the project steps carefully and ensure that all dependencies are correctly installed before running the solution.
 
 ## Acknowledgments
-The basis for this project is inspired by [Patrick Loeber](https://github.com/patrickloeber) in his work at [Teach AI To Play Snake - Reinforcement Learning Tutorial With PyTorch And Pygame](https://youtube.com/playlist?list=PLqnslRFeH2UrDh7vUmJ60YrmWd64mTTKV)
+The basis for this project is inspired by [Patrick Loeber](https://github.com/patrickloeber) for his work in [Teach AI To Play Snake - Reinforcement Learning Tutorial With PyTorch And Pygame](https://youtube.com/playlist?list=PLqnslRFeH2UrDh7vUmJ60YrmWd64mTTKV)
 ## License
 This project is licensed under the MIT License. Feel free to use, modify, and distribute it according to the terms of the license.
 

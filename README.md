@@ -93,7 +93,7 @@ Critic:
 $$A_{\text{critic}}(s_{t})' = R_{t} + (1-s_{t->terminal}) ( \gamma* V(s_{t+1}) - V(s_{t}) )$$
 
 Actor:
-$$\theta_{\text{actor}} \leftarrow \theta_{\text{actor}} +\nabla_{\theta_{\text{actor}}} \log(\pi_{\theta_{\text{actor}}}(a_{t}|s_{t})) A_{\text{critic}}(s_{t})$$
+$$\theta_{\text{actor}} = \nabla_{\theta_{\text{actor}}} \log(\pi_{\theta_{\text{actor}}}(a_{t}|s_{t})) A_{\text{critic}}(s_{t})$$
 
 
 

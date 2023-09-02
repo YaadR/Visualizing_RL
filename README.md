@@ -5,7 +5,7 @@ Visualizing how different agents perceive their environment in the game Snake: A
 * [Yaad Rebhun](https://github.com/YaadR)
 * [Itai Zeitouni](https://github.com/Itaize33)
 
-# SNAKE
+# Snake
 The snake game environment is a visualization tool to evaluate different RL algorithms on the game Snake.
 the algorithms need to learn how to guide the snake to the food without hitting the wall or eating itself (self-loop).
 these algorithms do that by using image processing to create an input vector of values used in determining the best next step for the snake to play.

@@ -2,7 +2,11 @@
     "cSpell.words": [
         "argmax",
         "astype",
+        "axhline",
+        "axvline",
+        "dones",
         "dtype",
+        "hspace",
         "imshow",
         "optim",
         "pyplot",

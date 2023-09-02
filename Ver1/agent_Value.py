@@ -140,16 +140,16 @@ class Agent_Value:
 
     def get_states_value(self, game):
         # [Straight, Right, Left]
-        rewards, done, next_states = [], [], []
+        rewards, dones, next_states = [], [], []
         actions = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
         for i, action in enumerate(actions):
             self.env_model = game.copy(self.env_model)
             reward, done, score = self.env_model.play_step(action)
             next_state = self.get_state(self.env_model)
-            rewards.append(reward), done.append(done), next_states.append(next_state)
+            rewards.append(reward), dones.append(done), next_states.append(next_state)
 
-        done = np.array(done).astype(int)
-        return rewards, done, next_states
+        dones = np.array(dones).astype(int)
+        return rewards, dones, next_states
 
     def train(self):
         plot_scores = []

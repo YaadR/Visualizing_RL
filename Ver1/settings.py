@@ -16,6 +16,13 @@ class settings:
     NUM_EPISODES = 100
     BATCH_SIZE = 1000
     LAMBDA = 0.8
+    SPEED = 20
+
+    WHITE = (255, 255, 255)
+    RED = (200, 0, 0)
+    BLUE1 = (0, 0, 255)
+    BLUE2 = (0, 100, 255)
+    BLACK = (0, 0, 0)
 
 
 S = settings()

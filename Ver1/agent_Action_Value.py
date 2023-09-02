@@ -6,39 +6,19 @@ Action Value Agent:
  - value based : action value
 """
 
+from settings import S
 import torch
 import random
 import numpy as np
 from collections import deque
 from game import SnakeGameAI, Direction, Point, pygame
 from model import Linear_Net, Value_Trainer_A
-from helper import (
-    heat_map_step,
-    distance_collapse,
-    activation_visualize,
-    array_tobinary,
-    entropy,
-    softmax,
-    cirtenty_function,
-)
+from helper import heat_map_step, distance_collapse, activation_visualize
+from helper import array_tobinary, entropy, softmax, cirtenty_function
 
 from path import BASE_DIR
 
 import matplotlib.pyplot as plt
-
-
-##
-BLOCK_SIZE = 20
-WIDTH = 480
-HEIGHT = 360
-##
-
-LR = 0.001
-NUM_ACTIONS = 3  # Number of possible actions (up, down, left, right)
-STATE_VEC_SIZE = 11
-HIDDEN_LAYER = 256
-
-USE_HEAT_MAP = True
 
 
 class Action_Value:
@@ -46,8 +26,8 @@ class Action_Value:
         self.n_games = 0
         self.epsilon = 0  # randomness
         self.gamma = 0.9  # discount rate
-        self.net = Linear_Net(STATE_VEC_SIZE, HIDDEN_LAYER, NUM_ACTIONS)
-        self.trainer = Value_Trainer_A(self.net, lr=LR, gamma=self.gamma)
+        self.net = Linear_Net(S.STATE_VEC_SIZE, S.HIDDEN_LAYER, S.NUM_ACTIONS)
+        self.trainer = Value_Trainer_A(self.net, lr=S.LR, gamma=self.gamma)
         self.prediction = [0, 0, 0]
 
     def get_state(self, game):
@@ -61,12 +41,6 @@ class Action_Value:
         dir_r = game.direction == Direction.RIGHT
         dir_u = game.direction == Direction.UP
         dir_d = game.direction == Direction.DOWN
-
-        # env = pygame.surfarray.array3d(game.display)
-        # min_env = np.zeros((HEIGHT//BLOCK_SIZE,WIDTH//BLOCK_SIZE))
-        # for x,i in enumerate(range(0,HEIGHT-BLOCK_SIZE,BLOCK_SIZE)):
-        #     for y,j in enumerate(range(0,WIDTH-BLOCK_SIZE,BLOCK_SIZE)):
-        #         min_env[x, y] = np.sum(np.sum(env[i:i+BLOCK_SIZE,j:j+BLOCK_SIZE],axis=2))//BLOCK_SIZE**2
 
         state = [
             # Danger straight
@@ -171,200 +145,194 @@ class Action_Value:
 
         return action
 
+    def train(self):
+        plot_scores = []
+        plot_mean_scores = []
+        total_score = 0
+        record = 0
+        game = SnakeGameAI(arrow=False, agentID=0, certainty_flag=True)
+        mean_score = 0
+        seen_states = set()
+        counter = 0
+        screen_sample = 20
+        system_entropy = []
+        mean_entropy = deque(maxlen=10)  # Moving average of decision entropy
 
-def train(agent):
-    plot_scores = []
-    plot_mean_scores = []
-    total_score = 0
-    record = 0
-    game = SnakeGameAI(arrow=False, agentID=0, certainty_flag=True)
-    mean_score = 0
-    seen_states = set()
-    counter = 0
-    screen_sample = 20
-    system_entropy = []
-    mean_entropy = deque(maxlen=10)  # Moving average of decision entropy
+        heatmap = np.ones((game.w // 10, game.h // 10))  # Heatmap init
+        plt.ion()
 
-    heatmap = np.ones((game.w // 10, game.h // 10))  # Heatmap init
-    plt.ion()
-
-    # Weight Visualization
-    # fig, axs = plt.subplots(1, 2,width_ratios=[6,1], figsize=(6, 6))
-
-    # Full Net Visualization
-    # fig, axs = plt.subplots(1, 4,width_ratios=[12,4,8,1], figsize=(8, 6))
-    heat_flag = False
-    layers_flag = False
-    if heat_flag:
-        figure, axis = plt.subplots(1, 2, width_ratios=[2, 3], figsize=(10, 4))
-        axis[0].set_title("Heatmap")
-
-    while True:
-        # get old state
-        state_prev = agent.get_state(game)
-
-        # get move
-        action = agent.get_action(state_prev)
-        game.actions_probability = agent.prediction
-        mean_entropy.append(cirtenty_function(entropy(agent.prediction)))
-        game.certainty = np.round(np.mean(mean_entropy), 5)
-        # print(game.certainty)
-
-        # perform move and get new state
-        reward, done, score = game.play_step(action)
-        state = agent.get_state(game)
-
-        # update heatmap
+        heat_flag = False
+        layers_flag = False
         if heat_flag:
-            if reward:
-                # reset heatmap
-                heatmap[:] = 1
-            else:
-                X, Y = distance_collapse(
-                    state[-2:], game.w, game.h, game.direction.value
-                )
-                heatmap = heat_map_step(
-                    heatmap,
-                    game.direction.value,
-                    game.w // 10,
-                    game.h // 10,
-                    int(game.head.x) // 10,
-                    int(game.head.y) // 10,
-                    any(state[:3]),
-                    X // 10,
-                    Y // 10,
-                )
+            figure, axis = plt.subplots(1, 2, width_ratios=[2, 3], figsize=(10, 4))
+            axis[0].set_title("Heatmap")
 
-        if (
-            (mean_score > 12) or (agent.n_games <= 15 and agent.n_games >= 5)
-        ) and heat_flag:
-            axis[0].imshow(heatmap.T, cmap="viridis", interpolation="nearest")
+        while True:
+            # get old state
+            state_prev = self.get_state(game)
 
-        if agent.n_games == 20 or agent.n_games == 80 or agent.n_games == 150:
-            if not counter % 50:
-                pygame.image.save(
-                    game.display,
-                    BASE_DIR / f"Ver1/data/plots/Certainty/certain_{counter}.jpg",
-                )
-            counter += 1
+            # get move
+            action = self.get_action(state_prev)
+            game.actions_probability = self.prediction
+            mean_entropy.append(cirtenty_function(entropy(self.prediction)))
+            game.certainty = np.round(np.mean(mean_entropy), 5)
+            # print(game.certainty)
 
-        # train short memory
-        agent.train_online(state_prev, action, reward, state, done)
+            # perform move and get new state
+            reward, done, score = game.play_step(action)
+            state = self.get_state(game)
 
-        # Activation layer of every unique state
-        if layers_flag and mean_score > 15 and len(game.snake) > 20:
-            if array_tobinary(state) not in seen_states:
-                plt.close()
-                plt.ion()
-                fig, axs = plt.subplots(
-                    1, 4, width_ratios=[1, 3, 1, 5], figsize=(10, 6)
-                )
-                seen_states.add(array_tobinary(state))
-                env = pygame.surfarray.array3d(game.display)
-                layer_1_activation = agent.net.linear1(
-                    torch.tensor(state, dtype=torch.float)
-                )
-                layer_2_activation = (
-                    agent.net.linear2(torch.relu(layer_1_activation)).detach().numpy()
-                )
-                layer_1_activation = layer_1_activation.detach().numpy()
-                activation_visualize(
-                    state.reshape((1, -1)),
-                    layer_1_activation,
-                    layer_2_activation.reshape((1, -1)),
-                    axs,
-                    env,
-                    array_tobinary(state),
-                )
-
-        if done:
-            # plot result
-            game.reset()
-            agent.n_games += 1
+            # update heatmap
             if heat_flag:
-                heatmap[:] = 1
+                if reward:
+                    # reset heatmap
+                    heatmap[:] = 1
+                else:
+                    X, Y = distance_collapse(
+                        state[-2:], game.w, game.h, game.direction.value
+                    )
+                    heatmap = heat_map_step(
+                        heatmap,
+                        game.direction.value,
+                        game.w // 10,
+                        game.h // 10,
+                        int(game.head.x) // 10,
+                        int(game.head.y) // 10,
+                        any(state[:3]),
+                        X // 10,
+                        Y // 10,
+                    )
 
-            if score > record:
-                record = score
-
-            plot_scores.append(score)
-            total_score += score
-            mean_score = total_score / agent.n_games
-
-            print(
-                "Game:",
-                agent.n_games,
-                "Score:",
-                score,
-                "Record:",
-                record,
-                "Mean Score:",
-                round(mean_score, 3),
-            )
-
-            plot_mean_scores.append(mean_score)
-
-            if heat_flag:
-                axis[1].cla()
-                axis[1].set_title("Training")
-                axis[1].set_xlabel("Games")
-                axis[1].set_ylabel("Score")
-                axis[1].plot(plot_scores)
-                axis[1].plot(plot_mean_scores)
-                axis[1].set_ylim(ymin=0)
-                axis[1].text(
-                    len(plot_scores) - 1, plot_scores[-1], str(plot_scores[-1])
-                )
-                axis[1].text(
-                    len(plot_mean_scores) - 1,
-                    plot_mean_scores[-1],
-                    str(round(plot_mean_scores[-1], 3)),
-                )
-
-        if USE_HEAT_MAP:
             if (
-                ((mean_score > 12) or (agent.n_games <= 15 and agent.n_games >= 5))
-                and heat_flag
-            ) or done:
-                plt.show()
-                plt.pause(0.001)
+                (mean_score > 12) or (self.n_games <= 15 and self.n_games >= 5)
+            ) and heat_flag:
+                axis[0].imshow(heatmap.T, cmap="viridis", interpolation="nearest")
 
+            if self.n_games == 20 or self.n_games == 80 or self.n_games == 150:
+                if not counter % 50:
+                    pygame.image.save(
+                        game.display,
+                        BASE_DIR / f"Ver1/data/plots/Certainty/certain_{counter}.jpg",
+                    )
+                counter += 1
 
-def play(agent):
-    plot_scores = []
-    record = 0
-    game = SnakeGameAI(arrow=True, obstacle_flag=True)
+            # train short memory
+            self.train_online(state_prev, action, reward, state, done)
 
-    while True:
-        # get old state
-        state = agent.get_state(game)
-        # get move
-        action = agent.get_action(state)
-        game.actions_probability = agent.prediction
-        # perform move and get new state
-        reward, done, score = game.play_step(action)
-        if done:
-            game.reset()
-            agent.n_games += 1
+            # Activation layer of every unique state
+            if layers_flag and mean_score > 15 and len(game.snake) > 20:
+                if array_tobinary(state) not in seen_states:
+                    plt.close()
+                    plt.ion()
+                    fig, axs = plt.subplots(
+                        1, 4, width_ratios=[1, 3, 1, 5], figsize=(10, 6)
+                    )
+                    seen_states.add(array_tobinary(state))
+                    env = pygame.surfarray.array3d(game.display)
+                    layer_1_activation = self.net.linear1(
+                        torch.tensor(state, dtype=torch.float)
+                    )
+                    layer_2_activation = (
+                        self.net.linear2(torch.relu(layer_1_activation))
+                        .detach()
+                        .numpy()
+                    )
+                    layer_1_activation = layer_1_activation.detach().numpy()
+                    activation_visualize(
+                        state.reshape((1, -1)),
+                        layer_1_activation,
+                        layer_2_activation.reshape((1, -1)),
+                        axs,
+                        env,
+                        array_tobinary(state),
+                    )
 
-            if score > record:
-                record = score
-            plot_scores.append(score)
+            if done:
+                # plot result
+                game.reset()
+                self.n_games += 1
+                if heat_flag:
+                    heatmap[:] = 1
 
-            print(
-                "Game:",
-                agent.n_games,
-                "Score:",
-                score,
-                "Record:",
-                record,
-                "Mean Score:",
-            )
+                if score > record:
+                    record = score
+
+                plot_scores.append(score)
+                total_score += score
+                mean_score = total_score / self.n_games
+
+                print(
+                    "Game:",
+                    self.n_games,
+                    "Score:",
+                    score,
+                    "Record:",
+                    record,
+                    "Mean Score:",
+                    round(mean_score, 3),
+                )
+
+                plot_mean_scores.append(mean_score)
+
+                if heat_flag:
+                    axis[1].cla()
+                    axis[1].set_title("Training")
+                    axis[1].set_xlabel("Games")
+                    axis[1].set_ylabel("Score")
+                    axis[1].plot(plot_scores)
+                    axis[1].plot(plot_mean_scores)
+                    axis[1].set_ylim(ymin=0)
+                    axis[1].text(
+                        len(plot_scores) - 1, plot_scores[-1], str(plot_scores[-1])
+                    )
+                    axis[1].text(
+                        len(plot_mean_scores) - 1,
+                        plot_mean_scores[-1],
+                        str(round(plot_mean_scores[-1], 3)),
+                    )
+
+            if S.USE_HEAT_MAP:
+                if (
+                    ((mean_score > 12) or (self.n_games <= 15 and self.n_games >= 5))
+                    and heat_flag
+                ) or done:
+                    plt.show()
+                    plt.pause(0.001)
+
+    def play(self):
+        plot_scores = []
+        record = 0
+        game = SnakeGameAI(arrow=True, obstacle_flag=True)
+
+        while True:
+            # get old state
+            state = self.get_state(game)
+            # get move
+            action = self.get_action(state)
+            game.actions_probability = self.prediction
+            # perform move and get new state
+            reward, done, score = game.play_step(action)
+            if done:
+                game.reset()
+                self.n_games += 1
+
+                if score > record:
+                    record = score
+                plot_scores.append(score)
+
+                print(
+                    "Game:",
+                    self.n_games,
+                    "Score:",
+                    score,
+                    "Record:",
+                    record,
+                    "Mean Score:",
+                )
 
 
 def main():
     agent = Action_Value()
-
-    train(agent)
+    agent.train()
     plt.close()
-    play(agent)
+    agent.play()

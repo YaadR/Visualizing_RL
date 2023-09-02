@@ -144,8 +144,11 @@ class SnakeGameAI:
         # 5. update ui and clock
         self._update_ui()
 
-        # 6. call pygame event to prevent not responding error
-        pygame.event.pump()
+        # 6. check close program
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit(0)
 
         # 7. return game over and score
         return reward, game_over, self.score

@@ -13,20 +13,9 @@ from game import SnakeGameAI, Direction, Point
 from model import Linear_Net, Value_Trainer_V
 
 import matplotlib.pyplot as plt
-
+from settings import *
 
 ALPHA = 0.5  # Learning rate
-GAMMA = 0.9  # Discount factor
-##
-BLOCK_SIZE = 20
-WIDTH = 480
-HEIGHT = 360
-##
-
-LR = 0.001
-NUM_ACTIONS = 3  # Number of possible actions (up, down, left, right)
-STATE_VEC_SIZE = 11
-HIDDEN_LAYER = 256
 
 i = 0
 mean_scores = []
@@ -36,11 +25,11 @@ class Agent_Value:
     def __init__(self):
         self.n_games = 0
         self.epsilon = 0  # randomness
-        self.gamma = GAMMA  # discount rate
+        self.gamma = S.GAMMA  # discount rate
         self.alpha = ALPHA  #
-        self.net = Linear_Net(STATE_VEC_SIZE, HIDDEN_LAYER, NUM_ACTIONS)
+        self.net = Linear_Net(S.STATE_VEC_SIZE, S.HIDDEN_LAYER, S.NUM_ACTIONS)
         self.trainer = Value_Trainer_V(
-            self.net, lr=LR, gamma=self.gamma, alpha=self.alpha
+            self.net, lr=S.LR, gamma=self.gamma, alpha=self.alpha
         )
         self.prediction = [0, 0, 0]
         self.env_model = SnakeGameAI()
@@ -151,112 +140,109 @@ class Agent_Value:
 
     def get_states_value(self, game):
         # [Straight, Right, Left]
-        rewards, dones, next_states = [], [], []
+        rewards, done, next_states = [], [], []
         actions = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
         for i, action in enumerate(actions):
             self.env_model = game.copy(self.env_model)
             reward, done, score = self.env_model.play_step(action)
             next_state = self.get_state(self.env_model)
-            rewards.append(reward), dones.append(done), next_states.append(next_state)
+            rewards.append(reward), done.append(done), next_states.append(next_state)
 
-        dones = np.array(dones).astype(int)
-        return rewards, dones, next_states
+        done = np.array(done).astype(int)
+        return rewards, done, next_states
 
+    def train(self):
+        plot_scores = []
+        plot_mean_scores = []
+        total_score = 0
+        record = 0
+        game = SnakeGameAI(arrow=True, agentID=0)
+        mean_score = 0
 
-def train(agent):
-    plot_scores = []
-    plot_mean_scores = []
-    total_score = 0
-    record = 0
-    game = SnakeGameAI(arrow=True, agentID=0)
-    mean_score = 0
+        plt.ion()
 
-    plt.ion()
+        while True:
+            # get old state
+            state = self.get_state(game)
 
-    while True:
-        # get old state
-        state = agent.get_state(game)
+            # get move
+            action = self.get_action(state)
+            game.actions_probability = self.prediction
 
-        # get move
-        action = agent.get_action(state)
-        game.actions_probability = agent.prediction
+            # perform move and get new state
+            _reward, _done, _state_next = self.get_states_value(game)
 
-        # perform move and get new state
-        _reward, _done, _state_next = agent.get_states_value(game)
+            reward, done, score = game.play_step(action)
 
-        reward, done, score = game.play_step(action)
+            # train short memory
+            self.train_online(state, _reward, _state_next, _done)
 
-        # train short memory
-        agent.train_online(state, _reward, _state_next, _done)
+            if done:
+                # plot result
+                game.reset()
+                self.n_games += 1
 
-        if done:
-            # plot result
-            game.reset()
-            agent.n_games += 1
+                if score > record:
+                    record = score
 
-            if score > record:
-                record = score
+                plot_scores.append(score)
+                total_score += score
+                mean_score = total_score / self.n_games
+                print(
+                    "Games:",
+                    i,
+                    "Game:",
+                    self.n_games,
+                    "Score:",
+                    score,
+                    "Record:",
+                    record,
+                    "Mean Score:",
+                    round(mean_score, 3),
+                )
+                plot_mean_scores.append(mean_score)
 
-            plot_scores.append(score)
-            total_score += score
-            mean_score = total_score / agent.n_games
-            print(
-                "Games:",
-                i,
-                "Game:",
-                agent.n_games,
-                "Score:",
-                score,
-                "Record:",
-                record,
-                "Mean Score:",
-                round(mean_score, 3),
-            )
-            plot_mean_scores.append(mean_score)
+                if self.n_games >= 80:
+                    mean_scores.append(list(plot_mean_scores))
+                    break
 
-            if agent.n_games >= 80:
-                mean_scores.append(list(plot_mean_scores))
-                break
+    def play(self):
+        plot_scores = []
+        record = 0
+        game = SnakeGameAI(arrow=True, obstacle_flag=True)
 
+        while True:
+            # get old state
+            state = self.get_state(game)
+            # get move
+            action = self.get_action(state)
+            # perform move and get new state
+            reward, done, score = game.play_step(action)
+            if done:
+                game.reset()
+                self.n_games += 1
 
-def play(agent):
-    plot_scores = []
-    record = 0
-    game = SnakeGameAI(arrow=True, obstacle_flag=True)
+                if score > record:
+                    record = score
+                plot_scores.append(score)
 
-    while True:
-        # get old state
-        state = agent.get_state(game)
-        # get move
-        action = agent.get_action(state)
-        # perform move and get new state
-        reward, done, score = game.play_step(action)
-        if done:
-            game.reset()
-            agent.n_games += 1
-
-            if score > record:
-                record = score
-            plot_scores.append(score)
-
-            # plot(plot_scores, plot_mean_scores)
-            print(
-                "Game:",
-                agent.n_games,
-                "Score:",
-                score,
-                "Record:",
-                record,
-                "Mean Score:",
-            )
+                # plot(plot_scores, plot_mean_scores)
+                print(
+                    "Game:",
+                    self.n_games,
+                    "Score:",
+                    score,
+                    "Record:",
+                    record,
+                    "Mean Score:",
+                )
 
 
 def main():
     agent = Agent_Value()
-
-    train(agent)
+    agent.train()
     plt.close()
-    play(agent)
+    agent.play()
 
 
 if __name__ == "__main__":

@@ -9,7 +9,7 @@ Policy Gradient Network | A2C Network
 
 """
 
-#
+from settings import *
 import torch
 import random
 import numpy as np
@@ -20,24 +20,6 @@ from model import ActorCritic, A2C_Trainer
 import matplotlib.pyplot as plt
 import warnings
 
-warnings.filterwarnings("ignore")
-
-##
-BLOCK_SIZE = 20
-WIDTH = 480
-HEIGHT = 360
-##
-
-MAX_MEMORY = 100_000
-BATCH_SIZE = 1000
-LR = 0.001
-NUM_ACTIONS = 3  # Number of possible actions (up, down, left, right)
-ALPHA = 0.1  # Learning rate
-GAMMA = 0.9  # Discount factor
-EPSILON = 50
-NUM_EPISODES = 100  # Number of training episodes
-STATE_VEC_SIZE = 11
-HIDDEN_LAYER = 256
 
 mean_scores = []
 i = 0
@@ -46,15 +28,17 @@ i = 0
 class Agent_Policy:
     def __init__(self):
         self.n_games = 0
-        self.gamma = GAMMA  # discount rate
-        self.memory = deque(maxlen=MAX_MEMORY)  # popleft()
+        self.gamma = S.GAMMA  # discount rate
+        self.memory = deque(maxlen=S.MAX_MEMORY)  # popleft()
         self.epsilon = 0
 
         # Actor Critic combined
-        self.net = ActorCritic(STATE_VEC_SIZE, NUM_ACTIONS)  # Linear_QNet(11, 256, 3)
-        self.optimizer = torch.optim.Adam(self.net.parameters(), lr=LR)
+        self.net = ActorCritic(
+            S.STATE_VEC_SIZE, S.NUM_ACTIONS
+        )  # Linear_QNet(11, 256, 3)
+        self.optimizer = torch.optim.Adam(self.net.parameters(), lr=S.LR)
         self.trainer = A2C_Trainer(
-            net=self.net, optimizer=self.optimizer, lr=LR, gamma=self.gamma
+            net=self.net, optimizer=self.optimizer, lr=S.LR, gamma=self.gamma
         )
         self.prediction = [0, 0, 0]
 
@@ -152,7 +136,7 @@ class Agent_Policy:
         if random.randint(0, 200) < self.epsilon:
             prediction, _ = self.net(torch.tensor(state, dtype=torch.float))
             self.prediction = prediction.squeeze().detach().numpy()
-            move = np.random.choice(NUM_ACTIONS, p=self.prediction)
+            move = np.random.choice(S.NUM_ACTIONS, p=self.prediction)
             action[move] = 1
         else:
             prediction, _ = self.net(torch.tensor(state, dtype=torch.float))
@@ -162,88 +146,89 @@ class Agent_Policy:
 
         return action
 
+    def train(self):
+        plot_scores = []
+        plot_mean_scores = []
+        total_score = 0
+        record = 0
+        mean_score = 0
+        game = SnakeGameAI(arrow=True, agentID=0)
+        plt.ion()
 
-def train(agent):
-    plot_scores = []
-    plot_mean_scores = []
-    total_score = 0
-    record = 0
-    mean_score = 0
-    game = SnakeGameAI(arrow=True, agentID=0)
-    plt.ion()
+        while True:
+            # get old state
+            state_old = self.get_state(game)
+            # get move
+            action = self.get_action(state_old)
+            game.actions_probability = self.prediction
 
-    while True:
-        # get old state
-        state_old = agent.get_state(game)
-        # get move
-        action = agent.get_action(state_old)
-        game.actions_probability = agent.prediction
+            # perform move and get new state
+            reward, done, score = game.play_step(action)
+            state_new = self.get_state(game)
 
-        # perform move and get new state
-        reward, done, score = game.play_step(action)
-        state_new = agent.get_state(game)
-
-        # train short memory
-        agent.train_online(state_old, np.argmax(action), reward, state_new, int(done))
-
-        if done:
-            # plot result
-            game.reset()
-            agent.n_games += 1
-
-            if score > record:
-                record = score
-
-            plot_scores.append(score)
-            total_score += score
-            mean_score = total_score / agent.n_games
-            plot_mean_scores.append(mean_score)
-            if agent.n_games >= 400:
-                mean_scores.append(list(plot_mean_scores))
-                break
-
-            # plot(plot_scores, plot_mean_scores)
-            print(
-                "Games:",
-                i,
-                "Game:",
-                agent.n_games,
-                "Score:",
-                score,
-                "Record:",
-                record,
-                "Mean Score:",
-                round(mean_score, 3),
+            # train short memory
+            self.train_online(
+                state_old, np.argmax(action), reward, state_new, int(done)
             )
 
+            if done:
+                # plot result
+                game.reset()
+                self.n_games += 1
 
-def play(agent):
-    plot_scores = []
-    record = 0
-    game = SnakeGameAI(arrow=True, obstacle_flag=True)
+                if score > record:
+                    record = score
 
-    while True:
-        # get old state
-        state = agent.get_state(game)
-        # get move
-        action = agent.get_action(state)
-        game.actions_probability = agent.prediction
-        # perform move and get new state
-        reward, done, score = game.play_step(action)
-        if done:
-            game.reset()
-            agent.n_games += 1
+                plot_scores.append(score)
+                total_score += score
+                mean_score = total_score / self.n_games
+                plot_mean_scores.append(mean_score)
+                if self.n_games >= 400:
+                    mean_scores.append(list(plot_mean_scores))
+                    break
 
-            if score > record:
-                record = score
-            plot_scores.append(score)
+                # plot(plot_scores, plot_mean_scores)
+                print(
+                    "Games:",
+                    i,
+                    "Game:",
+                    self.n_games,
+                    "Score:",
+                    score,
+                    "Record:",
+                    record,
+                    "Mean Score:",
+                    round(mean_score, 3),
+                )
+
+    def play(self):
+        plot_scores = []
+        record = 0
+        game = SnakeGameAI(arrow=True, obstacle_flag=True)
+
+        while True:
+            # get old state
+            state = self.get_state(game)
+            # get move
+            action = self.get_action(state)
+            game.actions_probability = self.prediction
+            # perform move and get new state
+            reward, done, score = game.play_step(action)
+            if done:
+                game.reset()
+                self.n_games += 1
+
+                if score > record:
+                    record = score
+                plot_scores.append(score)
 
 
 def main():
+    warnings.filterwarnings("ignore")
     agent = Agent_Policy()
-    train(agent)
+    agent.train()
     plt.close()
-    play(agent)
+    agent.play()
 
 
 if __name__ == "__main__":

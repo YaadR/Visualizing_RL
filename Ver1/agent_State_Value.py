@@ -13,32 +13,21 @@ from game import SnakeGameAI, Direction, Point, pygame
 from model import Linear_Net, State_Value_Trainer, nn
 from helper import plot, array_tobinary
 import matplotlib.pyplot as plt
+from settings import *
 
-
-ALPHA = 0.3  # Learning rate
-GAMMA = 0.9  # Discount factor
-##
-BLOCK_SIZE = 20
-WIDTH = 480
-HEIGHT = 360
-##
-
-LR = 0.001
-STATE_VALUE = 1  # Number of possible actions (up, down, left, right)
-STATE_VEC_SIZE = 11
-HIDDEN_LAYER = 256
+S.ALPHA = 0.3  # Learning rate
 
 
 class Agent_State_Value:
     def __init__(self):
         self.n_games = 0
         self.epsilon = 0  # randomness
-        self.gamma = GAMMA  # discount rate
-        self.alpha = ALPHA  #
+        self.gamma = S.GAMMA  # discount rate
+        self.alpha = S.ALPHA  #
         self.Q = dict()  # Q table
-        self.net = Linear_Net(STATE_VEC_SIZE, HIDDEN_LAYER, STATE_VALUE)
+        self.net = Linear_Net(S.STATE_VEC_SIZE, S.HIDDEN_LAYER, S.STATE_VALUE)
         self.trainer = State_Value_Trainer(
-            self.net, lr=LR, gamma=self.gamma, alpha=self.alpha
+            self.net, lr=S.LR, gamma=self.gamma, alpha=self.alpha
         )
         self.actions_probability = [0, 0, 0]
 
@@ -153,105 +142,99 @@ class Agent_State_Value:
             self.net(torch.tensor(s_prime, dtype=torch.float)).detach().numpy()[0]
         )
 
+    def train(self):
+        plot_scores = []
+        plot_mean_scores = []
+        total_score = 0
+        record = 0
+        game = SnakeGameAI(arrow=True, agentID=0)
+        mean_score = 0
 
-def train(agent):
-    plot_scores = []
-    plot_mean_scores = []
-    total_score = 0
-    record = 0
-    game = SnakeGameAI(arrow=True, agentID=0)
-    mean_score = 0
+        plt.ion()
 
-    plt.ion()
+        while True:
+            # get old state
+            state_prev = self.get_state(game)
 
-    while True:
-        # get old state
-        state_prev = agent.get_state(game)
+            if array_tobinary(state_prev) not in self.Q.keys():
+                self.Q[array_tobinary(state_prev)] = [0, 0, 0]
+            # get move
 
-        if array_tobinary(state_prev) not in agent.Q.keys():
-            agent.Q[array_tobinary(state_prev)] = [0, 0, 0]
-        # get move
+            action = self.get_action(state_prev)
+            game.actions_probability = self.actions_probability
 
-        action = agent.get_action(state_prev)
-        game.actions_probability = agent.actions_probability
+            reward, done, score = game.play_step(action)
+            state = self.get_state(game)
 
-        # perform move and get new state
-        # _reward, _done, _state_next = agent.get_states_value(game)
+            # train value approximation
+            self.train_online(state_prev, reward, state, done)
+            self.update_Q(state_prev, action, state)
 
-        reward, done, score = game.play_step(action)
-        state = agent.get_state(game)
+            if done:
+                # plot result
+                game.reset()
+                self.n_games += 1
 
-        # train value approximation
-        agent.train_online(state_prev, reward, state, done)
+                if score > record:
+                    record = score
 
-        agent.update_Q(state_prev, action, state)
+                plot_scores.append(score)
+                total_score += score
+                mean_score = total_score / self.n_games
+                print(
+                    "Game:",
+                    self.n_games,
+                    "Score:",
+                    score,
+                    "Record:",
+                    record,
+                    "Mean Score:",
+                    round(mean_score, 3),
+                )
+                plot_mean_scores.append(mean_score)
 
-        if done:
-            # plot result
-            game.reset()
-            agent.n_games += 1
+                plot(plot_scores, plot_mean_scores)
+                if mean_score > 12:
+                    break
 
-            if score > record:
-                record = score
+    def play(self):
+        plot_scores = []
+        record = 0
+        game = SnakeGameAI(arrow=True, obstacle_flag=True)
 
-            plot_scores.append(score)
-            total_score += score
-            mean_score = total_score / agent.n_games
-            print(
-                "Game:",
-                agent.n_games,
-                "Score:",
-                score,
-                "Record:",
-                record,
-                "Mean Score:",
-                round(mean_score, 3),
-            )
-            plot_mean_scores.append(mean_score)
+        while True:
+            # get old state
+            state = self.get_state(game)
+            # get move
+            action = self.get_action(state)
+            game.actions_probability = self.actions_probability
+            # perform move and get new state
+            reward, done, score = game.play_step(action)
+            if done:
+                game.reset()
+                self.n_games += 1
 
-            plot(plot_scores, plot_mean_scores)
-            if mean_score > 12:
-                break
+                if score > record:
+                    record = score
+                plot_scores.append(score)
 
-
-def play(agent):
-    plot_scores = []
-    record = 0
-    game = SnakeGameAI(arrow=True, obstacle_flag=True)
-
-    while True:
-        # get old state
-        state = agent.get_state(game)
-        # get move
-        action = agent.get_action(state)
-        game.actions_probability = agent.actions_probability
-        # perform move and get new state
-        reward, done, score = game.play_step(action)
-        if done:
-            game.reset()
-            agent.n_games += 1
-
-            if score > record:
-                record = score
-            plot_scores.append(score)
-
-            # plot(plot_scores, plot_mean_scores)
-            print(
-                "Game:",
-                agent.n_games,
-                "Score:",
-                score,
-                "Record:",
-                record,
-                "Mean Score:",
-            )
+                # plot(plot_scores, plot_mean_scores)
+                print(
+                    "Game:",
+                    self.n_games,
+                    "Score:",
+                    score,
+                    "Record:",
+                    record,
+                    "Mean Score:",
+                )
 
 
 def main():
     agent = Agent_State_Value()
 
-    train(agent)
-    play(agent)
+    agent.train()
+    agent.play()
 
 
 if __name__ == "__main__":

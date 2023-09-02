@@ -39,6 +39,9 @@ NUM_EPISODES = 100  # Number of training episodes
 STATE_VEC_SIZE = 11
 HIDDEN_LAYER = 256
 
+mean_scores = []
+i = 0
+
 
 class Agent_Policy:
     def __init__(self):
@@ -160,7 +163,7 @@ class Agent_Policy:
         return action
 
 
-def train():
+def train(agent):
     plot_scores = []
     plot_mean_scores = []
     total_score = 0
@@ -214,7 +217,7 @@ def train():
             )
 
 
-def play():
+def play(agent):
     plot_scores = []
     record = 0
     game = SnakeGameAI(arrow=True, obstacle_flag=True)
@@ -236,11 +239,12 @@ def play():
             plot_scores.append(score)
 
 
-if __name__ == "__main__":
+def main():
     agent = Agent_Policy()
-    mean_scores = []
-    i = 0
-
-    train()
+    train(agent)
     plt.close()
-    play()
+    play(agent)
+
+
+if __name__ == "__main__":
+    main()

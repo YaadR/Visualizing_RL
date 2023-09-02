@@ -45,6 +45,9 @@ AGENT_UI = [[BLUE, RED], [BLUE, BLUE_FOOD], [PURPLE, PURPLE_FOOD], [GREEN, GREEN
 OBSTACLE_HEIGHT = 60
 OBSTACLE_WIDTH = 80
 
+text_position = [[0, 0], [0, 25], [0, 50]]
+AGENT_NAMES = ["Action Value", "Policy", "State Value"]
+
 
 class SnakeGameArena:
     def __init__(self, w=WIDTH, h=HEIGHT, arrow=False, agent_num=1):
@@ -58,10 +61,6 @@ class SnakeGameArena:
         self.env = []
         for i in range(1, agent_num + 1):
             self.env.append(SnakeGameAI(arrow=arrow, agentID=i))
-
-
-text_position = [[0, 0], [0, 25], [0, 50]]
-AGENT_NAMES = ["Action Value", "Policy", "State Value"]
 
 
 class SnakeGameAICompetition:

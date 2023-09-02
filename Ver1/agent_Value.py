@@ -28,6 +28,9 @@ NUM_ACTIONS = 3  # Number of possible actions (up, down, left, right)
 STATE_VEC_SIZE = 11
 HIDDEN_LAYER = 256
 
+i = 0
+mean_scores = []
+
 
 class Agent_Value:
     def __init__(self):
@@ -160,7 +163,7 @@ class Agent_Value:
         return rewards, dones, next_states
 
 
-def train():
+def train(agent):
     plot_scores = []
     plot_mean_scores = []
     total_score = 0
@@ -211,14 +214,12 @@ def train():
             )
             plot_mean_scores.append(mean_score)
 
-            # plot(plot_scores, plot_mean_scores)
-
             if agent.n_games >= 80:
                 mean_scores.append(list(plot_mean_scores))
                 break
 
 
-def play():
+def play(agent):
     plot_scores = []
     record = 0
     game = SnakeGameAI(arrow=True, obstacle_flag=True)
@@ -250,11 +251,13 @@ def play():
             )
 
 
-if __name__ == "__main__":
+def main():
     agent = Agent_Value()
-    mean_scores = []
-    i = 0
 
-    train()
+    train(agent)
     plt.close()
-    play()
+    play(agent)
+
+
+if __name__ == "__main__":
+    main()

@@ -136,7 +136,7 @@ class Agent_Q:
         )
 
 
-def train():
+def train(agent):
     plot_scores = []
     plot_mean_scores = []
     total_score = 0
@@ -190,7 +190,7 @@ def train():
                 break
 
 
-def play():
+def play(agent):
     plot_scores = []
     plot_mean_scores = []
     total_score = 0
@@ -239,7 +239,11 @@ def play():
             )
 
 
-if __name__ == "__main__":
+def main():
     agent = Agent_Q()
-    train()
-    play()
+    train(agent)
+    play(agent)
+
+
+if __name__ == "__main__":
+    main()

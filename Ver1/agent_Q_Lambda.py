@@ -3,8 +3,7 @@ Q(Lambda) Algorithm
 """
 
 import numpy as np
-from collections import deque
-from game import SnakeGameAI, Direction, Point, pygame
+from game import SnakeGameAI, Direction, Point
 from helper import table_visualize, array_tobinary
 import matplotlib.pyplot as plt
 
@@ -147,7 +146,7 @@ class Agent_Q_Lambda:
                 self.eligibility_trace[key][act] *= self.gamma * self.Lambda
 
 
-def train():
+def train(agent):
     plot_scores = []
     plot_mean_scores = []
     total_score = 0
@@ -200,7 +199,7 @@ def train():
                 break
 
 
-def play():
+def play(agent):
     plot_scores = []
     plot_mean_scores = []
     total_score = 0
@@ -245,7 +244,12 @@ def play():
             )
 
 
-if __name__ == "__main__":
+def main():
     agent = Agent_Q_Lambda()
-    train()
-    play()
+    train(agent)
+    plt.close()
+    play(agent)
+
+
+if __name__ == "__main__":
+    main()

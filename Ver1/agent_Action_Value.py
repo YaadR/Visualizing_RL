@@ -172,7 +172,7 @@ class Action_Value:
         return action
 
 
-def train():
+def train(agent):
     plot_scores = []
     plot_mean_scores = []
     total_score = 0
@@ -330,7 +330,7 @@ def train():
                 plt.pause(0.001)
 
 
-def play():
+def play(agent):
     plot_scores = []
     record = 0
     game = SnakeGameAI(arrow=True, obstacle_flag=True)
@@ -362,11 +362,9 @@ def play():
             )
 
 
-if __name__ == "__main__":
+def main():
     agent = Action_Value()
-    mean_scores = []
-    i = 0
 
-    train()
+    train(agent)
     plt.close()
-    play()
+    play(agent)

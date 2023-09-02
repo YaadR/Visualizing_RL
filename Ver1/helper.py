@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 from IPython import display
 from scipy.ndimage import gaussian_filter
 import numpy as np
+from path import BASE_DIR
 
 plt.ion()
 
@@ -174,7 +175,7 @@ def activation_visualize(
 
     plt.tight_layout()
     plt.savefig(
-        f"D:\GitHub\Reposetories\Visualizing_RL\Ver1\data\plots\\valid activation\state_{index}.jpg"
+        BASE_DIR / f"Ver1/data/plots/valid activation/state_{index}.jpg"
     )  # Specify the desired file name and extension
     plt.show()
 
@@ -220,9 +221,7 @@ def plot_mean_scores_buffer(scores, title):
 
     # Save fig
     plt.savefig(
-        r"D:\GitHub\Reposetories\Visualizing_RL\Ver1\data\plots\Buffers\Mean "
-        + title
-        + ".jpg"
+        BASE_DIR / f"Ver1/data/plots/Buffers/Mean {title}.jpg"
     )  # Specify the desired file name and extension
 
     # Show the plot
@@ -250,9 +249,7 @@ def plot_std_mean_scores_buffer(mean_scores, title):
     plt.ylabel("Mean Score")
 
     plt.savefig(
-        r"D:\GitHub\Reposetories\Visualizing_RL\Ver1\data\plots\Buffers\STD "
-        + title
-        + ".jpg"
+        f"Ver1/data/plots/Buffers/STD {title}.jpg"
     )  # Specify the desired file name and extension
     plt.legend()
     plt.tight_layout()

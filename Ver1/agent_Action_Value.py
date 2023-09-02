@@ -22,6 +22,8 @@ from helper import (
     cirtenty_function,
 )
 
+from path import BASE_DIR
+
 import matplotlib.pyplot as plt
 
 
@@ -235,20 +237,12 @@ def train():
             (mean_score > 12) or (agent.n_games <= 15 and agent.n_games >= 5)
         ) and heat_flag:
             axis[0].imshow(heatmap.T, cmap="viridis", interpolation="nearest")
-        #     if not counter%50 and screen_sample>0:
-        #         PATH = 'D:\GitHub\Reposetories\Visualizing_RL\Ver1\data\plots\HeatMap'
-        #         extent = axis[0].get_window_extent().transformed(figure.dpi_scale_trans.inverted())
-        #         figure.savefig(PATH+'\heatmap_'+str(counter), bbox_inches=extent.expanded(1.2, 1.3))
-        #         pygame.image.save(game.display, PATH+"\screenshot"+str(counter)+".jpeg")
-        #     counter+=1
-        #     screen_sample -=1
-        # else:
-        #     screen_sample=25
+
         if agent.n_games == 20 or agent.n_games == 80 or agent.n_games == 150:
             if not counter % 50:
                 pygame.image.save(
                     game.display,
-                    f"D:\GitHub\Reposetories\Visualizing_RL\Ver1\data\plots\Certainty\certain_{counter}.jpg",
+                    BASE_DIR / f"Ver1/data/plots/Certainty/certain_{counter}.jpg",
                 )
             counter += 1
 
@@ -263,7 +257,6 @@ def train():
                 fig, axs = plt.subplots(
                     1, 4, width_ratios=[1, 3, 1, 5], figsize=(10, 6)
                 )
-                # plt.subplots_adjust(wspace=0.1)
                 seen_states.add(array_tobinary(state))
                 env = pygame.surfarray.array3d(game.display)
                 layer_1_activation = agent.net.linear1(
@@ -291,16 +284,10 @@ def train():
 
             if score > record:
                 record = score
-            # print('Game', agent.n_games, 'Score', score, 'Record:', record)
-
-            # system_entropy.append(np.mean(mean_entropy))
-
-            # weight_visualize(agent.net,axs)
 
             plot_scores.append(score)
             total_score += score
             mean_score = total_score / agent.n_games
-            # print('Games:', i,'Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:')
             print(
                 "Game:",
                 agent.n_games,
@@ -312,11 +299,7 @@ def train():
                 round(mean_score, 3),
             )
             plot_mean_scores.append(mean_score)
-            # plot_system_entropy(mean_entropy)
-            # plot(plot_scores, plot_mean_scores)
-            # if agent.n_games>=400:
-            #     mean_scores.append(list(plot_mean_scores))
-            #     break
+
             if heat_flag:
                 axis[1].cla()
                 axis[1].set_title("Training")

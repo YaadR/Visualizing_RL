@@ -5,12 +5,7 @@
 .idea/vcs.xml
 .idea/Visualizing_RL.iml
 .idea/workspace.xml
-Ver1/__pycache__/agent_Q.cpython-39.pyc
-Ver1/__pycache__/agent_Q_Lambda.cpython-39.pyc
-Ver1/__pycache__/agentDQN.cpython-39.pyc
-Ver1/__pycache__/game.cpython-39.pyc
-Ver1/__pycache__/game_multi.cpython-39.pyc
-Ver1/__pycache__/helper.cpython-39.pyc
-Ver1/__pycache__/model.cpython-39.pyc
 
+Ver1/__pycache__/
 venv/
+Ver1/data/plots/Certainty/*

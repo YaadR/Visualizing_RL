@@ -144,9 +144,10 @@ class SnakeGameAI:
         # 5. update ui and clock
         self._update_ui()
 
-        # self.clock.tick(SPEED)
+        # 6. call pygame event to prevent not responding error
+        pygame.event.pump()
 
-        # 6. return game over and score
+        # 7. return game over and score
         return reward, game_over, self.score
 
     def is_collision(self, pt=None):

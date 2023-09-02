@@ -288,6 +288,7 @@ def train():
             plot_scores.append(score)
             total_score += score
             mean_score = total_score / agent.n_games
+
             print(
                 "Game:",
                 agent.n_games,
@@ -298,6 +299,7 @@ def train():
                 "Mean Score:",
                 round(mean_score, 3),
             )
+
             plot_mean_scores.append(mean_score)
 
             if heat_flag:
@@ -343,7 +345,6 @@ def play():
                 record = score
             plot_scores.append(score)
 
-            # plot(plot_scores, plot_mean_scores)
             print(
                 "Game:",
                 agent.n_games,

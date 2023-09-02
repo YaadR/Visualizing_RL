@@ -48,7 +48,6 @@ class ActorCritic(nn.Module):
     def forward(self, state):
         x = F.relu(self.fc1(state))
         x = F.relu(self.fc2(x))
-        # policy = torch.log(F.softmax(self.fc_actor(x), dim=-1))
         policy = F.softmax(self.fc_actor(x), dim=-1)
         value = self.fc_critic(x)
         return policy, value
@@ -95,8 +94,7 @@ class A2C_Trainer:
         loss = actor_loss + critic_loss
         # Update the network
         self.optimizer.zero_grad()
-        # actor_loss.backward()
-        # critic_loss.backward()
+
         loss.backward()
         self.optimizer.step()
 

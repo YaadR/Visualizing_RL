@@ -346,9 +346,6 @@ class SnakeGameAICompetition:
                 self.display, BROWN, pygame.Rect(pt.x, pt.y, BLOCK_SIZE, BLOCK_SIZE)
             )
 
-        # for pt in self.snake[agentID]:
-        #     pygame.draw.rect(self.display, AGENT_UI[agentID+1][0], pygame.Rect(pt.x, pt.y, BLOCK_SIZE, BLOCK_SIZE))
-        #
         snake_color_decay = AGENT_UI[agentID + 1][0]
         decay_ratio = 0.90 if len(self.snake[agentID]) < 10 else 0.97
         for pt in self.snake[agentID]:
@@ -380,12 +377,8 @@ class SnakeGameAICompetition:
         )
         self.display.blit(text, text_position[agentID])
 
-        # user_control = font.render("Agent", True, WHITE)
-        # self.display.blit(user_control, [self.w-80, 0])
         if self.arrow:
             self.arrow_ui(agentID=agentID)
-
-        # pygame.display.flip()
 
     def _move(self, action, agentID=0):
         # [straight, right, left]

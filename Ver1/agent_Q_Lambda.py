@@ -31,7 +31,6 @@ class Agent_Q_Lambda:
         self.gamma = GAMMA  # discount rate
         self.alpha = ALPHA
         self.Lambda = LAMBDA  # learning rate
-        # self.Q = np.zeros((2**STATE_VEC_SIZE, NUM_ACTIONS)) # Initialize Q-table
         self.Q = dict()
         self.eligibility_trace = dict()
         self.num_actions = NUM_ACTIONS
@@ -49,13 +48,6 @@ class Agent_Q_Lambda:
         dir_r = game.direction == Direction.RIGHT
         dir_u = game.direction == Direction.UP
         dir_d = game.direction == Direction.DOWN
-
-        # env = pygame.surfarray.array3d(game.display)
-        # min_env = np.zeros((HEIGHT // BLOCK_SIZE, WIDTH // BLOCK_SIZE))
-        # for x, i in enumerate(range(0, HEIGHT - BLOCK_SIZE, BLOCK_SIZE)):
-        #     for y, j in enumerate(range(0, WIDTH - BLOCK_SIZE, BLOCK_SIZE)):
-        #         min_env[x, y] = np.sum(np.sum(env[i:i + BLOCK_SIZE, j:j + BLOCK_SIZE], axis=2)) // BLOCK_SIZE ** 2
-        # state  = [Danger straight,Danger right,Danger left,L,R,U,D,food left,food right,food up,food down]
 
         state = [
             # Danger straight
@@ -228,10 +220,6 @@ def play():
 
         # perform move and get new state
         reward, done, score = game.play_step(action)
-        # state_next = agent.get_state(game)
-        # if array_tobinary(state_next) not in agent.Q.keys():
-        #     agent.Q[array_tobinary(state_next)] = [0,0,0]
-        #     agent.eligibility_trace[array_tobinary(state_next)] = [0, 0, 0]
 
         if done:
             game.reset()

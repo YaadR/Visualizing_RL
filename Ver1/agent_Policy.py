@@ -112,12 +112,6 @@ class Agent_Policy:
         dir_u = game.direction[id].value == Direction.UP.value
         dir_d = game.direction[id].value == Direction.DOWN.value
 
-        # env = pygame.surfarray.array3d(game.display)
-        # min_env = np.zeros((HEIGHT//BLOCK_SIZE,WIDTH//BLOCK_SIZE))
-        # for x,i in enumerate(range(0,HEIGHT-BLOCK_SIZE,BLOCK_SIZE)):
-        #     for y,j in enumerate(range(0,WIDTH-BLOCK_SIZE,BLOCK_SIZE)):
-        #         min_env[x, y] = np.sum(np.sum(env[i:i+BLOCK_SIZE,j:j+BLOCK_SIZE],axis=2))//BLOCK_SIZE**2
-
         state = [
             # Danger straight
             (dir_r and game.is_collision(point_r, id))
@@ -244,21 +238,11 @@ def play():
                 record = score
             plot_scores.append(score)
 
-            # plot(plot_scores, plot_mean_scores)
-            # print('Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:')
-
 
 if __name__ == "__main__":
     agent = Agent_Policy()
     mean_scores = []
     i = 0
-
-    # for i in range(20):
-    #     agent = Agent_Policy()
-    #     train()
-    # name = 'Action Policy Agents'
-    # plot_mean_scores_buffer(mean_scores,name)
-    # plot_std_mean_scores_buffer(mean_scores,name)
 
     train()
     plt.close()

@@ -108,19 +108,12 @@ def net_visualize(model, axs):
                 bias_img = bias_img.reshape(-1, 1)
             axs[i].imshow(bias_img, cmap="gray")
             axs[i].set_title(f"Biases {(i + 1)//2} ")
-            # axs[j].axis('off')
         else:
             if layer.shape[0] > layer.shape[1]:
                 layer = layer.T
-            # if i==0:
-            #     bias_img = np.reshape(bias, (16*4,13*4))
-            # elif i==2:
-            #     bias_img = np.reshape(bias, (16*2, 3*8))
+
             axs[i].imshow(layer.T, cmap="gray")
             axs[i].set_title(f"Wights {i + 1}")
-    # for g in range(len(axs)):
-    #     axs[g].set_xticks([])
-    #     axs[g].set_yticks([])
 
     plt.tight_layout()
     plt.show()
@@ -153,8 +146,7 @@ def weight_visualize(model, axs):
 
     plt.tight_layout()
     plt.subplots_adjust(wspace=0.3)
-    # if index==50 or index==200:
-    #     plt.savefig(f'D:\GitHub\Reposetories\Visualizing_RL\Ver1\data\plots\\NetViz\\netviz_{index}.jpg')
+
     plt.show()
     plt.pause(0.1)
 

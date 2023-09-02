@@ -380,20 +380,3 @@ if __name__ == "__main__":
     train()
     plt.close()
     play()
-    # for i in range(20):
-    #     agent = Action_Value()
-    #     train()
-    # name = 'Action Value Agents'
-    # plot_mean_scores_buffer(mean_scores,name)
-    # plot_std_mean_scores_buffer(mean_scores,name)
-
-    # plt.close()
-    # plt.ion()
-    # fig, axs = plt.subplots(1, 3, width_ratios=[1, 5,1], figsize=(8, 6))
-    # plt.subplots_adjust(wspace=0.1)
-
-    #     state_vector = state_vector.reshape((1, -1))
-    #     layer_1_activation = agent.net.linear1(state_vector)
-    #     layer_2_activation = agent.net.linear2(torch.relu(layer_1_activation)).detach().numpy()
-    #     layer_1_activation = layer_1_activation.detach().numpy()
-    #     activation_visualize(state_vector, layer_1_activation, layer_2_activation, axs,i,i)

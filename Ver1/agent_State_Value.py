@@ -54,12 +54,6 @@ class Agent_State_Value:
         dir_u = game.direction == Direction.UP
         dir_d = game.direction == Direction.DOWN
 
-        # env = pygame.surfarray.array3d(game.display)
-        # min_env = np.zeros((HEIGHT//BLOCK_SIZE,WIDTH//BLOCK_SIZE))
-        # for x,i in enumerate(range(0,HEIGHT-BLOCK_SIZE,BLOCK_SIZE)):
-        #     for y,j in enumerate(range(0,WIDTH-BLOCK_SIZE,BLOCK_SIZE)):
-        #         min_env[x, y] = np.sum(np.sum(env[i:i+BLOCK_SIZE,j:j+BLOCK_SIZE],axis=2))//BLOCK_SIZE**2
-
         state = [
             # Danger straight
             (dir_r and game.is_collision(point_r))
@@ -105,12 +99,6 @@ class Agent_State_Value:
         dir_u = game.direction[id].value == Direction.UP.value
         dir_d = game.direction[id].value == Direction.DOWN.value
 
-        # env = pygame.surfarray.array3d(game.display)
-        # min_env = np.zeros((HEIGHT//BLOCK_SIZE,WIDTH//BLOCK_SIZE))
-        # for x,i in enumerate(range(0,HEIGHT-BLOCK_SIZE,BLOCK_SIZE)):
-        #     for y,j in enumerate(range(0,WIDTH-BLOCK_SIZE,BLOCK_SIZE)):
-        #         min_env[x, y] = np.sum(np.sum(env[i:i+BLOCK_SIZE,j:j+BLOCK_SIZE],axis=2))//BLOCK_SIZE**2
-
         state = [
             # Danger straight
             (dir_r and game.is_collision(point_r, id))
@@ -136,10 +124,7 @@ class Agent_State_Value:
             game.food.x < game.head[id].x,  # food left
             game.food.x > game.head[id].x,  # food right
             game.food.y < game.head[id].y,  # food up
-            game.food.y > game.head[id].y  # food down
-            # Food distance from head - X axis, Y axis and both
-            # preprocessing.normalize([[math.dist([game.head[id].x], [game.food.x]), 0, game.w]])[0][0],
-            # preprocessing.normalize([[math.dist([game.head[id].y], [game.food.y]), 0, game.h]])[0][0]
+            game.food.y > game.head[id].y,  # food down
         ]
 
         return np.array(state, dtype=int)
@@ -151,8 +136,6 @@ class Agent_State_Value:
         # random moves: tradeoff exploration / exploitation
         self.epsilon = 80 - self.n_games
         action = [0, 0, 0]
-        # prediction = list(itertools.chain.from_iterable(self.net(torch.tensor(state, dtype=torch.float)).detach().numpy()))
-        # prediction = self.net(torch.tensor(state, dtype=torch.float)).detach().numpy()
         if random.randint(0, 200) < self.epsilon:
             move = random.randint(0, 2)
             self.actions_probability = action
@@ -180,9 +163,6 @@ def train():
     mean_score = 0
 
     plt.ion()
-
-    # fig, axs = plt.subplots(1, 3,width_ratios=[4,1,6], figsize=(8, 6))
-    # fig, axs = plt.subplots(1, 4, width_ratios=[12, 4, 8, 1], figsize=(8, 6))
 
     while True:
         # get old state
@@ -271,4 +251,4 @@ if __name__ == "__main__":
     agent = Agent_State_Value()
 
     train()
-    # play()
+    play()

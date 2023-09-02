@@ -54,12 +54,6 @@ class Agent_Value:
         dir_u = game.direction == Direction.UP
         dir_d = game.direction == Direction.DOWN
 
-        # env = pygame.surfarray.array3d(game.display)
-        # min_env = np.zeros((HEIGHT//BLOCK_SIZE,WIDTH//BLOCK_SIZE))
-        # for x,i in enumerate(range(0,HEIGHT-BLOCK_SIZE,BLOCK_SIZE)):
-        #     for y,j in enumerate(range(0,WIDTH-BLOCK_SIZE,BLOCK_SIZE)):
-        #         min_env[x, y] = np.sum(np.sum(env[i:i+BLOCK_SIZE,j:j+BLOCK_SIZE],axis=2))//BLOCK_SIZE**2
-
         state = [
             # Danger straight
             (dir_r and game.is_collision(point_r))
@@ -85,10 +79,7 @@ class Agent_Value:
             game.food.x < game.head.x,  # food left
             game.food.x > game.head.x,  # food right
             game.food.y < game.head.y,  # food up
-            game.food.y > game.head.y  # food down
-            # Food distance from head - X axis, Y axis and both
-            # preprocessing.normalize([[math.dist([game.head.x],[game.food.x]),0,game.w]])[0][0],
-            # preprocessing.normalize([[math.dist([game.head.y],[game.food.y]),0,game.h]])[0][0]
+            game.food.y > game.head.y,  # food down
         ]
 
         return np.array(state, dtype=float)
@@ -104,12 +95,6 @@ class Agent_Value:
         dir_r = game.direction[id].value == Direction.RIGHT.value
         dir_u = game.direction[id].value == Direction.UP.value
         dir_d = game.direction[id].value == Direction.DOWN.value
-
-        # env = pygame.surfarray.array3d(game.display)
-        # min_env = np.zeros((HEIGHT//BLOCK_SIZE,WIDTH//BLOCK_SIZE))
-        # for x,i in enumerate(range(0,HEIGHT-BLOCK_SIZE,BLOCK_SIZE)):
-        #     for y,j in enumerate(range(0,WIDTH-BLOCK_SIZE,BLOCK_SIZE)):
-        #         min_env[x, y] = np.sum(np.sum(env[i:i+BLOCK_SIZE,j:j+BLOCK_SIZE],axis=2))//BLOCK_SIZE**2
 
         state = [
             # Danger straight
@@ -136,10 +121,7 @@ class Agent_Value:
             game.food.x < game.head[id].x,  # food left
             game.food.x > game.head[id].x,  # food right
             game.food.y < game.head[id].y,  # food up
-            game.food.y > game.head[id].y  # food down
-            # Food distance from head - X axis, Y axis and both
-            # preprocessing.normalize([[math.dist([game.head[id].x], [game.food.x]), 0, game.w]])[0][0],
-            # preprocessing.normalize([[math.dist([game.head[id].y], [game.food.y]), 0, game.h]])[0][0]
+            game.food.y > game.head[id].y,  # food down
         ]
 
         return np.array(state, dtype=float)
@@ -187,9 +169,6 @@ def train():
     mean_score = 0
 
     plt.ion()
-
-    # fig, axs = plt.subplots(1, 3,width_ratios=[4,1,6], figsize=(8, 6))
-    # fig, axs = plt.subplots(1, 4, width_ratios=[12, 4, 8, 1], figsize=(8, 6))
 
     while True:
         # get old state
@@ -279,10 +258,3 @@ if __name__ == "__main__":
     train()
     plt.close()
     play()
-
-    # for i in range(20):
-    #     agent = Agent_Value()
-    #     train()
-    # name = 'State Value Agents'
-    # plot_mean_scores_buffer(mean_scores,name)
-    # plot_std_mean_scores_buffer(mean_scores,name)

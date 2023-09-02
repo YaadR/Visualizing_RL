@@ -7,7 +7,6 @@ import copy
 from pygame.locals import *
 
 pygame.init()
-# font = pygame.font.Font('./Ver1/arial.ttf', 25)
 font = pygame.font.SysFont("arial", 18, bold=True)
 
 
@@ -87,7 +86,6 @@ class SnakeGameAI:
         return copied_game
 
     def place_obstacle(self):
-        # self.obstacle = [Point(80, 60), Point(80, 240), Point(320, 60), Point(320, 240)]
         for W, H in [(80, 60), (80, 240), (320, 60), (320, 240)]:
             for h in range(H, H + OBSTACLE_HEIGHT, BLOCK_SIZE):
                 for w in range(W, W + OBSTACLE_HEIGHT, BLOCK_SIZE):
@@ -345,9 +343,6 @@ class SnakeGameAI:
                 AGENT_UI[self.agentID][0],
             )
             self.display.blit(text, text_position[self.agentID - 1])
-
-        # text = font.render(f"Score: {self.score}", True, WHITE)
-        # self.display.blit(text, [10, 0])
 
         if self.arrow:
             self.arrow_ui()

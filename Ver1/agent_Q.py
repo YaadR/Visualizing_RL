@@ -45,13 +45,6 @@ class Agent_Q:
         dir_u = game.direction == Direction.UP
         dir_d = game.direction == Direction.DOWN
 
-        # env = pygame.surfarray.array3d(game.display)
-        # min_env = np.zeros((HEIGHT // BLOCK_SIZE, WIDTH // BLOCK_SIZE))
-        # for x, i in enumerate(range(0, HEIGHT - BLOCK_SIZE, BLOCK_SIZE)):
-        #     for y, j in enumerate(range(0, WIDTH - BLOCK_SIZE, BLOCK_SIZE)):
-        #         min_env[x, y] = np.sum(np.sum(env[i:i + BLOCK_SIZE, j:j + BLOCK_SIZE], axis=2)) // BLOCK_SIZE ** 2
-        # state  = [Danger straight,Danger right,Danger left,L,R,U,D,food left,food right,food up,food down]
-
         state = [
             # Danger straight
             (dir_r and game.is_collision(point_r))
@@ -93,13 +86,6 @@ class Agent_Q:
         dir_r = game.direction == Direction.RIGHT
         dir_u = game.direction == Direction.UP
         dir_d = game.direction == Direction.DOWN
-
-        # env = pygame.surfarray.array3d(game.display)
-        # min_env = np.zeros((HEIGHT // BLOCK_SIZE, WIDTH // BLOCK_SIZE))
-        # for x, i in enumerate(range(0, HEIGHT - BLOCK_SIZE, BLOCK_SIZE)):
-        #     for y, j in enumerate(range(0, WIDTH - BLOCK_SIZE, BLOCK_SIZE)):
-        #         min_env[x, y] = np.sum(np.sum(env[i:i + BLOCK_SIZE, j:j + BLOCK_SIZE], axis=2)) // BLOCK_SIZE ** 2
-        # state  = [Danger straight,Danger right,Danger left,L,R,U,D,food left,food right,food up,food down]
 
         state = [
             # Danger straight

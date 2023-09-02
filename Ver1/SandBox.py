@@ -40,7 +40,6 @@ while running:
     color = (int((1 - t) * 255), int(t * 255), 0)
 
     # Draw percentage bar
-    # pygame.draw.rect(screen, color, (50, int(volb - vol), 35, vol), 0)  # Percentage bar
     pygame.draw.rect(screen, color, (10, 10, int(t * 120), 40), 0)  # Percentage bar
     pygame.draw.rect(screen, color, (10, 10, 120, 40), 3)  # Outline of bar
 

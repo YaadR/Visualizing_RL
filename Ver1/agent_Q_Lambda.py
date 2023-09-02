@@ -5,16 +5,8 @@ Q(Lambda) Algorithm
 import numpy as np
 from collections import deque
 from game import SnakeGameAI, Direction, Point, pygame
-from helper import (
-    plot,
-    heat_map_step,
-    distance_collapse,
-    table_visualize,
-    array_tobinary,
-)
+from helper import table_visualize, array_tobinary
 import matplotlib.pyplot as plt
-import json
-import statistics
 
 # Constants
 NUM_ACTIONS = 3  # Number of possible actions (up, down, left, right)

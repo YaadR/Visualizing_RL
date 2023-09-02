@@ -9,15 +9,10 @@ Agent Value:
 import torch
 import random
 import numpy as np
-from collections import deque
 from game import SnakeGameAI, Direction, Point, pygame
 from model import Linear_Net, State_Value_Trainer, nn
-from helper import plot, net_visualize, activation_visualize, array_tobinary
-from sklearn import preprocessing
-import math
+from helper import plot, array_tobinary
 import matplotlib.pyplot as plt
-import itertools
-import statistics
 
 
 ALPHA = 0.3  # Learning rate

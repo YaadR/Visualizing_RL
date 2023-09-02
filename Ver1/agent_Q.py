@@ -2,11 +2,8 @@
 Q learning
 """
 import numpy as np
-from collections import deque
 from game import SnakeGameAI, Direction, Point, pygame
-from helper import plot, heat_map_step, distance_collapse, array_tobinary
-import matplotlib.pyplot as plt
-import json
+from helper import array_tobinary
 
 # Constants
 NUM_ACTIONS = 3  # Number of possible actions (up, down, left, right)

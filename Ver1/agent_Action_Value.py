@@ -13,25 +13,16 @@ from collections import deque
 from game import SnakeGameAI, Direction, Point, pygame
 from model import Linear_Net, Value_Trainer_A
 from helper import (
-    plot_std_mean_scores_buffer,
-    plot_mean_scores_buffer,
-    plot,
     heat_map_step,
     distance_collapse,
-    net_visualize,
     activation_visualize,
     array_tobinary,
-    plot_system_entropy,
     entropy,
     softmax,
     cirtenty_function,
-    normalize,
-    weight_visualize,
 )
-from sklearn import preprocessing
-import math
+
 import matplotlib.pyplot as plt
-import statistics
 
 
 ##

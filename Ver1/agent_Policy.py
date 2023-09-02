@@ -16,16 +16,8 @@ import numpy as np
 from collections import deque
 from game import SnakeGameAI, Direction, Point
 from model import ActorCritic, A2C_Trainer
-from helper import (
-    plot,
-    net_visualize,
-    plot_mean_scores_buffer,
-    plot_std_mean_scores_buffer,
-)
-from sklearn import preprocessing
-import math
+
 import matplotlib.pyplot as plt
-import statistics
 import warnings
 
 warnings.filterwarnings("ignore")

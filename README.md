@@ -1,26 +1,48 @@
-# Visualizing RL: 
-##### How the agent perceives the environment during training
+# Visualizing_RL
+Visualizing how different agents perceive their environment in the game Snake: Algorithms in Reinforcement Learning
 
-
-#### Authors:
+# Authors
 * [Yaad Rebhun](https://github.com/YaadR)
 * [Itai Zeitouni](https://github.com/Itaize33)
 
-## Project description:
-Visualizing how different agents perceive their environment in the game Snake: Algorithms in Reinforcement Learning
-
-### SNAKE:
+# Snake
 The snake game environment is a visualization tool to evaluate different RL algorithms on the game Snake.
 the algorithms need to learn how to guide the snake to the food without hitting the wall or eating itself (self-loop).
 these algorithms do that by using image processing to create an input vector of values used in determining the best next step for the snake to play.
 each time the snake eats the food the algorithm gets a reward.
 the input vector has 3 values. each value defines the next step (forward, left, right). this is defined differently in each algorithm using state/action values.
 
-### Project setups:
-1. Run ```pip install -r requirements.txt```.
-2. Every agent can run independently. The arena file is the only file that can also run independently. it runs all agents simultaneously in the same arena to compete and determine the best agent for the snake game. 
+# Project setup
+1. **Clone Repository**
+    ```bash
+    git clone https://github.com/YaadR/Visualizing_RL.git
+    cd Visualizing_RL
+    ```
 
-### Visualization solutions:
+2. **Create Virtual Environment**
+    ```bash
+    python3 -m venv venv
+    ```
+
+3. **Activate Environment**
+    ```bash
+    # Linux/MacOS
+    source venv/bin/activate
+    # Windows
+    venv/Scripts/activate
+    ```
+
+4. **Install requirements**
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+5. **Run Project**
+    ```
+    python3 Ver1\main.py
+    ```
+
+## Visualization solutions:
 1. Heatmap
 2. Certainty Arrows
 3. Neural network weights visualization (where NN is used)
@@ -61,8 +83,8 @@ the input vector has 3 values. each value defines the next step (forward, left, 
 </p>
 
 
-## Reinforcement algorithms & concepts:
-#### Agent State Value:
+## Reinforcement algorithms & concepts
+### Agent State Value
  - Value-based: state value
  - Model-based
  - off policy
@@ -72,7 +94,7 @@ RL Algorithm:
 $$V(s_t)' = V(s_t) + \alpha* \left[ R_{t+1} + (1-s_{t->terminal})(\gamma* V(s_{t+1}) - V(s_t) \right)]$$
 
 
-#### Agent Action Value:
+### Agent Action Value
  - Value-based: action value
  - Model-free
  - off policy
@@ -82,7 +104,7 @@ RL Algorithm:
 $$Q(s_t)' = R_{t+1} + (1-s_{t->terminal})(\gamma* Max(Q(S_{t+1},A_{t+1})))$$
 
 
-#### Agent Policy:
+### Agent Policy
  - Policy-based
  - Model-free
  - on policy
@@ -95,11 +117,7 @@ $$A_{\text{critic}}(s_{t})' = R_{t} + (1-s_{t->terminal}) ( \gamma* V(s_{t+1}) -
 Actor:
 $$\theta_{\text{actor}} = \nabla_{\theta_{\text{actor}}} \log(\pi_{\theta_{\text{actor}}}(a_{t}|s_{t})) A_{\text{critic}}(s_{t})$$
 
-
-
-
-
-#### Training - Stability, Mean & STD - 20 Rounds:
+### Training - Stability, Mean & STD - 20 Rounds
 <p float="left">
   <img src="https://github.com/YaadR/Visualizing_RL/blob/main/Ver1/data/plots/Buffers/Mean%20State%20Value%20Agents.jpg" width="250" />
   <img src="https://github.com/YaadR/Visualizing_RL/blob/main/Ver1/data/plots/Buffers/Mean%20Action%20Value%20Agents.jpg?raw=true" width="250" />
@@ -114,15 +132,13 @@ $$\theta_{\text{actor}} = \nabla_{\theta_{\text{actor}}} \log(\pi_{\theta_{\text
 ### Algorithms compete in an Arena
 [![Arena](https://github.com/YaadR/Visualizing_RL/blob/main/Ver1/data/materials/arena-compete-gif.gif)](https://youtu.be/_RmOt_EeuUU)
 
-
-
-
 ## Additional Notes
 
 Please follow the project steps carefully and ensure that all dependencies are correctly installed before running the solution.
 
 ## Acknowledgments
 The basis for this project is inspired by [Patrick Loeber](https://github.com/patrickloeber) for his work in [Teach AI To Play Snake - Reinforcement Learning Tutorial With PyTorch And Pygame](https://youtube.com/playlist?list=PLqnslRFeH2UrDh7vUmJ60YrmWd64mTTKV)
+
 ## License
 This project is licensed under the MIT License. Feel free to use, modify, and distribute it according to the terms of the license.
 

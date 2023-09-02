@@ -38,6 +38,8 @@ NUM_ACTIONS = 3  # Number of possible actions (up, down, left, right)
 STATE_VEC_SIZE = 11
 HIDDEN_LAYER = 256
 
+USE_HEAT_MAP = True
+
 
 class Action_Value:
     def __init__(self):
@@ -318,10 +320,14 @@ def train():
                     plot_mean_scores[-1],
                     str(round(plot_mean_scores[-1], 3)),
                 )
-        # Uncomment the following code if you want to use the heatmap feature
-        # if (((mean_score > 12) or (agent.n_games <= 15 and agent.n_games >= 5)) and heat_flag) or done:
-        #     plt.show()
-        #     plt.pause(0.001)
+
+        if USE_HEAT_MAP:
+            if (
+                ((mean_score > 12) or (agent.n_games <= 15 and agent.n_games >= 5))
+                and heat_flag
+            ) or done:
+                plt.show()
+                plt.pause(0.001)
 
 
 def play():

@@ -1,5 +1,12 @@
 import os
 
+# Create Path object
+#   my_path = Path("/Users/UserName/Desktop")
+
+# Append to Path
+#   open(my_path / "test.txt")
+#   my_path / "test.txt" == os.path.join(py_path, "test.txt")
+
 
 class Path:
     base: str
@@ -17,4 +24,5 @@ class Path:
         return self.base
 
 
+# Path to Visualizing_Rl directory
 BASE_DIR = Path(os.path.abspath(os.path.join(__file__, os.pardir, os.pardir)))

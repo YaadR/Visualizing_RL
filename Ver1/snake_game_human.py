@@ -21,8 +21,6 @@ class Direction(Enum):
 
 Point = namedtuple("Point", "x, y")
 
-# rgb colors
-
 
 class SnakeGame:
     def __init__(self, w=640, h=480):

@@ -12,7 +12,7 @@ HEIGHT = 360
 TRAIN_STOP = 15
 MAX_GAMES = 300
 MIN_GAMES = 150
-plot_colors = ['blue', 'purple', 'green']
+plot_colors = ["blue", "purple", "green"]
 
 
 def train(agent_num=1):
@@ -33,7 +33,7 @@ def train(agent_num=1):
 
     while True:
         # get old state
-        for i,agent in enumerate(Agents):
+        for i, agent in enumerate(Agents):
             if not trained[i]:
                 state = agent.get_state(arena.env[i])
 
@@ -52,10 +52,12 @@ def train(agent_num=1):
                 arena.displays[i] = pygame.surfarray.array3d(arena.env[i].display)
                 state_next = agent.get_state(arena.env[i])
 
-                if i==1:
+                if i == 1:
                     # train online
-                    agent.train_online(state, np.argmax(action), reward, state_next, done)
-                elif i==0:
+                    agent.train_online(
+                        state, np.argmax(action), reward, state_next, done
+                    )
+                elif i == 0:
                     agent.train_online(state, action, reward, state_next, done)
                 if done:
                     arena.env[i].reset()
@@ -67,31 +69,53 @@ def train(agent_num=1):
                     plot_scores[i].append(score)
                     total_score[i] += score
                     mean_score = total_score[i] / agent.n_games
-                    plot_mean_scores[i].append(round(mean_score,3))
-                    trained[i] = ((mean_score > TRAIN_STOP) and (agent.n_games>=MIN_GAMES)) or (agent.n_games>=MAX_GAMES)
+                    plot_mean_scores[i].append(round(mean_score, 3))
+                    trained[i] = (
+                        (mean_score > TRAIN_STOP) and (agent.n_games >= MIN_GAMES)
+                    ) or (agent.n_games >= MAX_GAMES)
 
                     axis[i].cla()
                     axis[i].set_title(AGENT_NAMES[i])
-                    axis[i].set_xlabel('Games')
-                    axis[i].set_ylabel('Score')
+                    axis[i].set_xlabel("Games")
+                    axis[i].set_ylabel("Score")
                     axis[i].plot(plot_scores[i], color=plot_colors[i])
                     axis[i].plot(plot_mean_scores[i])
-                    axis[i].axhline(y=TRAIN_STOP, color='orange', linestyle='--')
+                    axis[i].axhline(y=TRAIN_STOP, color="orange", linestyle="--")
                     if agent.n_games > MIN_GAMES - 10:
-                        axis[i].axvline(x=MIN_GAMES, color='green', linestyle='--')
+                        axis[i].axvline(x=MIN_GAMES, color="green", linestyle="--")
                     if agent.n_games > MAX_GAMES - 20:
-                        axis[i].axvline(x=MIN_GAMES, color='red', linestyle='--')
+                        axis[i].axvline(x=MIN_GAMES, color="red", linestyle="--")
                     axis[i].set_ylim(ymin=0)
-                    axis[i].text(len(plot_scores[i]) - 1, plot_scores[i][-1], str(plot_scores[i][-1]))
-                    axis[i].text(len(plot_mean_scores[i]) - 1, plot_mean_scores[i][-1], str(plot_mean_scores[i][-1]))
+                    axis[i].text(
+                        len(plot_scores[i]) - 1,
+                        plot_scores[i][-1],
+                        str(plot_scores[i][-1]),
+                    )
+                    axis[i].text(
+                        len(plot_mean_scores[i]) - 1,
+                        plot_mean_scores[i][-1],
+                        str(plot_mean_scores[i][-1]),
+                    )
                     plt.show(block=False)
-                    plt.pause(.1)
+                    plt.pause(0.1)
 
                     arena.env[i].display.fill(BLACK)
                     if trained[i]:
-                        arena.displays[i] = pygame.surfarray.array3d(arena.env[i].display)
-                    print('Agent:', i, 'Game:', agent.n_games, 'Score:', score, 'Record:', record[i], 'Mean Score:',
-                          round(mean_score, 3))
+                        arena.displays[i] = pygame.surfarray.array3d(
+                            arena.env[i].display
+                        )
+                    print(
+                        "Agent:",
+                        i,
+                        "Game:",
+                        agent.n_games,
+                        "Score:",
+                        score,
+                        "Record:",
+                        record[i],
+                        "Mean Score:",
+                        round(mean_score, 3),
+                    )
 
         if np.all(trained):
             break
@@ -118,7 +142,6 @@ def play(agent_num=1):
     while True:
         # get old state
         for i, agent in enumerate(Agents):
-
             state = agent.get_state_arena(arena, i)
 
             # get action
@@ -137,18 +160,28 @@ def play(agent_num=1):
                 plot_scores[i].append(score[i])
                 total_score[i] += score[i]
                 mean_score = total_score[i] / agent.n_games
-                plot_mean_scores[i].append(round(mean_score,3))
+                plot_mean_scores[i].append(round(mean_score, 3))
 
                 # arena.display.fill(BLACK)
-                print('Agent:', i, 'Game:', agent.n_games, 'Score:', score[i], 'Record:', record[i], 'Mean Score:',
-                      round(mean_score, 3))
+                print(
+                    "Agent:",
+                    i,
+                    "Game:",
+                    agent.n_games,
+                    "Score:",
+                    score[i],
+                    "Record:",
+                    record[i],
+                    "Mean Score:",
+                    round(mean_score, 3),
+                )
 
         pygame.display.flip()
         arena.display.fill(BLACK)
 
 
-if __name__ == '__main__':
-    AGENT_NAMES = ["Action Value", "Policy","State Value"]
+if __name__ == "__main__":
+    AGENT_NAMES = ["Action Value", "Policy", "State Value"]
     agentActionValue = agent_Action_Value.Action_Value()
     agentA2C = agent_Policy.Agent_Policy()
     agentValue = agent_Value.Agent_Value()

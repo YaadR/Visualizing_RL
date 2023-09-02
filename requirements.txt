@@ -1,0 +1,7 @@
+Pygame==0.2.2
+Pillow==10.0.0
+Pygments==2.15.1
+gym==0.26.2
+gym-notices==0.0.8
+ipython==8.14.0
+

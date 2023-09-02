@@ -1,4 +1,4 @@
-'''
+"""
 Policy Gradient Network | A2C Network
 
  - Model free
@@ -7,7 +7,7 @@ Policy Gradient Network | A2C Network
  - value based : state value
  - policy based
 
-'''
+"""
 
 #
 import torch
@@ -16,7 +16,12 @@ import numpy as np
 from collections import deque
 from game import SnakeGameAI, Direction, Point
 from model import ActorCritic, A2C_Trainer
-from helper import plot, net_visualize,plot_mean_scores_buffer,plot_std_mean_scores_buffer
+from helper import (
+    plot,
+    net_visualize,
+    plot_mean_scores_buffer,
+    plot_std_mean_scores_buffer,
+)
 from sklearn import preprocessing
 import math
 import matplotlib.pyplot as plt
@@ -53,7 +58,9 @@ class Agent_Policy:
         # Actor Critic combined
         self.net = ActorCritic(STATE_VEC_SIZE, NUM_ACTIONS)  # Linear_QNet(11, 256, 3)
         self.optimizer = torch.optim.Adam(self.net.parameters(), lr=LR)
-        self.trainer = A2C_Trainer(net=self.net, optimizer=self.optimizer, lr=LR, gamma=self.gamma)
+        self.trainer = A2C_Trainer(
+            net=self.net, optimizer=self.optimizer, lr=LR, gamma=self.gamma
+        )
         self.prediction = [0, 0, 0]
 
     def get_state(self, game):
@@ -70,39 +77,33 @@ class Agent_Policy:
 
         state = [
             # Danger straight
-            (dir_r and game.is_collision(point_r)) or
-            (dir_l and game.is_collision(point_l)) or
-            (dir_u and game.is_collision(point_u)) or
-            (dir_d and game.is_collision(point_d)),
-
+            (dir_r and game.is_collision(point_r))
+            or (dir_l and game.is_collision(point_l))
+            or (dir_u and game.is_collision(point_u))
+            or (dir_d and game.is_collision(point_d)),
             # Danger right
-            (dir_u and game.is_collision(point_r)) or
-            (dir_d and game.is_collision(point_l)) or
-            (dir_l and game.is_collision(point_u)) or
-            (dir_r and game.is_collision(point_d)),
-
+            (dir_u and game.is_collision(point_r))
+            or (dir_d and game.is_collision(point_l))
+            or (dir_l and game.is_collision(point_u))
+            or (dir_r and game.is_collision(point_d)),
             # Danger left
-            (dir_d and game.is_collision(point_r)) or
-            (dir_u and game.is_collision(point_l)) or
-            (dir_r and game.is_collision(point_u)) or
-            (dir_l and game.is_collision(point_d)),
-
+            (dir_d and game.is_collision(point_r))
+            or (dir_u and game.is_collision(point_l))
+            or (dir_r and game.is_collision(point_u))
+            or (dir_l and game.is_collision(point_d)),
             # Move direction
             dir_l,
             dir_r,
             dir_u,
             dir_d,
-
             # Food location
             game.food.x < game.head.x,  # food left
             game.food.x > game.head.x,  # food right
             game.food.y < game.head.y,  # food up
             game.food.y > game.head.y,  # food down
-
             # Food distance from head - X axis, Y axis and both
             # round(preprocessing.normalize([[math.dist([game.head.x], [game.food.x]), 0, game.w]])[0][0],2),
             # round(preprocessing.normalize([[math.dist([game.head.y], [game.food.y]), 0, game.h]])[0][0],2)
-
         ]
 
         return np.array(state, dtype=int)
@@ -127,34 +128,30 @@ class Agent_Policy:
 
         state = [
             # Danger straight
-            (dir_r and game.is_collision(point_r, id)) or
-            (dir_l and game.is_collision(point_l, id)) or
-            (dir_u and game.is_collision(point_u, id)) or
-            (dir_d and game.is_collision(point_d, id)),
-
+            (dir_r and game.is_collision(point_r, id))
+            or (dir_l and game.is_collision(point_l, id))
+            or (dir_u and game.is_collision(point_u, id))
+            or (dir_d and game.is_collision(point_d, id)),
             # Danger right
-            (dir_u and game.is_collision(point_r, id)) or
-            (dir_d and game.is_collision(point_l, id)) or
-            (dir_l and game.is_collision(point_u, id)) or
-            (dir_r and game.is_collision(point_d, id)),
-
+            (dir_u and game.is_collision(point_r, id))
+            or (dir_d and game.is_collision(point_l, id))
+            or (dir_l and game.is_collision(point_u, id))
+            or (dir_r and game.is_collision(point_d, id)),
             # Danger left
-            (dir_d and game.is_collision(point_r, id)) or
-            (dir_u and game.is_collision(point_l, id)) or
-            (dir_r and game.is_collision(point_u, id)) or
-            (dir_l and game.is_collision(point_d, id)),
-
+            (dir_d and game.is_collision(point_r, id))
+            or (dir_u and game.is_collision(point_l, id))
+            or (dir_r and game.is_collision(point_u, id))
+            or (dir_l and game.is_collision(point_d, id)),
             # Move direction
             dir_l,
             dir_r,
             dir_u,
             dir_d,
-
             # Food location
             game.food.x < game.head[id].x,  # food left
             game.food.x > game.head[id].x,  # food right
             game.food.y < game.head[id].y,  # food up
-            game.food.y > game.head[id].y  # food down
+            game.food.y > game.head[id].y,  # food down
         ]
 
         return np.array(state, dtype=int)
@@ -215,17 +212,29 @@ def train():
             total_score += score
             mean_score = total_score / agent.n_games
             plot_mean_scores.append(mean_score)
-            if agent.n_games>=400:
+            if agent.n_games >= 400:
                 mean_scores.append(list(plot_mean_scores))
                 break
 
             # plot(plot_scores, plot_mean_scores)
-            print('Games:', i,'Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:', round(mean_score, 3))
+            print(
+                "Games:",
+                i,
+                "Game:",
+                agent.n_games,
+                "Score:",
+                score,
+                "Record:",
+                record,
+                "Mean Score:",
+                round(mean_score, 3),
+            )
+
 
 def play():
     plot_scores = []
     record = 0
-    game = SnakeGameAI(arrow=True,obstacle_flag=True)
+    game = SnakeGameAI(arrow=True, obstacle_flag=True)
 
     while True:
         # get old state
@@ -244,12 +253,13 @@ def play():
             plot_scores.append(score)
 
             # plot(plot_scores, plot_mean_scores)
-            #print('Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:')
+            # print('Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:')
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     agent = Agent_Policy()
     mean_scores = []
-    i=0
+    i = 0
 
     # for i in range(20):
     #     agent = Agent_Policy()
@@ -261,5 +271,3 @@ if __name__ == '__main__':
     train()
     plt.close()
     play()
-
-

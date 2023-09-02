@@ -1,18 +1,18 @@
-'''
+"""
 Agent Value:
  - Model free
  - off policy
   - online
  - value based : state value
-'''
+"""
 
 import torch
 import random
 import numpy as np
 from collections import deque
 from game import SnakeGameAI, Direction, Point, pygame
-from model import Linear_Net, State_Value_Trainer,nn
-from helper import plot,net_visualize, activation_visualize,array_tobinary
+from model import Linear_Net, State_Value_Trainer, nn
+from helper import plot, net_visualize, activation_visualize, array_tobinary
 from sklearn import preprocessing
 import math
 import matplotlib.pyplot as plt
@@ -35,17 +35,17 @@ HIDDEN_LAYER = 256
 
 
 class Agent_State_Value:
-
     def __init__(self):
         self.n_games = 0
         self.epsilon = 0  # randomness
         self.gamma = GAMMA  # discount rate
-        self.alpha = ALPHA #
-        self.Q = dict()     # Q table
+        self.alpha = ALPHA  #
+        self.Q = dict()  # Q table
         self.net = Linear_Net(STATE_VEC_SIZE, HIDDEN_LAYER, STATE_VALUE)
-        self.trainer = State_Value_Trainer(self.net, lr=LR, gamma=self.gamma,alpha=self.alpha)
+        self.trainer = State_Value_Trainer(
+            self.net, lr=LR, gamma=self.gamma, alpha=self.alpha
+        )
         self.actions_probability = [0, 0, 0]
-
 
     def get_state(self, game):
         head = game.snake[0]
@@ -67,35 +67,30 @@ class Agent_State_Value:
 
         state = [
             # Danger straight
-            (dir_r and game.is_collision(point_r)) or
-            (dir_l and game.is_collision(point_l)) or
-            (dir_u and game.is_collision(point_u)) or
-            (dir_d and game.is_collision(point_d)),
-
+            (dir_r and game.is_collision(point_r))
+            or (dir_l and game.is_collision(point_l))
+            or (dir_u and game.is_collision(point_u))
+            or (dir_d and game.is_collision(point_d)),
             # Danger right
-            (dir_u and game.is_collision(point_r)) or
-            (dir_d and game.is_collision(point_l)) or
-            (dir_l and game.is_collision(point_u)) or
-            (dir_r and game.is_collision(point_d)),
-
+            (dir_u and game.is_collision(point_r))
+            or (dir_d and game.is_collision(point_l))
+            or (dir_l and game.is_collision(point_u))
+            or (dir_r and game.is_collision(point_d)),
             # Danger left
-            (dir_d and game.is_collision(point_r)) or
-            (dir_u and game.is_collision(point_l)) or
-            (dir_r and game.is_collision(point_u)) or
-            (dir_l and game.is_collision(point_d)),
-
+            (dir_d and game.is_collision(point_r))
+            or (dir_u and game.is_collision(point_l))
+            or (dir_r and game.is_collision(point_u))
+            or (dir_l and game.is_collision(point_d)),
             # Move direction
             dir_l,
             dir_r,
             dir_u,
             dir_d,
-
             # Food location
             game.food.x < game.head.x,  # food left
             game.food.x > game.head.x,  # food right
             game.food.y < game.head.y,  # food up
             game.food.y > game.head.y  # food down
-
             # Food distance from head - X axis, Y axis and both
             # preprocessing.normalize([[math.dist([game.head.x],[game.food.x]),0,game.w]])[0][0],
             # preprocessing.normalize([[math.dist([game.head.y],[game.food.y]),0,game.h]])[0][0]
@@ -123,35 +118,30 @@ class Agent_State_Value:
 
         state = [
             # Danger straight
-            (dir_r and game.is_collision(point_r, id)) or
-            (dir_l and game.is_collision(point_l, id)) or
-            (dir_u and game.is_collision(point_u, id)) or
-            (dir_d and game.is_collision(point_d, id)),
-
+            (dir_r and game.is_collision(point_r, id))
+            or (dir_l and game.is_collision(point_l, id))
+            or (dir_u and game.is_collision(point_u, id))
+            or (dir_d and game.is_collision(point_d, id)),
             # Danger right
-            (dir_u and game.is_collision(point_r, id)) or
-            (dir_d and game.is_collision(point_l, id)) or
-            (dir_l and game.is_collision(point_u, id)) or
-            (dir_r and game.is_collision(point_d, id)),
-
+            (dir_u and game.is_collision(point_r, id))
+            or (dir_d and game.is_collision(point_l, id))
+            or (dir_l and game.is_collision(point_u, id))
+            or (dir_r and game.is_collision(point_d, id)),
             # Danger left
-            (dir_d and game.is_collision(point_r, id)) or
-            (dir_u and game.is_collision(point_l, id)) or
-            (dir_r and game.is_collision(point_u, id)) or
-            (dir_l and game.is_collision(point_d, id)),
-
+            (dir_d and game.is_collision(point_r, id))
+            or (dir_u and game.is_collision(point_l, id))
+            or (dir_r and game.is_collision(point_u, id))
+            or (dir_l and game.is_collision(point_d, id)),
             # Move direction
             dir_l,
             dir_r,
             dir_u,
             dir_d,
-
             # Food location
             game.food.x < game.head[id].x,  # food left
             game.food.x > game.head[id].x,  # food right
             game.food.y < game.head[id].y,  # food up
             game.food.y > game.head[id].y  # food down
-
             # Food distance from head - X axis, Y axis and both
             # preprocessing.normalize([[math.dist([game.head[id].x], [game.food.x]), 0, game.w]])[0][0],
             # preprocessing.normalize([[math.dist([game.head[id].y], [game.food.y]), 0, game.h]])[0][0]
@@ -180,8 +170,10 @@ class Agent_State_Value:
 
         return action
 
-    def update_Q(self,s,a,s_prime):
-        self.Q[array_tobinary(s)][np.argmax(a)] = self.net(torch.tensor(s_prime, dtype=torch.float)).detach().numpy()[0]
+    def update_Q(self, s, a, s_prime):
+        self.Q[array_tobinary(s)][np.argmax(a)] = (
+            self.net(torch.tensor(s_prime, dtype=torch.float)).detach().numpy()[0]
+        )
 
 
 def train():
@@ -202,7 +194,7 @@ def train():
         state_prev = agent.get_state(game)
 
         if array_tobinary(state_prev) not in agent.Q.keys():
-            agent.Q[array_tobinary(state_prev)] = [0,0,0]
+            agent.Q[array_tobinary(state_prev)] = [0, 0, 0]
         # get move
 
         action = agent.get_action(state_prev)
@@ -217,7 +209,7 @@ def train():
         # train value approximation
         agent.train_online(state_prev, reward, state, done)
 
-        agent.update_Q(state_prev,action,state)
+        agent.update_Q(state_prev, action, state)
 
         if done:
             # plot result
@@ -230,7 +222,16 @@ def train():
             plot_scores.append(score)
             total_score += score
             mean_score = total_score / agent.n_games
-            print('Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:', round(mean_score, 3))
+            print(
+                "Game:",
+                agent.n_games,
+                "Score:",
+                score,
+                "Record:",
+                record,
+                "Mean Score:",
+                round(mean_score, 3),
+            )
             plot_mean_scores.append(mean_score)
 
             plot(plot_scores, plot_mean_scores)
@@ -260,12 +261,19 @@ def play():
             plot_scores.append(score)
 
             # plot(plot_scores, plot_mean_scores)
-            print('Game:', agent.n_games, 'Score:', score, 'Record:', record, 'Mean Score:')
+            print(
+                "Game:",
+                agent.n_games,
+                "Score:",
+                score,
+                "Record:",
+                record,
+                "Mean Score:",
+            )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     agent = Agent_State_Value()
 
     train()
     # play()
-
